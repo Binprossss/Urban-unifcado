@@ -40,20 +40,20 @@
     </script>
     <style>
         html.dark { color-scheme: dark; }
-        html.dark body { background-color: #0b0f19; color: #f1f5f9; }
-        html.dark main { background-color: #0b0f19 !important; }
-        html.dark header { background-color: #0f172a !important; border-color: #1e293b !important; color: #ffffff !important; }
+        html.dark body { background-color: #09090b !important; color: #f4f4f5 !important; }
+        html.dark main { background-color: #09090b !important; }
+        html.dark header { background-color: #121214 !important; border-color: #27272a !important; color: #ffffff !important; }
         html.dark header h2 { color: #ffffff !important; }
-        html.dark .bg-white { background-color: #131c2e !important; border-color: #1e293b !important; color: #f1f5f9 !important; }
-        html.dark .bg-gray-50 { background-color: #0b0f19 !important; }
-        html.dark .bg-gray-100 { background-color: #0b0f19 !important; }
+        html.dark .bg-white { background-color: #141416 !important; border-color: #27272a !important; color: #f4f4f5 !important; }
+        html.dark .bg-gray-50 { background-color: #09090b !important; }
+        html.dark .bg-gray-100 { background-color: #09090b !important; }
         html.dark .text-gray-900 { color: #ffffff !important; }
-        html.dark .text-gray-800 { color: #f1f5f9 !important; }
-        html.dark .text-gray-700 { color: #cbd5e1 !important; }
-        html.dark .text-gray-600, html.dark .text-gray-500 { color: #94a3b8 !important; }
-        html.dark .border-gray-200 { border-color: #1e293b !important; }
-        html.dark .border-gray-300 { border-color: #334155 !important; }
-        html.dark input, html.dark select, html.dark textarea { background-color: #0b0f19 !important; border-color: #334155 !important; color: #ffffff !important; }
+        html.dark .text-gray-800 { color: #f4f4f5 !important; }
+        html.dark .text-gray-700 { color: #d4d4d8 !important; }
+        html.dark .text-gray-600, html.dark .text-gray-500 { color: #a1a1aa !important; }
+        html.dark .border-gray-200 { border-color: #27272a !important; }
+        html.dark .border-gray-300 { border-color: #3f3f46 !important; }
+        html.dark input, html.dark select, html.dark textarea { background-color: #121214 !important; border-color: #27272a !important; color: #ffffff !important; }
     </style>
 
     <script>
@@ -139,13 +139,13 @@
             <div class="flex items-center space-x-3">
                 <!-- Interruptor de Tema en Panel de Administración -->
                 <button id="theme-toggle" onclick="toggleTheme()" type="button" 
-                        class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-gray-200 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none cursor-pointer flex items-center justify-center border border-gray-200 dark:border-slate-700" 
+                        class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-zinc-200 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-[#18181b] transition focus:outline-none cursor-pointer flex items-center justify-center border border-gray-200 dark:border-[#27272a]" 
                         title="Alternar entre modo claro y oscuro" aria-label="Alternar tema">
                     <i id="theme-icon" class="fas fa-moon text-base"></i>
                 </button>
-                <div class="flex items-center space-x-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-3.5 py-1.5 rounded-full">
+                <div class="flex items-center space-x-2 bg-gray-50 dark:bg-[#18181b] border border-gray-200 dark:border-[#27272a] px-3.5 py-1.5 rounded-full">
                     <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
-                    <span class="text-xs font-bold text-gray-700 dark:text-gray-200">Admin_GDL</span>
+                    <span class="text-xs font-bold text-gray-700 dark:text-zinc-100">Admin_GDL</span>
                 </div>
             </div>
         </header>

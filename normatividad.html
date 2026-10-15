@@ -54,22 +54,23 @@
     <style>
         body { font-family: 'Open Sans', sans-serif; }
         html.dark { color-scheme: dark; }
-        html.dark body { background-color: #0b0f19; color: #f1f5f9; }
-        html.dark nav { background-color: #0f172a !important; border-color: #1e293b !important; }
+        html.dark body { background-color: #09090b !important; color: #f4f4f5 !important; }
+        html.dark main { background-color: #09090b !important; }
+        html.dark nav { background-color: #121214 !important; border-color: #27272a !important; }
         html.dark nav a.text-black { color: #ffffff !important; }
-        html.dark nav a.text-gray-600 { color: #cbd5e1 !important; }
-        html.dark #mobile-nav-menu { background-color: #0f172a !important; border-color: #1e293b !important; }
-        html.dark #mobile-nav-menu a { color: #cbd5e1 !important; }
-        html.dark .bg-white { background-color: #131c2e !important; border-color: #1e293b !important; color: #f1f5f9 !important; }
-        html.dark .bg-gray-50 { background-color: #0b0f19 !important; }
+        html.dark nav a.text-gray-600 { color: #d4d4d8 !important; }
+        html.dark #mobile-nav-menu { background-color: #121214 !important; border-color: #27272a !important; }
+        html.dark #mobile-nav-menu a { color: #d4d4d8 !important; }
+        html.dark .bg-white { background-color: #141416 !important; border-color: #27272a !important; color: #f4f4f5 !important; }
+        html.dark .bg-gray-50 { background-color: #09090b !important; }
         html.dark .text-gray-900 { color: #ffffff !important; }
-        html.dark .text-gray-800 { color: #f1f5f9 !important; }
-        html.dark .text-gray-600 { color: #94a3b8 !important; }
-        html.dark .text-gray-500 { color: #94a3b8 !important; }
-        html.dark .border-gray-200 { border-color: #1e293b !important; }
+        html.dark .text-gray-800 { color: #f4f4f5 !important; }
+        html.dark .text-gray-600 { color: #a1a1aa !important; }
+        html.dark .text-gray-500 { color: #a1a1aa !important; }
+        html.dark .border-gray-200 { border-color: #27272a !important; }
     </style>
 </head>
-<body class="bg-white dark:bg-slate-950 text-gray-800 dark:text-slate-100 antialiased transition-colors duration-200">
+<body class="bg-white dark:bg-[#09090b] text-gray-800 dark:text-[#f4f4f5] antialiased transition-colors duration-200">
 
     <!-- Top Utility Bar -->
     <div class="bg-hikgray-900 border-b border-gray-800 text-xs text-gray-400 py-1.5 hidden md:block">
@@ -111,7 +112,7 @@
                 <div class="flex items-center space-x-2 sm:space-x-3">
                     <!-- Interruptor de Tema al lado de Iniciar Sesión -->
                     <button id="theme-toggle" onclick="toggleTheme()" type="button" 
-                            class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-gray-200 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none cursor-pointer flex items-center justify-center border border-gray-200 dark:border-slate-700" 
+                            class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-zinc-200 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-[#1a1b1e] transition focus:outline-none cursor-pointer flex items-center justify-center border border-gray-200 dark:border-[#2b2c30]" 
                             title="Alternar entre modo claro y oscuro" aria-label="Alternar tema">
                         <i id="theme-icon" class="fas fa-moon text-base"></i>
                         <span class="sr-only">Alternar tema</span>
@@ -119,13 +120,13 @@
 
                     <!-- Botón de Iniciar Sesión / Administración (no cambia si estás logeado o no) -->
                     <a href="login.html" id="btn-iniciar-sesion" 
-                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-100 hover:text-hikred dark:hover:text-hikred border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 transition shadow-xs focus:outline-none" 
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 dark:text-zinc-100 hover:text-hikred dark:hover:text-hikred border border-gray-300 dark:border-[#2b2c30] bg-white dark:bg-[#16171a] hover:bg-gray-50 dark:hover:bg-[#202125] transition shadow-xs focus:outline-none" 
                        title="Iniciar Sesión / Portal de Administración">
                         <i class="fas fa-user-shield text-hikred text-sm"></i>
                         <span class="hidden sm:inline">Iniciar Sesión</span>
                     </a>
 
-                    <button type="button" onclick="document.getElementById('mobile-nav-menu').classList.toggle('hidden')" class="md:hidden text-gray-700 dark:text-gray-200 hover:text-hikred transition p-2" aria-label="Abrir menú" aria-controls="mobile-nav-menu">
+                    <button type="button" onclick="document.getElementById('mobile-nav-menu').classList.toggle('hidden')" class="md:hidden text-gray-700 dark:text-zinc-200 hover:text-hikred transition p-2" aria-label="Abrir menú" aria-controls="mobile-nav-menu">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
