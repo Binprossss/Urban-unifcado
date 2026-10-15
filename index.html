@@ -616,7 +616,7 @@
                     <a href="recomendaciones.html" class="text-sm font-semibold text-gray-600 dark:text-zinc-300 hover:text-hikred dark:hover:text-hikred transition-colors py-2">Recomendaciones</a>
                 </div>
 
-                <!-- ACCIONES NAVBAR: INTERRUPTOR DE TEMA + BOTÓN INICIAR SESIÓN + BÚSQUEDA -->
+                <!-- ACCIONES NAVBAR: INTERRUPTOR DE TEMA + BOTÓN INICIAR SESIÓN + BOTÓN CERRAR SESIÓN + BÚSQUEDA -->
                 <div class="flex items-center space-x-2 sm:space-x-3">
                     <!-- Interruptor de Tema (Modo Claro / Modo Oscuro) al lado del botón Iniciar Sesión -->
                     <button id="theme-toggle" onclick="toggleTheme()" type="button" 
@@ -633,6 +633,14 @@
                         <i class="fas fa-user-shield text-hikred text-sm sm:text-base"></i>
                         <span>Iniciar Sesión</span>
                     </a>
+
+                    <!-- Botón de Cerrar Sesión (se muestra cuando hay sesión iniciada) -->
+                    <button id="btn-cerrar-sesion" onclick="cerrarSesion()" type="button" 
+                            class="hidden items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold text-gray-700 dark:text-zinc-200 hover:text-hikred dark:hover:text-hikred border border-gray-300 dark:border-[#27272a] hover:border-hikred dark:hover:border-hikred bg-white dark:bg-[#141416] hover:bg-gray-50 dark:hover:bg-[#1f1f23] transition shadow-xs focus:outline-none cursor-pointer" 
+                            title="Cerrar Sesión Administrativa" aria-label="Cerrar sesión">
+                        <i class="fas fa-right-from-bracket text-hikred text-sm sm:text-base"></i>
+                        <span class="hidden sm:inline">Cerrar Sesión</span>
+                    </button>
 
                     <!-- Buscador Documental Global (RAG) -->
                     <button onclick="toggleSearchModal()" class="text-gray-600 dark:text-zinc-300 hover:text-hikred dark:hover:text-hikred transition focus:outline-none cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#18181b]" title="Buscar en Base Normativa">
@@ -1172,9 +1180,10 @@
 
         function resetHeroTimer() {
             if (heroInterval) clearInterval(heroInterval);
+            // Actualización automática del Hero cada 5 minutos (300,000 ms)
             heroInterval = setInterval(() => {
                 renderHeroSlide(currentHeroIndex + 1);
-            }, 5000);
+            }, 300000);
         }
 
         function ejecutarAccionHeroSlide() {
@@ -2167,6 +2176,73 @@
                 }
             });
         }
+
+        /* =========================================================
+           CONTROL Y VERIFICACIÓN DE SESIÓN EN HEADER (INDEX)
+           ========================================================= */
+        async function verificarEstadoSesion() {
+            const btnCerrar = document.getElementById('btn-cerrar-sesion');
+            let estaAutenticado = false;
+
+            try {
+                const res = await fetch('/api/sesion', { credentials: 'same-origin', cache: 'no-store' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.autenticado) {
+                        estaAutenticado = true;
+                        try { localStorage.setItem('urbanbuild_role', 'admin'); } catch (e) {}
+                    }
+                }
+            } catch (e) {
+                // Respaldo en caso de fallo de red
+            }
+
+            if (!estaAutenticado) {
+                const localRole = localStorage.getItem('urbanbuild_role');
+                const sessionJustIn = sessionStorage.getItem('urban_just_logged_in');
+                if (localRole === 'admin' || sessionJustIn === 'true') {
+                    estaAutenticado = true;
+                }
+            }
+
+            if (btnCerrar) {
+                if (estaAutenticado) {
+                    btnCerrar.classList.remove('hidden');
+                    btnCerrar.classList.add('inline-flex');
+                } else {
+                    btnCerrar.classList.add('hidden');
+                    btnCerrar.classList.remove('inline-flex');
+                }
+            }
+        }
+
+        async function cerrarSesion() {
+            const btnCerrar = document.getElementById('btn-cerrar-sesion');
+            if (btnCerrar) {
+                btnCerrar.disabled = true;
+                btnCerrar.classList.add('opacity-75');
+            }
+
+            try {
+                await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
+            } catch (e) {}
+
+            try {
+                localStorage.removeItem('urbanbuild_role');
+                sessionStorage.removeItem('urban_just_logged_in');
+            } catch (e) {}
+
+            if (btnCerrar) {
+                btnCerrar.disabled = false;
+                btnCerrar.classList.remove('opacity-75');
+                btnCerrar.classList.add('hidden');
+                btnCerrar.classList.remove('inline-flex');
+            }
+        }
+
+        // Ejecutar verificación de sesión inmediatamente y en DOMContentLoaded
+        verificarEstadoSesion();
+        document.addEventListener('DOMContentLoaded', verificarEstadoSesion);
     </script>
 </body>
 </html>

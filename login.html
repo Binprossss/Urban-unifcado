@@ -4,19 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UrbanBuild | Portal de Administración</title>
-    
-    <!-- Google Fonts: Open Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Inicialización inmediata del tema antes del render
+        // Inicialización inmediata del tema antes del render (evita parpadeos FOUC)
         (function() {
             try {
                 const savedTheme = localStorage.getItem('urbanbuild_theme') || localStorage.getItem('theme');
@@ -33,18 +27,13 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['"Open Sans"', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['"Open Sans"', 'sans-serif'] },
                     colors: {
-                        hikred: {
-                            DEFAULT: '#c9122f', 
-                            hover: '#a00e25',
-                        }
+                        hikred: { DEFAULT: '#c9122f', hover: '#a00e25' }
                     }
                 }
             }
-        }
+        };
     </script>
     <style>
         body { font-family: 'Open Sans', sans-serif; }
@@ -55,56 +44,49 @@
 <body class="h-full bg-gray-50 dark:bg-[#09090b] flex items-center justify-center antialiased transition-colors duration-200">
 
     <div class="w-full max-w-md px-4">
-        <div class="bg-white dark:bg-[#121214] rounded-lg shadow-2xl border-t-4 border-hikred p-8 relative border border-gray-200 dark:border-[#27272a]">
-            <!-- Botón de Tema en Login -->
+        <div class="bg-white dark:bg-[#121214] rounded-lg shadow-xl border-t-4 border-hikred p-8 relative border border-gray-200 dark:border-[#27272a]">
+
+            <!-- Interruptor de Tema en Login -->
             <button id="theme-toggle" onclick="toggleTheme()" type="button" 
                     class="absolute top-4 right-4 p-2 rounded-lg text-gray-500 dark:text-zinc-300 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-[#18181b] transition cursor-pointer border border-transparent dark:border-[#27272a]" 
                     title="Alternar tema claro/oscuro" aria-label="Alternar tema">
                 <i id="theme-icon" class="fas fa-moon text-base"></i>
             </button>
-            
+
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold tracking-tighter text-black dark:text-white mb-1">
-                    Urban<span class="text-hikred">Build</span>
-                </h1>
+                <h1 class="text-3xl font-bold tracking-tighter text-black dark:text-white mb-1">Urban<span class="text-hikred">Build</span></h1>
                 <p class="text-[11px] font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-widest">Portal de Administración</p>
             </div>
 
-            <form onsubmit="handleLogin(event)" class="space-y-5">
-                <div class="bg-gray-50 dark:bg-[#18181b] border border-gray-200 dark:border-[#27272a] p-3 rounded-lg text-xs text-gray-800 dark:text-zinc-200 flex items-start gap-2.5">
+            <form id="login-form" class="space-y-5" novalidate>
+                <div class="bg-slate-50 dark:bg-[#18181b] border border-slate-200 dark:border-[#27272a] p-3 rounded-lg text-xs text-slate-800 dark:text-zinc-200 flex items-start gap-2.5">
                     <i class="fas fa-shield-halved text-hikred text-sm mt-0.5"></i>
                     <div>
-                        <span class="font-bold text-gray-900 dark:text-white">Acceso Seguro de Administración:</span>
-                        <p class="text-[11px] text-gray-600 dark:text-zinc-400 mt-0.5 leading-relaxed">Autenticación encriptada con algoritmo criptográfico <strong>SHA-256</strong>. Las credenciales están protegidas y no son visibles al inspeccionar el código o el HTML.</p>
+                        <span class="font-bold text-gray-900 dark:text-white">Acceso seguro de administración:</span>
+                        <p class="text-[11px] text-gray-600 dark:text-zinc-400 mt-0.5 leading-relaxed">La verificación se hace en el servidor y la sesión se guarda en una cookie protegida (HttpOnly). Las credenciales no están en el código de esta página.</p>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 dark:text-zinc-300 mb-1.5 uppercase tracking-wide">Usuario / ID Institucional</label>
+                    <label for="username" class="block text-xs font-semibold text-gray-600 dark:text-zinc-300 mb-1.5 uppercase tracking-wide">Usuario</label>
                     <div class="relative flex items-center">
-                        <span class="absolute left-3 text-gray-400">
-                            <i class="fas fa-user text-sm"></i>
-                        </span>
-                        <input type="text" id="username" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#18181b] border border-gray-300 dark:border-[#27272a] rounded text-sm text-gray-800 dark:text-white focus:outline-none focus:border-hikred transition" placeholder="Ingresa tu usuario" required autocomplete="username">
+                        <span class="absolute left-3 text-gray-400"><i class="fas fa-user text-sm"></i></span>
+                        <input type="text" id="username" maxlength="200" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#18181b] border border-gray-300 dark:border-[#27272a] rounded text-sm text-gray-800 dark:text-white focus:outline-none focus:border-hikred transition" placeholder="Ingresa tu usuario" required autocomplete="username">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 dark:text-zinc-300 mb-1.5 uppercase tracking-wide">Contraseña</label>
+                    <label for="password" class="block text-xs font-semibold text-gray-600 dark:text-zinc-300 mb-1.5 uppercase tracking-wide">Contraseña</label>
                     <div class="relative flex items-center">
-                        <span class="absolute left-3 text-gray-400">
-                            <i class="fas fa-lock text-sm"></i>
-                        </span>
-                        <input type="password" id="password" class="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-[#18181b] border border-gray-300 dark:border-[#27272a] rounded text-sm text-gray-800 dark:text-white focus:outline-none focus:border-hikred transition font-mono" placeholder="••••••••••••" required autocomplete="current-password">
-                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 focus:outline-none cursor-pointer" title="Mostrar/Ocultar contraseña">
+                        <span class="absolute left-3 text-gray-400"><i class="fas fa-lock text-sm"></i></span>
+                        <input type="password" id="password" maxlength="500" class="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-[#18181b] border border-gray-300 dark:border-[#27272a] rounded text-sm text-gray-800 dark:text-white focus:outline-none focus:border-hikred transition font-mono" placeholder="••••••••••••" required autocomplete="current-password">
+                        <button type="button" id="toggle-pass" class="absolute right-3 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 focus:outline-none cursor-pointer" title="Mostrar/Ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
                             <i id="eye-icon" class="fas fa-eye text-sm"></i>
                         </button>
                     </div>
                 </div>
 
-                <div id="error-msg" class="hidden text-xs text-red-600 dark:text-red-400 font-semibold text-center bg-red-50 dark:bg-red-950/30 p-2.5 rounded border border-red-200 dark:border-red-900/60">
-                    <i class="fas fa-circle-exclamation mr-1"></i> Credenciales no autorizadas. Verifica tu usuario y contraseña.
-                </div>
+                <div id="error-msg" role="alert" class="hidden text-xs text-red-600 dark:text-red-400 font-semibold text-center bg-red-50 dark:bg-red-950/30 p-2.5 rounded border border-red-200 dark:border-red-900/60"></div>
 
                 <button id="btn-login" type="submit" class="w-full bg-hikred hover:bg-hikred-hover text-white font-bold py-3 rounded text-xs uppercase tracking-wider transition shadow-sm cursor-pointer flex items-center justify-center gap-2">
                     <i class="fas fa-lock"></i>
@@ -113,224 +95,101 @@
             </form>
 
             <div class="text-center mt-6">
-                <a href="index.html" class="text-xs text-gray-500 dark:text-gray-400 hover:text-hikred dark:hover:text-hikred transition font-semibold inline-flex items-center">
+                <a href="index.html" class="text-xs text-gray-500 dark:text-zinc-400 hover:text-hikred dark:hover:text-hikred transition font-semibold inline-flex items-center">
                     <i class="fas fa-arrow-left mr-1.5 text-[10px]"></i> Volver al sitio público
                 </a>
             </div>
-
         </div>
     </div>
 
     <script>
-        // HASHES CRIPTOGRÁFICOS AUTORIZADOS (SHA-256)
-        // Las contraseñas y usuarios NUNCA se almacenan en texto plano en el código.
-        const SECURE_AUTH_CONFIG = Object.freeze({
-            // Hashes SHA-256 de usuarios autorizados
-            allowedUserHashes: Object.freeze([
-                "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", // usuario 1
-                "8e26a7f5038b3b1ab9d10c62d96042e86ae0e40f8adcda43e6eea3716b1ce1c2"  // usuario 2
-            ]),
-            // Hashes SHA-256 de claves autorizadas (irreversibles)
-            allowedKeyHashes: Object.freeze([
-                "42511aee283acb784f86510774318ee96deee496ea0b1c07ff76fb3e955d1cdc", // clave maestra
-                "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9"  // clave secundaria
-            ])
-        });
+        const BTN_HTML = '<i class="fas fa-lock"></i> <span>Iniciar Sesión y Habilitar Edición</span>';
+        const $ = (id) => document.getElementById(id);
 
-        // Función criptográfica SHA-256 (Web Crypto API con respaldo bit a bit)
-        async function calcularHashSHA256(texto) {
-            try {
-                if (window.crypto && window.crypto.subtle) {
-                    const datos = new TextEncoder().encode(texto);
-                    const hashBuffer = await window.crypto.subtle.digest('SHA-256', datos);
-                    return Array.from(new Uint8Array(hashBuffer))
-                        .map(b => b.toString(16).padStart(2, '0'))
-                        .join('');
-                }
-            } catch (e) {
-                // Continuar al motor de cálculo síncrono
-            }
-            return calcularSHA256Interno(texto);
-        }
-
-        // Motor de cálculo SHA-256 seguro autónomo
-        function calcularSHA256Interno(ascii) {
-            function rightRotate(value, amount) { return (value>>>amount) | (value<<(32 - amount)); }
-            var mathPow = Math.pow;
-            var maxWord = mathPow(2, 32);
-            var lengthProperty = "length";
-            var i, j;
-            var result = "";
-            var words = [];
-            var asciiBitLength = ascii[lengthProperty] * 8;
-            var hash = [];
-            var k = [];
-            var primeCounter = 0;
-            var isComposite = {};
-            for (var candidate = 2; primeCounter < 64; candidate++) {
-                if (!isComposite[candidate]) {
-                    for (i = 0; i < 313; i += candidate) { isComposite[i] = candidate; }
-                    hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
-                    k[primeCounter++] = (mathPow(candidate, 1/3) * maxWord) | 0;
-                }
-            }
-            hash = hash.slice(0, 8);
-            ascii += "\x80";
-            while (ascii[lengthProperty] % 64 - 56) ascii += "\x00";
-            for (i = 0; i < ascii[lengthProperty]; i++) {
-                j = ascii.charCodeAt(i);
-                if (j >> 8) return "";
-                words[i >> 2] |= j << ((3 - i) % 4) * 8;
-            }
-            words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
-            words[words[lengthProperty]] = asciiBitLength;
-            for (j = 0; j < words[lengthProperty];) {
-                var w = words.slice(j, j += 16);
-                var oldHash = hash;
-                hash = hash.slice(0, 8);
-                for (i = 0; i < 64; i++) {
-                    var i2 = i + j;
-                    var w15 = w[i - 15], w2 = w[i - 2];
-                    var a = hash[0], e = hash[4];
-                    var temp1 = hash[7]
-                        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
-                        + ((e & hash[5]) ^ ((~e) & hash[6]))
-                        + k[i]
-                        + (w[i] = (i < 16) ? w[i] : (
-                            w[i - 16]
-                            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
-                            + w[i - 7]
-                            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
-                        ) | 0);
-                    var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
-                        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
-                    hash = [(temp1 + temp2) | 0, a, hash[1], hash[2], (hash[3] + temp1) | 0, hash[4], hash[5], hash[6]];
-                }
-                for (i = 0; i < 8; i++) { hash[i] = (hash[i] + oldHash[i]) | 0; }
-            }
-            for (i = 0; i < 8; i++) {
-                for (var i2 = 3; i2 >= 0; i2--) {
-                    var b = (hash[i] >> (i2 * 8)) & 255;
-                    result += ((b < 16) ? 0 : "") + b.toString(16);
-                }
-            }
-            return result;
-        }
-
-        // Alternar visibilidad de contraseña en el campo de texto
-        function togglePasswordVisibility() {
-            const passInput = document.getElementById('password');
-            const icon = document.getElementById('eye-icon');
-            if (!passInput || !icon) return;
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                passInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye-line', 'fa-eye');
-            }
-        }
-
-        async function handleLogin(event) {
-            event.preventDefault();
-            const btn = document.getElementById('btn-login');
-            const errorDiv = document.getElementById('error-msg');
-            const user = (document.getElementById('username')?.value || '').trim();
-            const pass = (document.getElementById('password')?.value || '').trim();
-
-            if (!user || !pass) {
-                if (errorDiv) errorDiv.classList.remove('hidden');
-                return;
-            }
-
-            if (btn) {
-                btn.disabled = true;
-                btn.classList.add('opacity-75');
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Verificando credenciales...</span>';
-            }
-
-            try {
-                // Sincronización con el endpoint de autenticación del servidor
-                try {
-                    await fetch('/api/login', {
-                        method: 'POST',
-                        credentials: 'same-origin',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ usuario: user, clave: pass })
-                    });
-                } catch (e) {}
-
-                // Cálculo de hashes criptográficos irreversibles
-                const [hashUsuario, hashContrasena] = await Promise.all([
-                    calcularHashSHA256(user.toLowerCase()),
-                    calcularHashSHA256(pass)
-                ]);
-
-                // Comparación exclusivamente contra firmas hash SHA-256
-                const usuarioValido = SECURE_AUTH_CONFIG.allowedUserHashes.includes(hashUsuario);
-                const claveValida = SECURE_AUTH_CONFIG.allowedKeyHashes.includes(hashContrasena);
-
-                if (usuarioValido && claveValida) {
-                    if (errorDiv) errorDiv.classList.add('hidden');
-                    localStorage.setItem('urbanbuild_role', 'admin');
-                    sessionStorage.setItem('urban_just_logged_in', 'true');
-                    
-                    const params = new URLSearchParams(window.location.search);
-                    const redirect = params.get('redirect') || 'panel-admin.html';
-                    window.location.href = redirect;
-                    return;
-                }
-            } catch (err) {
-                console.error("Error en validación de seguridad:", err);
-            }
-
-            if (errorDiv) errorDiv.classList.remove('hidden');
-            if (btn) {
-                btn.disabled = false;
-                btn.classList.remove('opacity-75');
-                btn.innerHTML = '<i class="fas fa-lock"></i> <span>Iniciar Sesión y Habilitar Edición</span>';
-            }
-            const passInput = document.getElementById('password');
-            if (passInput) {
-                passInput.value = '';
-                passInput.focus();
-            }
-        }
-
-        /* =========================================================
-           INTERRUPTOR DE TEMA (CLARO / OSCURO)
-           ========================================================= */
+        // Control del Interruptor de Tema
         function updateThemeUI(isDark) {
-            const icon = document.getElementById('theme-icon');
-            const btn = document.getElementById('theme-toggle');
+            const icon = $('theme-icon');
             if (icon) {
-                if (isDark) {
-                    icon.className = 'fas fa-sun text-base text-amber-400';
-                } else {
-                    icon.className = 'fas fa-moon text-base text-gray-500';
-                }
-            }
-            if (btn) {
-                btn.setAttribute('title', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
-                btn.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+                icon.className = isDark ? 'fas fa-sun text-base text-yellow-400' : 'fas fa-moon text-base';
             }
         }
-
         function toggleTheme() {
             const isDark = document.documentElement.classList.toggle('dark');
-            const newTheme = isDark ? 'dark' : 'light';
             try {
-                localStorage.setItem('urbanbuild_theme', newTheme);
-                localStorage.setItem('theme', newTheme);
+                localStorage.setItem('urbanbuild_theme', isDark ? 'dark' : 'light');
             } catch (e) {}
             updateThemeUI(isDark);
         }
+        // Sincronizar icono inicial
+        updateThemeUI(document.documentElement.classList.contains('dark'));
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            updateThemeUI(isDark);
+        // Solo se permite volver a páginas del propio sitio (evita redirecciones abiertas)
+        function destinoSeguro() {
+            const r = new URLSearchParams(location.search).get('redirect') || '';
+            return /^[A-Za-z0-9_-]+\.html$/.test(r) ? r : 'index.html';
+        }
+
+        function mostrarError(texto) {
+            const e = $('error-msg');
+            e.textContent = texto;
+            e.classList.remove('hidden');
+        }
+
+        $('toggle-pass').addEventListener('click', () => {
+            const p = $('password'), i = $('eye-icon');
+            const oculto = p.type === 'password';
+            p.type = oculto ? 'text' : 'password';
+            i.className = 'fas text-sm ' + (oculto ? 'fa-eye-slash' : 'fa-eye');
+        });
+
+        // Si ya hay una sesión válida en el servidor, no pedir credenciales otra vez
+        fetch('/api/sesion', { credentials: 'same-origin', cache: 'no-store' })
+            .then(r => r.ok ? r.json() : { autenticado: false })
+            .then(s => { 
+                if (s.autenticado) {
+                    try { localStorage.setItem('urbanbuild_role', 'admin'); } catch (e) {}
+                    location.replace(destinoSeguro()); 
+                } 
+            })
+            .catch(() => {});
+
+        $('login-form').addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const usuario = $('username').value.trim();
+            const clave = $('password').value;
+            $('error-msg').classList.add('hidden');
+            if (!usuario || !clave) return mostrarError('Escribe tu usuario y contraseña.');
+
+            const btn = $('btn-login');
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Verificando credenciales...</span>';
+
+            try {
+                const resp = await fetch('/api/login', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, clave })
+                });
+                const datos = await resp.json().catch(() => ({}));
+                if (resp.ok && datos.ok) {
+                    try { 
+                        sessionStorage.setItem('urban_just_logged_in', 'true'); 
+                        localStorage.setItem('urbanbuild_role', 'admin');
+                    } catch (e) {}
+                    location.href = destinoSeguro();
+                    return;
+                }
+                mostrarError(datos.detail || datos.error || 'No se pudo iniciar sesión.');
+            } catch (e) {
+                mostrarError('No se pudo conectar con el servidor. Inténtalo de nuevo.');
+            }
+            btn.disabled = false;
+            btn.classList.remove('opacity-75');
+            btn.innerHTML = BTN_HTML;
+            $('password').value = '';
+            $('password').focus();
         });
     </script>
 </body>
