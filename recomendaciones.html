@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recomendaciones y Dictámenes Técnicos | UrbanBuild</title>
+    
+    <!-- Google Fonts: Open Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome & Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Tailwind CSS & Marked.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        // Inicialización inmediata del tema antes del render
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('urbanbuild_theme') || localStorage.getItem('theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Open Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        hikred: {
+                            DEFAULT: '#c9122f',
+                            hover: '#a00e25',
+                            light: '#fce8eb'
+                        },
+                        hikgray: {
+                            800: '#2d2d2d',
+                            900: '#1a1a1a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Open Sans', sans-serif; }
+        :focus-visible { outline: 3px solid #c9122f; outline-offset: 2px; }
+        .skip-link { position: absolute; left: -9999px; top: 8px; z-index: 200000; background: #c9122f; color: #fff; padding: 8px 14px; border-radius: 6px; font-weight: 700; }
+        .skip-link:focus { left: 8px; }
+        .field { width: 100%; background: #f9fafb; border: 1px solid #d1d5db; padding: .65rem .85rem; border-radius: .5rem; font-size: .875rem; transition: border-color .15s ease, box-shadow .15s ease; }
+        .field:focus { outline: none; border-color: #c9122f; box-shadow: 0 0 0 3px rgba(201, 18, 47, 0.12); }
+        .lbl { display: block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #374151; margin-bottom: .3rem; }
+        
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { font-weight: 800; color: #111827; margin-top: 1.1rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: -0.01em; }
+        .markdown-body h3 { font-size: 1.1rem; border-bottom: 2px solid #f3f4f6; padding-bottom: 0.3rem; }
+        .markdown-body h4 { font-size: 0.95rem; font-weight: 700; color: #c9122f; margin-top: 0.8rem; margin-bottom: 0.3rem; }
+        .markdown-body p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .markdown-body ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+        .markdown-body ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+        .markdown-body li { margin-bottom: 0.25rem; }
+        .markdown-body strong { color: #111827; font-weight: 700; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff !important; }
+            #resultado-card { box-shadow: none !important; border: 0 !important; padding: 0 !important; }
+            #r-texto { font-size: 11pt !important; color: #000 !important; }
+        }
+        @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+        
+        html.dark { color-scheme: dark; }
+        html.dark body { background-color: #0b0f19; color: #f1f5f9; }
+        html.dark nav { background-color: #0f172a !important; border-color: #1e293b !important; }
+        html.dark nav a.text-black { color: #ffffff !important; }
+        html.dark nav a.text-gray-600 { color: #cbd5e1 !important; }
+        html.dark #mobile-menu { background-color: #0f172a !important; border-color: #1e293b !important; }
+        html.dark #mobile-menu a { color: #cbd5e1 !important; }
+        html.dark .bg-white { background-color: #131c2e !important; border-color: #1e293b !important; color: #f1f5f9 !important; }
+        html.dark .bg-gray-50 { background-color: #0b0f19 !important; }
+        html.dark .text-gray-900 { color: #ffffff !important; }
+        html.dark .text-gray-800 { color: #f1f5f9 !important; }
+        html.dark .text-gray-700 { color: #cbd5e1 !important; }
+        html.dark .text-gray-600 { color: #94a3b8 !important; }
+        html.dark .text-gray-500 { color: #94a3b8 !important; }
+        html.dark .border-gray-200 { border-color: #1e293b !important; }
+        html.dark .border-gray-300 { border-color: #334155 !important; }
+        html.dark .field { background-color: #0b0f19 !important; border-color: #334155 !important; color: #f8fafc !important; }
+        html.dark .lbl { color: #94a3b8 !important; }
+        html.dark .markdown-body h1, html.dark .markdown-body h2, html.dark .markdown-body h3 { color: #ffffff !important; }
+        html.dark .markdown-body strong { color: #f8fafc !important; }
+        html.dark .markdown-body p, html.dark .markdown-body li { color: #cbd5e1 !important; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
+
+    <a href="#contenido" class="skip-link no-print">Saltar al contenido</a>
+
+    <!-- Top Utility Bar -->
+    <div class="bg-hikgray-900 border-b border-gray-800 text-xs text-gray-400 py-1.5 hidden md:block no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center font-semibold text-[11px]">
+            <div class="flex items-center gap-3">
+                <span class="text-white"><i class="fas fa-map-location-dot text-hikred mr-1.5"></i> Ámbito: <strong>Zona Metropolitana de Guadalajara (9 Municipios)</strong></span>
+                <span class="text-gray-600">|</span>
+                <span class="text-red-300 bg-red-950/80 px-2 py-0.5 rounded border border-red-800/80">Motor IA: Gemini 3.8 Flash</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="index.html#soporte" class="hover:text-white transition">SOPORTE</a>
+                <a href="index.html#partners" class="hover:text-white transition">IMEPLAN / POTmet</a>
+                <a href="panel-admin.html" class="hover:text-hikred transition flex items-center gap-1">
+                    <i class="fas fa-shield-halved text-hikred"></i> ADMINISTRACIÓN
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegación Principal -->
+    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 no-print" aria-label="Navegación principal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="text-3xl font-bold tracking-tighter">
+                    <a href="index.html" class="text-black hover:opacity-90">Urban</a><a href="login.html" class="text-hikred hover:underline">Build</a>
+                </div>
+                
+                <div class="hidden md:flex space-x-7 items-center text-sm font-semibold">
+                    <a href="index.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Inicio</a>
+                    <a href="https://urbanbuilding.vercel.app" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-hikred transition-colors py-2 flex items-center gap-1">
+                        Captura de Datos <i class="fas fa-arrow-up-right-from-square text-[10px] text-gray-400"></i>
+                    </a>
+                    <a href="estadisticas.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Estadísticas</a>
+                    <a href="normatividad.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Normativa</a>
+                    <a href="recomendaciones.html" aria-current="page" class="text-hikred py-2 border-b-2 border-hikred">Recomendaciones</a>
+                    <a href="toma-de-decisiones.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Toma de Decisiones</a>
+                </div>
+
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- Interruptor de Tema al lado de Iniciar Sesión -->
+                    <button id="theme-toggle" onclick="toggleTheme()" type="button" 
+                            class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-gray-200 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none cursor-pointer flex items-center justify-center border border-gray-200 dark:border-slate-700" 
+                            title="Alternar entre modo claro y oscuro" aria-label="Alternar tema">
+                        <i id="theme-icon" class="fas fa-moon text-base"></i>
+                        <span class="sr-only">Alternar tema</span>
+                    </button>
+
+                    <!-- Botón de Iniciar Sesión / Administración (no cambia si estás logeado o no) -->
+                    <a href="login.html" id="btn-iniciar-sesion" 
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-100 hover:text-hikred dark:hover:text-hikred border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 transition shadow-xs focus:outline-none" 
+                       title="Iniciar Sesión / Portal de Administración">
+                        <i class="fas fa-user-shield text-hikred text-sm"></i>
+                        <span class="hidden sm:inline">Iniciar Sesión</span>
+                    </a>
+
+                    <button type="button" id="menu-btn" class="md:hidden text-gray-700 dark:text-gray-200 hover:text-hikred transition p-2" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu">
+                        <i class="fas fa-bars text-xl" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden border-t border-gray-200 bg-white">
+            <div class="px-4 py-3 flex flex-col space-y-1">
+                <a href="index.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Inicio</a>
+                <a href="https://urbanbuilding.vercel.app" target="_blank" rel="noopener noreferrer" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Captura de Datos</a>
+                <a href="estadisticas.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Estadísticas</a>
+                <a href="normatividad.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Normativa</a>
+                <a href="recomendaciones.html" class="py-2.5 text-sm font-bold text-hikred">Recomendaciones</a>
+                <a href="toma-de-decisiones.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Toma de Decisiones</a>
+                <a href="panel-admin.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred flex items-center gap-1.5 border-t border-gray-100 pt-3">
+                    <i class="fas fa-user-shield text-hikred"></i> Portal de Administración
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main id="contenido" class="grow py-10">
+
+        <!-- Banner de Encabezado -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 no-print">
+            <div class="bg-white border-l-4 border-hikred p-6 sm:p-8 shadow-sm rounded-r-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <div class="flex items-center space-x-3 mb-2">
+                        <span class="w-9 h-9 rounded-full bg-hikred text-white flex items-center justify-center font-bold text-sm shadow">
+                            <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                        </span>
+                        <div>
+                            <span class="text-[10px] font-bold bg-red-100 text-hikred border border-red-200 px-2 py-0.5 rounded uppercase tracking-wider">
+                                Auditoría Técnica & COS / CUS
+                            </span>
+                            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 uppercase tracking-tight mt-0.5">
+                                Recomendaciones & Dictámenes Urbanos
+                            </h1>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-xs sm:text-sm max-w-3xl leading-relaxed">
+                        Genera informes periciales a partir de datos de aforo y zonificación con <strong>Gemini 3.8 Flash</strong>, o diagnostica directamente fotografías de cruces, banquetas y calles de la Zona Metropolitana de Guadalajara bajo el Código Urbano de Jalisco.
+                    </p>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 p-3.5 rounded-xl text-right shrink-0">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block font-mono">Motor de Peritaje</span>
+                    <span class="text-xs font-bold text-hikred flex items-center justify-end gap-1.5 mt-0.5">
+                        <i class="fas fa-microchip"></i> Gemini 3.8 Flash + YOLOv8
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cuadrícula de Dos Módulos: Informe Técnico y Diagnóstico por Foto -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10 no-print">
+
+            <!-- MÓDULO 1: INFORME DE INTERVENCIÓN -->
+            <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 sm:p-8" aria-labelledby="t-dictamen">
+                <div class="flex items-center justify-between pb-3 mb-5 border-b border-gray-100">
+                    <div>
+                        <h2 id="t-dictamen" class="text-base sm:text-lg font-bold text-gray-900 uppercase flex items-center">
+                            <i class="fas fa-file-contract text-hikred mr-2" aria-hidden="true"></i> Informe de intervención
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Captura los parámetros del sitio o rellénalos desde una imagen.</p>
+                    </div>
+                    <span class="text-[10px] font-bold font-mono bg-slate-100 text-slate-700 px-2 py-1 rounded">RAG Normativo</span>
+                </div>
+
+                <form id="form-dictamen" class="space-y-4" novalidate>
+                    <div>
+                        <label for="f-zona" class="lbl">Zona o ubicación en ZMG</label>
+                        <input type="text" id="f-zona" maxlength="120" placeholder="Ej. Av. Revolución y Calzada Olímpica, Guadalajara" class="field" value="Av. Revolución y Calzada Olímpica, Guadalajara">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="f-uso" class="lbl">Uso de suelo propuesto</label>
+                            <select id="f-uso" class="field">
+                                <option value="Mixto">🏢 Mixto (Comercial / Habitacional)</option>
+                                <option value="Habitacional">🏡 Habitacional (H1 - H4)</option>
+                                <option value="Comercial">🛍️ Comercial & Servicios</option>
+                                <option value="Industrial">🏭 Industrial Ligero (I1)</option>
+                                <option value="Equipamiento">🏥 Equipamiento Institucional</option>
+                                <option value="Espacio público">🌳 Espacio Público / Parque</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="f-area" class="lbl">Área del predio (m²)</label>
+                            <input type="number" id="f-area" min="1" max="10000000" step="any" inputmode="decimal" class="field" placeholder="Ej. 650" value="650">
+                        </div>
+                    </div>
+
+                    <fieldset class="border border-gray-200 rounded-lg p-3 bg-gray-50/50">
+                        <legend class="lbl px-1 text-gray-600">Conteos de movilidad observados</legend>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div>
+                                <label for="f-peatones" class="text-[11px] font-semibold text-gray-600 block mb-1">Peatones</label>
+                                <input type="number" id="f-peatones" min="0" value="480" class="field font-mono font-bold text-center">
+                            </div>
+                            <div>
+                                <label for="f-vehiculos" class="text-[11px] font-semibold text-gray-600 block mb-1">Vehículos</label>
+                                <input type="number" id="f-vehiculos" min="0" value="1240" class="field font-mono font-bold text-center">
+                            </div>
+                            <div>
+                                <label for="f-bicicletas" class="text-[11px] font-semibold text-gray-600 block mb-1">Bicicletas</label>
+                                <input type="number" id="f-bicicletas" min="0" value="75" class="field font-mono font-bold text-center">
+                            </div>
+                            <div>
+                                <label for="f-motos" class="text-[11px] font-semibold text-gray-600 block mb-1">Motos</label>
+                                <input type="number" id="f-motos" min="0" value="95" class="field font-mono font-bold text-center">
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="f-periodo" class="text-[11px] font-semibold text-gray-600 block mb-1">Temporalidad del aforo</label>
+                            <select id="f-periodo" class="field">
+                                <option value="Por hora">Hora de máxima demanda (Pico Matutino / Vespertino)</option>
+                                <option value="Por día">Promedio diario (Tránsito Diario Promedio Anual)</option>
+                                <option value="Muestra puntual (foto o video)">Muestra puntual instantánea (YOLOv8 / Foto)</option>
+                            </select>
+                        </div>
+                    </fieldset>
+
+                    <!-- Caja para rellenar automáticamente conteos desde imagen -->
+                    <div class="border border-dashed border-gray-300 rounded-xl p-3.5 bg-gray-50">
+                        <label for="f-foto-conteo" class="text-xs font-bold text-gray-800 block mb-1.5 flex items-center justify-between">
+                            <span><i class="fas fa-eye mr-1.5 text-hikred"></i> Rellenar conteos desde una foto con Visión Artificial</span>
+                            <span class="text-[10px] text-gray-400 font-normal">Opcional</span>
+                        </label>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="file" id="f-foto-conteo" accept="image/jpeg,image/png,image/webp" class="text-xs flex-1 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300">
+                            <button type="button" id="btn-contar" class="bg-hikgray-900 hover:bg-black text-white text-xs font-bold px-4 py-2 rounded-lg transition shrink-0 flex items-center justify-center gap-1.5 shadow-sm">
+                                <i class="fas fa-calculator text-amber-400"></i> Contar con IA
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-gray-500 mt-2 leading-relaxed">
+                            El modelo de visión detecta peatones, autos, ciclistas y motos y los transfiere a los campos superiores.
+                        </p>
+                    </div>
+
+                    <p id="f-error" role="alert" class="text-xs text-red-600 font-semibold hidden bg-red-50 p-2.5 rounded-lg border border-red-200"></p>
+
+                    <button type="submit" id="btn-generar" class="w-full bg-hikred hover:bg-hikred-hover disabled:opacity-60 text-white font-bold px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fas fa-sparkles"></i>
+                        <span>Generar Dictamen con Gemini 3.8 Flash</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- MÓDULO 2: DIAGNÓSTICO POR FOTO -->
+            <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 sm:p-8 flex flex-col justify-between" aria-labelledby="t-foto">
+                <div>
+                    <div class="flex items-center justify-between pb-3 mb-5 border-b border-gray-100">
+                        <div>
+                            <h2 id="t-foto" class="text-base sm:text-lg font-bold text-gray-900 uppercase flex items-center">
+                                <i class="fas fa-camera text-hikred mr-2" aria-hidden="true"></i> Diagnóstico visual por foto
+                            </h2>
+                            <p class="text-xs text-gray-500 mt-0.5">Sube una fotografía de calle, banqueta, cruce o parque.</p>
+                        </div>
+                        <span class="text-[10px] font-bold font-mono bg-red-50 text-hikred border border-red-200 px-2 py-1 rounded">Multimodal</span>
+                    </div>
+
+                    <form id="form-foto" class="space-y-4" novalidate>
+                        <div>
+                            <label for="d-foto" class="lbl">Foto del sitio a peritar</label>
+                            <input type="file" id="d-foto" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" class="text-xs w-full file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
+                            
+                            <div class="mt-3 relative">
+                                <img id="d-preview" alt="Vista previa de la foto seleccionada" class="hidden w-full max-h-56 object-cover rounded-xl border border-gray-200 shadow-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="d-nota" class="lbl">Contexto adicional (opcional)</label>
+                            <textarea id="d-nota" rows="3" maxlength="500" placeholder="Ej. Cruce frente a plantel escolar; adultos mayores reportan falta de rampa y semáforo peatonal con tiempo insuficiente." class="field"></textarea>
+                        </div>
+
+                        <p id="d-error" role="alert" class="text-xs text-red-600 font-semibold hidden bg-red-50 p-2.5 rounded-lg border border-red-200"></p>
+
+                        <button type="submit" id="btn-diagnosticar" class="w-full bg-hikgray-900 hover:bg-black disabled:opacity-60 text-white font-bold px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center gap-2">
+                            <i class="fas fa-wand-magic-sparkles text-red-400"></i>
+                            <span>Diagnosticar Foto con IA</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-gray-100 text-[11px] text-gray-500 leading-relaxed">
+                    <i class="fas fa-shield-halved text-hikred mr-1"></i> <strong>Aviso Pericial:</strong> Los dictámenes se sustentan en la Norma Técnica de Accesibilidad Universal y la Jerarquía de Movilidad de Jalisco (Art. 25).
+                </div>
+            </section>
+        </div>
+
+        <!-- TARJETA DE RESULTADO GENERADO -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+            <section id="resultado-card" class="hidden bg-white border border-gray-200 rounded-xl shadow-md p-6 sm:p-10" aria-labelledby="r-titulo" aria-live="polite" tabindex="-1">
+                <div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-200 pb-4 mb-6">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono">Dictamen Oficial UrbanBuild</span>
+                        </div>
+                        <h2 id="r-titulo" class="text-xl sm:text-2xl font-extrabold text-gray-900 uppercase tracking-tight"></h2>
+                        <p id="r-meta" class="text-xs text-gray-500 mt-1 font-mono"></p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 no-print">
+                        <button type="button" id="btn-copiar" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3.5 py-2 rounded-lg text-xs font-bold border border-gray-300 transition flex items-center gap-1.5">
+                            <i class="fas fa-copy" aria-hidden="true"></i> Copiar
+                        </button>
+                        <button type="button" id="btn-imprimir" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3.5 py-2 rounded-lg text-xs font-bold border border-gray-300 transition flex items-center gap-1.5">
+                            <i class="fas fa-print" aria-hidden="true"></i> Imprimir / PDF
+                        </button>
+                        <button type="button" id="btn-guardar" class="bg-hikred hover:bg-hikred-hover disabled:opacity-50 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fas fa-bookmark" aria-hidden="true"></i> Guardar en Navegador
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenido con formato enriquecido -->
+                <div id="r-texto" class="markdown-body text-sm text-gray-800 leading-relaxed break-words bg-slate-50/50 p-6 rounded-xl border border-slate-200"></div>
+
+                <div class="mt-6 pt-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center text-[11px] text-gray-500 gap-2">
+                    <span><i class="fas fa-circle-check text-green-600 mr-1"></i> Generado con <strong>Gemini 3.8 Flash</strong> sobre legislación urbana de Jalisco.</span>
+                    <span class="font-mono">UrbanBuild URBIN Engine v3.8</span>
+                </div>
+            </section>
+        </div>
+
+        <!-- HISTORIAL DE INFORMES GUARDADOS -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 no-print">
+            <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 sm:p-8" aria-labelledby="t-hist">
+                <div class="flex flex-wrap justify-between items-center gap-3 mb-5 pb-3 border-b border-gray-100">
+                    <div>
+                        <h2 id="t-hist" class="text-base sm:text-lg font-bold text-gray-900 uppercase flex items-center">
+                            <i class="fas fa-clock-rotate-left text-hikred mr-2" aria-hidden="true"></i> Informes y dictámenes guardados
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Almacenados localmente en este navegador para consulta rápida (hasta 20 registros).</p>
+                    </div>
+                    <button type="button" id="btn-limpiar-historial" class="text-xs text-gray-400 hover:text-red-600 font-semibold transition flex items-center gap-1">
+                        <i class="fas fa-trash-can"></i> Limpiar todo
+                    </button>
+                </div>
+
+                <ul id="historial" class="space-y-3"></ul>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-hikgray-800 text-gray-400 py-12 border-t-4 border-hikred no-print mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs space-y-2">
+            <p class="font-bold text-white tracking-wider uppercase text-sm mb-1">UrbanBuild · Inteligencia Urbana Metropolitana</p>
+            <p>&copy; 2026 UrbanBuild. Todos los derechos reservados. Escuela Politécnica de Guadalajara.</p>
+            <p class="text-[11px] text-gray-500">Módulo de peritaje calibrado para los 9 municipios del Área Metropolitana de Guadalajara.</p>
+        </div>
+    </footer>
+
+    <!-- Toast de Notificaciones -->
+    <div id="toast" role="status" aria-live="polite" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-5 py-2.5 rounded-full shadow-2xl z-50 flex items-center gap-2 border border-gray-700 no-print">
+        <i class="fas fa-check-circle text-green-400" id="toast-icon"></i>
+        <span id="toast-text"></span>
+    </div>
+
+    <!-- Script de Lógica Interactiva -->
+    <script>
+    (function () {
+        const $ = (id) => document.getElementById(id);
+        const store = {
+            get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+            set(k, v) { try { localStorage.setItem(k, v); return true; } catch { return false; } }
+        };
+        const HIST_KEY = 'urban_reco_history';
+        const MAX_FILE_MB = 20;
+
+        // Toast
+        let toastTimer;
+        function toast(msg, icon = 'fa-check-circle text-green-400') {
+            const t = $('toast');
+            $('toast-text').textContent = msg;
+            $('toast-icon').className = 'fas ' + icon;
+            t.classList.remove('hidden');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.add('hidden'), 3500);
+        }
+
+        function showErr(id, msg) {
+            const e = $(id);
+            if (!e) return;
+            e.textContent = msg || '';
+            e.classList.toggle('hidden', !msg);
+        }
+
+        function busy(btn, on, text) {
+            if (on) {
+                btn.dataset.t = btn.innerHTML;
+                btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> <span>${text}</span>`;
+            } else if (btn.dataset.t) {
+                btn.innerHTML = btn.dataset.t;
+            }
+            btn.disabled = on;
+        }
+
+        const count = (id) => Math.min(100000, Math.max(0, Math.round(Number($(id).value) || 0)));
+
+        async function callApi(path, init, ms = 60000) {
+            const ctrl = new AbortController();
+            const to = setTimeout(() => ctrl.abort(), ms);
+            try {
+                let res;
+                try {
+                    res = await fetch(path, { ...init, signal: ctrl.signal });
+                } catch (e) {
+                    throw new Error(e.name === 'AbortError'
+                        ? 'La consulta tardó más del tiempo esperado. Inténtalo de nuevo.'
+                        : 'No se pudo conectar con el servidor.');
+                }
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || data.detail || `Error en el servidor (${res.status}).`);
+                return data;
+            } finally {
+                clearTimeout(to);
+            }
+        }
+
+        // Menú móvil
+        $('menu-btn').addEventListener('click', () => {
+            const open = $('mobile-menu').classList.toggle('hidden') === false;
+            $('menu-btn').setAttribute('aria-expanded', String(open));
+        });
+
+        // Resultado actual
+        let current = null;
+
+        function showResult(entry) {
+            current = entry;
+            $('r-titulo').textContent = entry.titulo;
+            $('r-meta').textContent = (entry.tipo === 'foto' ? 'Diagnóstico Visual' : 'Informe Técnico') + ' · ' + new Date(entry.ts).toLocaleString('es-MX', { hour12: false });
+            
+            // Renderizado enriquecido con marked.js
+            try {
+                $('r-texto').innerHTML = marked.parse(entry.texto);
+            } catch (e) {
+                $('r-texto').textContent = entry.texto;
+            }
+
+            $('btn-guardar').disabled = !!entry.saved;
+            $('resultado-card').classList.remove('hidden');
+            $('resultado-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            $('resultado-card').focus({ preventScroll: true });
+        }
+
+        $('btn-copiar').addEventListener('click', async () => {
+            if (!current) return;
+            try {
+                await navigator.clipboard.writeText(`${current.titulo}\n\n${current.texto}`);
+                toast('Dictamen copiado al portapapeles.');
+            } catch {
+                toast('Selecciona el texto manualmente para copiarlo.', 'fa-exclamation-triangle text-amber-400');
+            }
+        });
+
+        $('btn-imprimir').addEventListener('click', () => window.print());
+
+        // Historial
+        function loadHist() {
+            try {
+                const v = JSON.parse(store.get(HIST_KEY));
+                return Array.isArray(v) ? v.filter(x => x && typeof x.texto === 'string') : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveHist(list) {
+            return store.set(HIST_KEY, JSON.stringify(list.slice(0, 20)));
+        }
+
+        function renderHist() {
+            const ul = $('historial');
+            ul.replaceChildren();
+            const list = loadHist();
+
+            if (!list.length) {
+                const li = document.createElement('li');
+                li.className = 'text-xs text-gray-400 italic py-3 text-center bg-gray-50 rounded-lg border border-dashed border-gray-200';
+                li.textContent = 'Todavía no has guardado ningún dictamen. Genera un informe y haz clic en "Guardar en Navegador".';
+                ul.append(li);
+                return;
+            }
+
+            list.forEach(e => {
+                const li = document.createElement('li');
+                li.className = 'flex flex-wrap items-center justify-between gap-3 border border-gray-200 rounded-xl p-3.5 bg-gray-50 hover:bg-white hover:border-hikred/40 transition shadow-xs';
+                
+                const info = document.createElement('div');
+                info.className = 'min-w-0 flex-1';
+                
+                const t = document.createElement('div');
+                t.className = 'text-xs sm:text-sm font-bold text-gray-800 break-words flex items-center gap-1.5';
+                t.innerHTML = `<i class="fas ${e.tipo === 'foto' ? 'fa-camera text-hikred' : 'fa-file-lines text-blue-600'} text-xs"></i> <span>${e.titulo}</span>`;
+                
+                const d = document.createElement('div');
+                d.className = 'text-[11px] text-gray-500 font-mono mt-0.5';
+                d.textContent = (e.tipo === 'foto' ? 'Foto' : 'Informe') + ' · ' + new Date(e.ts).toLocaleString('es-MX', { hour12: false });
+                
+                info.append(t, d);
+
+                const acts = document.createElement('div');
+                acts.className = 'flex items-center gap-2';
+
+                const ver = document.createElement('button');
+                ver.type = 'button';
+                ver.className = 'text-xs font-bold text-hikred hover:underline px-2.5 py-1 rounded bg-red-50 border border-red-200';
+                ver.textContent = 'Ver';
+                ver.addEventListener('click', () => showResult({ ...e, saved: true }));
+
+                const del = document.createElement('button');
+                del.type = 'button';
+                del.className = 'text-xs font-semibold text-gray-400 hover:text-red-600 p-1.5';
+                del.innerHTML = '<i class="fas fa-trash"></i>';
+                del.title = 'Eliminar';
+                del.addEventListener('click', () => {
+                    saveHist(loadHist().filter(x => x.id !== e.id));
+                    renderHist();
+                    toast('Informe eliminado.', 'fa-trash text-gray-400');
+                });
+
+                acts.append(ver, del);
+                li.append(info, acts);
+                ul.append(li);
+            });
+        }
+
+        $('btn-guardar').addEventListener('click', () => {
+            if (!current || current.saved) return;
+            const list = loadHist();
+            list.unshift({ id: current.id, tipo: current.tipo, titulo: current.titulo, texto: current.texto, ts: current.ts });
+            if (!saveHist(list)) {
+                toast('No se pudo guardar en este navegador.', 'fa-exclamation-triangle text-amber-400');
+                return;
+            }
+            current.saved = true;
+            $('btn-guardar').disabled = true;
+            renderHist();
+            toast('Informe guardado en el navegador con éxito.');
+        });
+
+        $('btn-limpiar-historial').addEventListener('click', () => {
+            if (confirm('¿Deseas vaciar todo el historial de informes guardados?')) {
+                saveHist([]);
+                renderHist();
+                toast('Historial vaciado.');
+            }
+        });
+
+        // Contar desde foto con visión artificial
+        $('btn-contar').addEventListener('click', async () => {
+            const f = $('f-foto-conteo').files[0];
+            if (!f) {
+                showErr('f-error', 'Por favor selecciona primero una fotografía de tráfico o peatones.');
+                return;
+            }
+            showErr('f-error', '');
+            const btn = $('btn-contar');
+            busy(btn, true, 'Contando con IA...');
+
+            try {
+                const fd = new FormData();
+                fd.append('file', f);
+                fd.append('zone', $('f-zona').value.trim() || 'Zona Metropolitana de Guadalajara');
+
+                const data = await callApi('/api/nvidia-vision', { method: 'POST', body: fd }, 90000);
+                const t = data.telemetry || {};
+
+                $('f-peatones').value = Number(t.peatones) || 0;
+                $('f-vehiculos').value = Number(t.vehiculos) || 0;
+                $('f-bicicletas').value = Number(t.bicicletas) || 0;
+                $('f-motos').value = Number(t.motos) || 0;
+                $('f-periodo').value = 'Muestra puntual (foto o video)';
+
+                toast('Aforos rellenados automáticamente con Visión Artificial.');
+            } catch (e) {
+                showErr('f-error', e.message);
+            } finally {
+                busy(btn, false);
+            }
+        });
+
+        // Generar informe técnico
+        $('form-dictamen').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const area = Number($('f-area').value);
+            if (!(area > 0 && area <= 10000000)) {
+                showErr('f-error', 'Ingresa una superficie válida del terreno en m² (mayor a 0).');
+                $('f-area').focus();
+                return;
+            }
+            showErr('f-error', '');
+            const zona = $('f-zona').value.trim() || 'Zona Metropolitana de Guadalajara';
+            
+            const body = {
+                landArea: area,
+                landUse: $('f-uso').value,
+                trafficData: {
+                    zona,
+                    periodo: $('f-periodo').value,
+                    peatones: count('f-peatones'),
+                    vehiculos: count('f-vehiculos'),
+                    bicicletas: count('f-bicicletas'),
+                    motos: count('f-motos')
+                }
+            };
+
+            const btn = $('btn-generar');
+            busy(btn, true, 'Generando dictamen técnico...');
+
+            try {
+                const data = await callApi('/api/dictamen', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                }, 75000);
+
+                if (!data.dictamen) throw new Error('El servidor no devolvió contenido.');
+
+                showResult({
+                    id: Date.now(),
+                    tipo: 'dictamen',
+                    titulo: `Dictamen: ${zona}`,
+                    texto: data.dictamen,
+                    ts: Date.now(),
+                    saved: false
+                });
+            } catch (err) {
+                showErr('f-error', err.message);
+            } finally {
+                busy(btn, false);
+            }
+        });
+
+        // Previsualización de foto
+        $('d-foto').addEventListener('change', () => {
+            const f = $('d-foto').files[0];
+            const img = $('d-preview');
+            if (f && f.type.startsWith('image/')) {
+                const u = URL.createObjectURL(f);
+                img.src = u;
+                img.classList.remove('hidden');
+            } else {
+                img.removeAttribute('src');
+                img.classList.add('hidden');
+            }
+        });
+
+        // Diagnóstico por foto
+        $('form-foto').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const f = $('d-foto').files[0];
+            if (!f) {
+                showErr('d-error', 'Selecciona primero una foto para diagnosticar.');
+                return;
+            }
+            showErr('d-error', '');
+
+            const btn = $('btn-diagnosticar');
+            busy(btn, true, 'Analizando foto con Gemini 3.8 Flash...');
+
+            try {
+                const nota = $('d-nota').value.trim();
+                const prompt = 'Analiza esta foto de un espacio urbano (calle, banqueta, cruce o parque) en la Zona Metropolitana de Guadalajara bajo la normativa técnica y de accesibilidad de Jalisco. ' +
+                    'Responde en español con tres secciones: 1) Problemas visibles de accesibilidad, seguridad o movilidad; ' +
+                    '2) Intervenciones sugeridas, cada una con prioridad Alta, Media o Baja; ' +
+                    '3) Lo que no se puede determinar con esta foto. ' +
+                    (nota ? `\n\nContexto aportado por el operador: ${nota}` : '');
+
+                const fd = new FormData();
+                fd.append('prompt', prompt);
+                fd.append('file', f);
+
+                const data = await callApi('/api/chat', { method: 'POST', body: fd }, 90000);
+                const reply = data.reply || data.respuesta_texto;
+
+                if (!reply) throw new Error('El servidor no devolvió contenido de diagnóstico.');
+
+                showResult({
+                    id: Date.now(),
+                    tipo: 'foto',
+                    titulo: `Diagnóstico Visual: ${f.name.replace(/\.[^/.]+$/, '')}`,
+                    texto: reply,
+                    ts: Date.now(),
+                    saved: false
+                });
+            } catch (err) {
+                showErr('d-error', err.message);
+            } finally {
+                busy(btn, false);
+            }
+        });
+
+        renderHist();
+    })();
+
+    /* =========================================================
+       INTERRUPTOR DE TEMA (CLARO / OSCURO)
+       ========================================================= */
+    function updateThemeUI(isDark) {
+        const icon = document.getElementById('theme-icon');
+        const btn = document.getElementById('theme-toggle');
+        if (icon) {
+            if (isDark) {
+                icon.className = 'fas fa-sun text-base text-amber-400';
+            } else {
+                icon.className = 'fas fa-moon text-base text-gray-600 dark:text-gray-200';
+            }
+        }
+        if (btn) {
+            btn.setAttribute('title', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+            btn.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+        }
+    }
+
+    function toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        const newTheme = isDark ? 'dark' : 'light';
+        try {
+            localStorage.setItem('urbanbuild_theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        } catch (e) {}
+        updateThemeUI(isDark);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const isDark = document.documentElement.classList.contains('dark');
+        updateThemeUI(isDark);
+    });
+    </script>
+</body>
+</html>

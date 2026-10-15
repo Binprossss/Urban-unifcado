@@ -1,0 +1,2156 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://images.unsplash.com https://unpkg.com https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com https://geoserver2.imeplan.mx https://mapa.guadalajara.gob.mx:8443; connect-src 'self' https://nominatim.openstreetmap.org https://overpass-api.de https://*.basemaps.cartocdn.com https://geoserver2.imeplan.mx https://mapa.guadalajara.gob.mx:8443; object-src 'none'; base-uri 'self'; upgrade-insecure-requests;">
+    <title>UrbanBuild | Plataforma de Inteligencia Urbana y Movilidad</title>
+    
+    <!-- Google Fonts: Open Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome & Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS y Marked.js para el Asistente OLMOS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+
+    <script>
+        // Inicialización inmediata del tema antes del render para evitar parpadeos (FOUC)
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('urbanbuild_theme') || localStorage.getItem('theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Open Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        hikred: {
+                            DEFAULT: '#c9122f', 
+                            hover: '#a00e25',
+                            light: '#fce8eb'
+                        },
+                        hikgray: {
+                            800: '#2d2d2d',
+                            900: '#1a1a1a', 
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Open Sans', sans-serif; }
+        
+        /* Fondo oscuro fijo por defecto para evitar parpadeos blancos al cambiar de imagen */
+        .hero-slide {
+            background-color: #1a1a1a;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.8s ease-in-out;
+        }
+
+        .card-architecture {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .card-architecture:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* ================= MODO OSCURO (HIGH CONTRAST & ACCESSIBILITY) ================= */
+        html.dark {
+            color-scheme: dark;
+        }
+        html.dark body {
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
+        html.dark nav {
+            background-color: #0f172a !important;
+            border-color: #1e293b !important;
+        }
+        html.dark nav a.text-black {
+            color: #ffffff !important;
+        }
+        html.dark nav a.text-gray-600 {
+            color: #cbd5e1 !important;
+        }
+        html.dark nav a.text-gray-600:hover {
+            color: #c9122f !important;
+        }
+        html.dark #seccion-arquitectura {
+            background-color: #0b0f19 !important;
+        }
+        html.dark #seccion-arquitectura h2 {
+            color: #ffffff !important;
+        }
+        html.dark #seccion-arquitectura p.text-gray-500 {
+            color: #94a3b8 !important;
+        }
+        html.dark .card-architecture {
+            background: #131c2e !important;
+            border-color: #1e293b !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+        }
+        html.dark .card-architecture:hover {
+            border-color: #c9122f !important;
+            box-shadow: 0 10px 25px -5px rgba(201, 18, 47, 0.2) !important;
+        }
+        html.dark .card-architecture h3 {
+            color: #ffffff !important;
+        }
+        html.dark .card-architecture p {
+            color: #cbd5e1 !important;
+        }
+        html.dark #search-modal > div {
+            background-color: #0f172a !important;
+            border-color: #c9122f !important;
+            color: #f8fafc !important;
+        }
+        html.dark #search-modal h3 {
+            color: #ffffff !important;
+        }
+        html.dark #search-input {
+            background-color: #1e293b !important;
+            color: #ffffff !important;
+            border-color: #334155 !important;
+        }
+        html.dark #search-results p {
+            color: #94a3b8 !important;
+        }
+        html.dark footer {
+            background-color: #020617 !important;
+            border-color: #c9122f !important;
+            color: #94a3b8 !important;
+        }
+        html.dark .btn-ia-flotante {
+            background-color: #131c2e !important;
+            color: #ffffff !important;
+            border-color: #334155 !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6) !important;
+        }
+        html.dark #olmosModalContainer .bg-white {
+            background-color: #0f172a !important;
+            border-color: #1e293b !important;
+            color: #f8fafc !important;
+        }
+        html.dark #panel-tools {
+            background-color: #0b0f19 !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #section-map, html.dark #section-upload, html.dark #section-webcam {
+            background-color: #131c2e !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #section-map h2, html.dark #section-upload h2, html.dark #section-webcam h3 {
+            color: #e2e8f0 !important;
+        }
+        html.dark #drop-zone {
+            background-color: #0b0f19 !important;
+            border-color: #334155 !important;
+        }
+        html.dark #drop-zone p {
+            color: #94a3b8 !important;
+        }
+        html.dark #panel-chat {
+            background-color: #080d1a !important;
+        }
+        html.dark #panel-chat .bg-white {
+            background-color: #131c2e !important;
+            border-color: #1e293b !important;
+            color: #f1f5f9 !important;
+        }
+        html.dark #panel-chat .text-slate-600 {
+            color: #94a3b8 !important;
+        }
+        html.dark #chat-form {
+            background-color: #131c2e !important;
+            border-color: #334155 !important;
+        }
+        html.dark #chat-input {
+            color: #ffffff !important;
+        }
+        html.dark #chat-input::placeholder {
+            color: #64748b !important;
+        }
+        html.dark #loading-indicator {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f87171 !important;
+        }
+        html.dark .inegi-floating-panel {
+            background-color: #131c2e !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        html.dark .inegi-header {
+            background: #0b0f19 !important;
+            color: #f1f5f9 !important;
+            border-color: #334155 !important;
+        }
+        html.dark .inegi-body {
+            background: #131c2e !important;
+            color: #f1f5f9 !important;
+        }
+        html.dark .inegi-select, html.dark .inegi-search-input {
+            background-color: #0b0f19 !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+        html.dark .inegi-label {
+            color: #94a3b8 !important;
+        }
+        html.dark .inegi-tree-container {
+            background-color: #0b0f19 !important;
+            border-color: #334155 !important;
+        }
+        html.dark .inegi-tree-node, html.dark .inegi-tree-leaf {
+            color: #cbd5e1 !important;
+        }
+        html.dark .inegi-btn-secondary {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        html.dark .inegi-footer {
+            background: #0b0f19 !important;
+            border-color: #334155 !important;
+        }
+        html.dark #yolo-modal .bg-white {
+            background-color: #131c2e !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #yolo-modal .bg-slate-50 {
+            background-color: #0b0f19 !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #yolo-modal h3 {
+            color: #ffffff !important;
+        }
+
+        /* Estilos del Asistente OLMOS */
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        #map { height: 100%; width: 100%; min-height: 220px; border-radius: 0.5rem; z-index: 10; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .chat-modal-animation { animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .markdown-body p { margin-bottom: 0.5rem; }
+        .markdown-body h1 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem; margin-top: 1rem; color: #0f172a; }
+        .markdown-body h2 { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; margin-top: 1rem; color: #0f172a; }
+        .markdown-body h3 { font-size: 1.125rem; font-weight: bold; margin-bottom: 0.4rem; margin-top: 0.8rem; color: #0f172a; }
+        .markdown-body ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+        .markdown-body strong { font-weight: 700; color: #1e293b; }
+        
+        /* FIX DE ANIMACIÓN MÓVIL (Evita el doble toque) */
+        .btn-ia-flotante { width: 56px; transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+        @media (hover: hover) and (pointer: fine) {
+            .btn-ia-flotante:hover { width: 175px; }
+        }
+
+        /* Indicadores de puntos del carrusel */
+        .hero-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 9999px;
+            background-color: rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .hero-dot.active {
+            width: 28px;
+            background-color: #c9122f;
+        }
+
+        /* =========================================================
+           PANEL DE ANÁLISIS DEMOGRÁFICO Y URBANO (ESTILO OFICIAL INEGI)
+           ========================================================= */
+        .inegi-floating-panel {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            max-width: calc(100% - 12px);
+            background: #ffffff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, Roboto, "Helvetica Neue", sans-serif;
+            font-size: 11px;
+            color: #212529;
+            transition: max-height 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.2s ease, box-shadow 0.2s ease;
+            max-height: calc(100% - 12px);
+            overflow: hidden;
+        }
+        .inegi-floating-panel.inegi-collapsed {
+            top: 8px;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            width: auto;
+            min-width: 175px;
+            max-width: calc(100% - 96px);
+            max-height: 32px !important;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            border-color: #c9122f;
+        }
+        .inegi-floating-panel.inegi-collapsed .inegi-header {
+            border-radius: 19px;
+            padding: 5px 12px;
+        }
+        .inegi-header {
+            background: #c9122f;
+            color: #ffffff;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            flex-shrink: 0;
+            transition: border-radius 0.2s ease, padding 0.2s ease;
+        }
+        .inegi-badge {
+            background: #ffffff;
+            color: #c9122f;
+            font-weight: 900;
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 2px;
+            margin-right: 5px;
+            letter-spacing: 0.5px;
+        }
+        .inegi-counter-pill {
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+            font-size: 9.5px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-right: 5px;
+        }
+        .inegi-body {
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            background: #ffffff;
+            flex: 1;
+        }
+        .inegi-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #495057;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            display: block;
+        }
+        .inegi-select {
+            width: 100%;
+            padding: 3px 5px;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+            background: #fdfdfd;
+            font-size: 10.5px;
+            color: #333;
+            outline: none;
+        }
+        .inegi-select:focus {
+            border-color: #c9122f;
+            background: #fff;
+        }
+        .inegi-search-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .inegi-search-input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .inegi-search-input-wrap i {
+            position: absolute;
+            left: 7px;
+            color: #6c757d;
+            font-size: 10px;
+        }
+        .inegi-search-input {
+            width: 100%;
+            padding: 3px 6px 3px 22px;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+            font-size: 10.5px;
+            background: #ffffff;
+            outline: none;
+        }
+        .inegi-search-input:focus {
+            border-color: #c9122f;
+            box-shadow: 0 0 0 2px rgba(201, 18, 47, 0.15);
+        }
+        .inegi-radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            font-size: 9.5px;
+            color: #495057;
+        }
+        .inegi-radio-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+        }
+        .inegi-radio-label input[type="radio"] {
+            accent-color: #c9122f;
+            margin: 0;
+            cursor: pointer;
+        }
+        .inegi-sort-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 9.5px;
+            color: #6c757d;
+        }
+        .inegi-tree-container {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: #ffffff;
+            max-height: 125px;
+            overflow-y: auto;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .inegi-tree-node {
+            display: flex;
+            flex-direction: column;
+        }
+        .inegi-tree-header {
+            display: flex;
+            align-items: center;
+            padding: 2.5px 4px;
+            cursor: pointer;
+            border-radius: 2px;
+            font-weight: 700;
+            color: #212529;
+            user-select: none;
+            transition: background-color 0.1s;
+        }
+        .inegi-tree-header:hover {
+            background-color: #f1f5f9;
+        }
+        .inegi-expander {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 12px;
+            height: 12px;
+            border: 1px solid #6c757d;
+            background: #ffffff;
+            font-family: monospace;
+            font-size: 10px;
+            font-weight: 800;
+            color: #212529;
+            border-radius: 2px;
+            margin-right: 5px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .inegi-tree-children {
+            padding-left: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .inegi-tree-leaf {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2.5px 4px;
+            border-radius: 3px;
+            font-size: 10px;
+            color: #333333;
+            cursor: pointer;
+            transition: all 0.12s ease-in-out;
+            user-select: none;
+        }
+        .inegi-tree-leaf:hover {
+            background-color: #f8fafc;
+        }
+        .inegi-tree-leaf input[type="checkbox"] {
+            accent-color: #c9122f;
+            cursor: pointer;
+            margin: 0;
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+        }
+        .inegi-tree-leaf.selected {
+            background-color: #fce8eb !important;
+            color: #a00e25 !important;
+            font-weight: 600;
+        }
+        .inegi-footer {
+            padding: 5px 8px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .inegi-footer-status {
+            font-size: 9.5px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .inegi-btn-row {
+            display: flex;
+            gap: 6px;
+        }
+        .inegi-btn-primary {
+            flex: 1;
+            background: #c9122f;
+            color: #ffffff;
+            border: 1px solid #a00e25;
+            font-weight: 700;
+            padding: 4.5px 8px;
+            border-radius: 3px;
+            font-size: 10.5px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .inegi-btn-primary:hover:not(:disabled) {
+            background: #a00e25;
+        }
+        .inegi-btn-primary:disabled {
+            background: #e9ecef;
+            color: #adb5bd;
+            border-color: #dee2e6;
+            cursor: not-allowed;
+        }
+        .inegi-btn-secondary {
+            background: #ffffff;
+            color: #495057;
+            border: 1px solid #ced4da;
+            padding: 4.5px 8px;
+            border-radius: 3px;
+            font-size: 10.5px;
+            cursor: pointer;
+        }
+        .inegi-btn-secondary:hover {
+            background: #e9ecef;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-slate-950 text-gray-800 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- BARRA DE NAVEGACIÓN ORIGINAL CON INTERRUPTOR DE TEMA -->
+    <nav class="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-sm sticky top-0 z-40 transition-colors duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="text-3xl font-bold tracking-tighter">
+                    <a href="index.html" class="text-black dark:text-white hover:opacity-90">Urban</a><a href="login.html" class="text-hikred hover:underline">Build</a>
+                </div>
+                
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="index.html" class="text-sm font-semibold text-hikred py-2 border-b-2 border-hikred">Inicio</a>
+                    <a href="estadisticas.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-hikred dark:hover:text-hikred transition-colors py-2">Estadísticas</a>
+                    <a href="normatividad.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-hikred dark:hover:text-hikred transition-colors py-2">Normativa</a>
+                    <a href="recomendaciones.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-hikred dark:hover:text-hikred transition-colors py-2">Recomendaciones</a>
+                </div>
+
+                <!-- ACCIONES NAVBAR: INTERRUPTOR DE TEMA + BOTÓN INICIAR SESIÓN + BÚSQUEDA -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- Interruptor de Tema (Modo Claro / Modo Oscuro) al lado del botón Iniciar Sesión -->
+                    <button id="theme-toggle" onclick="toggleTheme()" type="button" 
+                            class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-gray-200 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none cursor-pointer flex items-center justify-center border border-gray-200 dark:border-slate-700" 
+                            title="Alternar entre modo claro y oscuro" aria-label="Alternar tema claro y oscuro">
+                        <i id="theme-icon" class="fas fa-moon text-base"></i>
+                        <span class="sr-only">Alternar tema</span>
+                    </button>
+
+                    <!-- Botón de Iniciar Sesión (no cambia si estás logeado o no) -->
+                    <a href="login.html" id="btn-iniciar-sesion" 
+                       class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-100 hover:text-hikred dark:hover:text-hikred border border-gray-300 dark:border-slate-700 hover:border-hikred dark:hover:border-hikred bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700/60 transition shadow-xs focus:outline-none" 
+                       title="Iniciar Sesión / Portal de Administración">
+                        <i class="fas fa-user-shield text-hikred text-sm sm:text-base"></i>
+                        <span>Iniciar Sesión</span>
+                    </a>
+
+                    <!-- Buscador Documental Global (RAG) -->
+                    <button onclick="toggleSearchModal()" class="text-gray-600 dark:text-gray-300 hover:text-hikred dark:hover:text-hikred transition focus:outline-none cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800" title="Buscar en Base Normativa">
+                        <i class="fas fa-search text-base"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        <!-- SECCIÓN HERO DINÁMICA QUE CAMBIA CON FLECHAS TRANSPARENTES (TODA LA IMAGEN REDIRIGE A LA ZONA ESPECÍFICA) -->
+        <section id="hero-section" onclick="ejecutarAccionHeroSlide()" class="hero-slide text-white py-24 lg:py-32 relative overflow-hidden cursor-pointer select-none transition-all duration-300 group" title="Haz clic en la imagen para ir a esta sección" style="background-image: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1519501025264-65ba15a82390?q=80&w=1920&auto=format&fit=crop');">
+            
+            <!-- Flecha transparente izquierda -->
+            <button type="button" onclick="event.stopPropagation(); prevHeroSlide()" class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-white/25 text-white/80 hover:text-white border border-white/25 backdrop-blur-md flex items-center justify-center transition-all duration-200 shadow-2xl cursor-pointer" title="Slide anterior" aria-label="Slide anterior">
+                <i class="fas fa-chevron-left text-lg sm:text-xl pointer-events-none"></i>
+            </button>
+
+            <!-- Flecha transparente derecha -->
+            <button type="button" onclick="event.stopPropagation(); nextHeroSlide()" class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white/10 hover:bg-white/25 text-white/80 hover:text-white border border-white/25 backdrop-blur-md flex items-center justify-center transition-all duration-200 shadow-2xl cursor-pointer" title="Slide siguiente" aria-label="Slide siguiente">
+                <i class="fas fa-chevron-right text-lg sm:text-xl pointer-events-none"></i>
+            </button>
+
+            <div class="max-w-7xl mx-auto px-8 sm:px-14 lg:px-16 relative z-10 pointer-events-none">
+                <div class="max-w-3xl">
+                    <span id="hero-badge" class="text-hikred font-bold text-xs uppercase tracking-widest block mb-3 transition-opacity duration-300">1. Estadísticas</span>
+                    <h1 id="hero-title" class="text-4xl md:text-6xl font-extrabold uppercase tracking-tight mb-6 leading-tight transition-opacity duration-300">
+                        Explorador GIS y Contexto Demográfico INEGI
+                    </h1>
+                    <p id="hero-desc" class="text-gray-300 text-base md:text-lg leading-relaxed transition-opacity duration-300">
+                        Cruza polígonos metropolitanos de IMEPLAN con microdatos del censo INEGI y el DENUE al instante.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Indicadores interactivos (dots) transparentes -->
+            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20" onclick="event.stopPropagation()">
+                <div class="hero-dot active" onclick="event.stopPropagation(); renderHeroSlide(0)" title="Slide 1"></div>
+                <div class="hero-dot" onclick="event.stopPropagation(); renderHeroSlide(1)" title="Slide 2"></div>
+                <div class="hero-dot" onclick="event.stopPropagation(); renderHeroSlide(2)" title="Slide 3"></div>
+                <div class="hero-dot" onclick="event.stopPropagation(); renderHeroSlide(3)" title="Slide 4"></div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN ARQUITECTURA DEL SISTEMA -->
+        <section id="seccion-arquitectura" class="py-20 bg-gray-50 scroll-mt-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-black uppercase tracking-wider mb-2">Arquitectura del Sistema</h2>
+                <div class="w-12 h-1 bg-hikred mx-auto mb-4"></div>
+                <p class="text-gray-500 text-sm">Selecciona cualquier fase para acceder a su módulo dedicado.</p>
+            </div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- FASE 1 -->
+                    <div id="card-estadisticas" class="card-architecture p-6 relative flex flex-col justify-between scroll-mt-28 transition-all duration-300">
+                        <div>
+                            <div class="text-hikred text-2xl mb-4"><i class="fas fa-chart-bar"></i></div>
+                            <h3 class="text-base font-bold text-black uppercase mb-2">1. Estadísticas</h3>
+                            <p class="text-xs text-gray-600 mb-6 leading-relaxed">Generación de datos estructurados por hora/zona, mapas de calor y cruce censal INEGI.</p>
+                        </div>
+                        <a href="estadisticas.html" class="text-hikred hover:text-hikred-hover font-bold text-xs uppercase tracking-wider inline-flex items-center">Ver Estadísticas <i class="fas fa-arrow-right ml-2 text-[10px]"></i></a>
+                    </div>
+
+                    <!-- FASE 2 -->
+                    <div id="card-normativa" class="card-architecture p-6 relative flex flex-col justify-between scroll-mt-28 transition-all duration-300">
+                        <span class="absolute top-4 right-4 bg-hikred text-white text-[10px] font-bold px-2.5 py-0.5 rounded">CORE IA</span>
+                        <div>
+                            <div class="text-hikred text-2xl mb-4"><i class="fas fa-book"></i></div>
+                            <h3 class="text-base font-bold text-black uppercase mb-2">2. Normativa</h3>
+                            <p class="text-xs text-gray-600 mb-6 leading-relaxed">Cruce de datos con reglamentos del Código Urbano Jalisco y POTmet metropolitano.</p>
+                        </div>
+                        <a href="normatividad.html" class="text-hikred hover:text-hikred-hover font-bold text-xs uppercase tracking-wider inline-flex items-center">Ver Documentos PDF <i class="fas fa-arrow-right ml-2 text-[10px]"></i></a>
+                    </div>
+
+                    <!-- FASE 3 -->
+                    <div id="card-recomendaciones" class="card-architecture p-6 relative flex flex-col justify-between scroll-mt-28 transition-all duration-300">
+                        <div>
+                            <div class="text-hikred text-2xl mb-4"><i class="fas fa-lightbulb"></i></div>
+                            <h3 class="text-base font-bold text-black uppercase mb-2">3. Recomendaciones</h3>
+                            <p class="text-xs text-gray-600 mb-6 leading-relaxed">Guía de intervención visual y estructural con fundamento normativo y visión cero.</p>
+                        </div>
+                        <a href="recomendaciones.html" class="text-hikred hover:text-hikred-hover font-bold text-xs uppercase tracking-wider inline-flex items-center">Ver Reportes <i class="fas fa-arrow-right ml-2 text-[10px]"></i></a>
+                    </div>
+
+                    <!-- FASE 4 -->
+                    <div id="card-decisiones" class="card-architecture p-6 relative flex flex-col justify-between scroll-mt-28 transition-all duration-300">
+                        <div>
+                            <div class="text-hikred text-2xl mb-4"><i class="fas fa-users-cog"></i></div>
+                            <h3 class="text-base font-bold text-black uppercase mb-2">4. Toma de Decisiones</h3>
+                            <p class="text-xs text-gray-600 mb-6 leading-relaxed">Panel ejecutivo para priorización de proyectos, presupuesto y movilidad sostenible.</p>
+                        </div>
+                        <a href="toma-de-decisiones.html" class="text-hikred hover:text-hikred-hover font-bold text-xs uppercase tracking-wider inline-flex items-center">Acceder al Panel <i class="fas fa-arrow-right ml-2 text-[10px]"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-hikgray-900 text-gray-400 py-8 border-t-4 border-hikred mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs space-y-2">
+            <p>&copy; 2026 UrbanBuild Systems. Todos los derechos reservados. Escuela Politécnica de Guadalajara.</p>
+        </div>
+    </footer>
+
+    <!-- MODAL DE BÚSQUEDA GLOBAL ORIGINAL -->
+    <div id="search-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex justify-center items-start pt-24 backdrop-blur-sm transition-all">
+        <div class="bg-white w-11/12 max-w-2xl rounded-lg shadow-2xl p-6 relative border-t-4 border-hikred">
+            <button onclick="toggleSearchModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition focus:outline-none cursor-pointer"><i class="fas fa-times text-xl"></i></button>
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-search text-hikred mr-2"></i> Búsqueda Documental Global (RAG)</h3>
+            <div class="flex border-2 border-gray-300 rounded overflow-hidden focus-within:border-hikred transition">
+                <input type="text" id="search-input" class="w-full p-3 outline-none text-gray-700 text-sm" placeholder="Busca por concepto: COS, CUS, normativa, rampas, tráfico..." oninput="performSearch()" onkeypress="if(event.key==='Enter')performSearch()">
+                <button onclick="performSearch()" class="bg-hikred text-white px-6 font-bold hover:bg-hikred-hover transition text-sm uppercase cursor-pointer">Buscar</button>
+            </div>
+            <div id="search-results" class="mt-6 hidden">
+                <p class="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3">Resultados en la Base Documental</p>
+                <ul class="space-y-3 max-h-64 overflow-y-auto pr-1" id="search-results-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- INICIO DE INTEGRACIÓN API RENDER: OLMOS (BOTÓN, CHAT, YOLO)    -->
+    <!-- ============================================================== -->
+
+    <!-- BOTÓN FLOTANTE URBIN IA -->
+    <div style="position: fixed; bottom: 24px; right: 24px; z-index: 9999;">
+        <button onclick="toggleOlmosModal()" class="btn-ia-flotante" style="background-color: #ffffff; color: #000000; height: 56px; border-radius: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #d1d5db; display: flex; align-items: center; cursor: pointer; overflow: hidden; position: relative;">
+            <div style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative;">
+                <i class="bi bi-robot" style="font-size: 24px; color: #c9122f;"></i>
+                <span style="position: absolute; top: 12px; right: 12px; width: 10px; height: 10px; background-color: #22c55e; border-radius: 50%; border: 2px solid #ffffff;"></span>
+            </div>
+            <span style="white-space: nowrap; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; padding-right: 16px; font-weight: 700;">URBIN IA</span>
+        </button>
+    </div>
+
+    <!-- MODAL PRINCIPAL OLMOS / CHAT -->
+    <div id="olmosModalContainer" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[10000] hidden items-center justify-center p-2 md:p-4">
+        <div class="bg-white w-full max-w-6xl h-[95vh] rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden chat-modal-animation relative">
+            <div class="bg-[#0f172a] px-4 sm:px-6 py-4 flex justify-between items-center border-b border-slate-800 shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-hikred w-9 h-9 rounded-full flex items-center justify-center text-white flex-shrink-0 shadow"><i class="fa-solid fa-draw-polygon text-white"></i></div>
+                    <div>
+                        <h2 class="text-sm md:text-base font-bold tracking-wide text-white">URBIN <span class="text-hikred">Urban Analytics</span></h2>
+                        <p class="text-[9px] md:text-[10px] text-slate-400">Plataforma de Ingeniería Vial y Normativa Urbana</p>
+                        <span id="api-status" class="mt-1 inline-flex text-[9px] text-slate-400">API: comprobando…</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="coordsDisplay" class="hidden md:block text-[11px] font-mono bg-slate-800 px-2.5 py-1 rounded text-red-400 border border-slate-700">Ubicación no seleccionada</div>
+                    <button onclick="toggleOlmosModal()" class="text-slate-400 hover:text-white transition p-2 rounded-lg hover:bg-slate-800 cursor-pointer"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+            </div>
+
+            <nav class="flex md:hidden bg-slate-800 text-slate-300 border-b border-slate-700 shrink-0 text-xs font-semibold z-20">
+                <button id="tab-btn-chat" onclick="cambiarTabMobile('chat')" class="flex-1 py-2.5 text-center border-b-2 border-hikred text-white flex items-center justify-center gap-1.5"><i class="fa-solid fa-comments"></i> <span>Chat</span></button>
+                <button id="tab-btn-gis" onclick="cambiarTabMobile('gis')" class="flex-1 py-2.5 text-center border-b-2 border-transparent hover:text-white flex items-center justify-center gap-1.5"><i class="fa-solid fa-map-location-dot"></i> <span>Mapa GIS</span></button>
+                <button id="tab-btn-vision" onclick="cambiarTabMobile('vision')" class="flex-1 py-2.5 text-center border-b-2 border-transparent hover:text-white flex items-center justify-center gap-1.5"><i class="fa-solid fa-video"></i> <span>Aforo</span></button>
+            </nav>
+
+            <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+                <aside id="panel-tools" class="w-full md:w-[380px] lg:w-[420px] bg-white border-r border-slate-200 flex flex-col shrink-0 h-full overflow-y-auto custom-scrollbar p-3 md:p-4 space-y-4 shadow-lg hidden md:flex">
+                    <div id="section-map" class="bg-slate-50 rounded-xl p-3 border border-slate-200 shadow-sm flex flex-col h-[280px] md:h-[320px] shrink-0">
+                        <h2 class="text-xs font-bold uppercase text-slate-600 tracking-wider mb-1.5"><i class="fa-solid fa-layer-group mr-1 text-hikred"></i> Explorador GIS</h2>
+                        <div class="flex-1 border border-slate-300 rounded-lg overflow-hidden relative shadow-inner">
+                            <div id="map"></div>
+                            
+                            <!-- PANEL FLOTANTE DE ANÁLISIS DEMOGRÁFICO Y URBANO (ESTILO INEGI) -->
+                            <div id="panel-inegi-constructor" class="inegi-floating-panel inegi-collapsed">
+                                <div class="inegi-header" onclick="togglePanelInegi()" title="Haz clic para abrir o cerrar el Banco de Indicadores INEGI">
+                                    <div class="flex items-center min-w-0 mr-1">
+                                        <span class="inegi-badge shrink-0">INEGI</span>
+                                        <span class="truncate">Banco de Indicadores</span>
+                                    </div>
+                                    <div class="flex items-center shrink-0 ml-auto">
+                                        <span id="inegi-badge-count" class="inegi-counter-pill">0</span>
+                                        <i id="inegi-toggle-icon" class="fa-solid fa-chevron-down text-[10px] transition-transform"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="inegi-body custom-scrollbar" id="inegi-panel-body">
+                                    <!-- 1. Selector Principal -->
+                                    <div>
+                                        <label class="inegi-label" for="inegi-tema-select">Programa / Tema:</label>
+                                        <select id="inegi-tema-select" class="inegi-select">
+                                            <option value="demografia_sociedad" selected>Demografía y Sociedad (Censo)</option>
+                                            <option value="economia_denue">Economía y Establecimientos (DENUE)</option>
+                                            <option value="medio_ambiente">Medio Ambiente y Territorio</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- 2. Barra de Búsqueda Avanzada -->
+                                    <div class="inegi-search-box">
+                                        <div class="inegi-search-input-wrap">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                            <input type="text" id="inegi-search-input" class="inegi-search-input" placeholder="Buscar indicador..." oninput="filtrarArbolInegi()">
+                                        </div>
+                                        <div class="inegi-radio-group">
+                                            <label class="inegi-radio-label"><input type="radio" name="inegi_match" value="all" checked onchange="filtrarArbolInegi()"> Todas las palabras</label>
+                                            <label class="inegi-radio-label"><input type="radio" name="inegi_match" value="any" onchange="filtrarArbolInegi()"> Cualquier palabra</label>
+                                            <label class="inegi-radio-label"><input type="radio" name="inegi_match" value="exact" onchange="filtrarArbolInegi()"> Frase completa</label>
+                                        </div>
+                                        <div class="inegi-sort-row">
+                                            <span>Orden:</span>
+                                            <select id="inegi-sort-select" class="inegi-select" onchange="ordenarIndicadoresInegi()">
+                                                <option value="name">Por nombre del indicador</option>
+                                                <option value="proximity">Por proximidad a coordenadas</option>
+                                                <option value="key">Por clave oficial</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. Árbol de Indicadores (Tree-view) -->
+                                    <label class="inegi-label">Árbol de Indicadores Urbanos:</label>
+                                    <div class="inegi-tree-container custom-scrollbar" id="inegi-tree-root">
+                                        <!-- Educación -->
+                                        <div class="inegi-tree-node" data-category="educacion">
+                                            <div class="inegi-tree-header" onclick="toggleNodoInegi('cat-educacion')">
+                                                <span class="inegi-expander" id="exp-cat-educacion">-</span>
+                                                <i class="fa-solid fa-graduation-cap text-slate-500 mr-1 text-[10px]"></i>
+                                                <span>Educación</span>
+                                            </div>
+                                            <div class="inegi-tree-children" id="cat-educacion">
+                                                <div class="inegi-tree-node">
+                                                    <div class="inegi-tree-header" onclick="toggleNodoInegi('sub-caract-edu')">
+                                                        <span class="inegi-expander" id="exp-sub-caract-edu">-</span>
+                                                        <i class="fa-regular fa-folder text-amber-500 mr-1 text-[10px]"></i>
+                                                        <span>Características educativas de la población</span>
+                                                    </div>
+                                                    <div class="inegi-tree-children" id="sub-caract-edu">
+                                                        <label class="inegi-tree-leaf" for="ind-edu-1">
+                                                            <input type="checkbox" id="ind-edu-1" class="inegi-checkbox" value="ED_MAT_PRIM" data-nombre="Tasa neta de matriculación en la enseñanza primaria" onchange="onCheckboxInegiChange(this)">
+                                                            <span>Tasa neta de matriculación en la enseñanza primaria</span>
+                                                        </label>
+                                                        <label class="inegi-tree-leaf" for="ind-edu-2">
+                                                            <input type="checkbox" id="ind-edu-2" class="inegi-checkbox" value="ED_BAS_15MAS" data-nombre="Porcentaje de personas de 15 años y más con educación básica" onchange="onCheckboxInegiChange(this)">
+                                                            <span>Porcentaje de personas de 15 años y más con educación básica</span>
+                                                        </label>
+                                                        <label class="inegi-tree-leaf" for="ind-edu-3">
+                                                            <input type="checkbox" id="ind-edu-3" class="inegi-checkbox" value="ED_GRADO_PROM" data-nombre="Grado promedio de escolaridad de la población" onchange="onCheckboxInegiChange(this)">
+                                                            <span>Grado promedio de escolaridad de la población</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Empleo y Ocupación -->
+                                        <div class="inegi-tree-node" data-category="empleo">
+                                            <div class="inegi-tree-header" onclick="toggleNodoInegi('cat-empleo')">
+                                                <span class="inegi-expander" id="exp-cat-empleo">+</span>
+                                                <i class="fa-solid fa-briefcase text-slate-500 mr-1 text-[10px]"></i>
+                                                <span>Empleo y Ocupación</span>
+                                            </div>
+                                            <div class="inegi-tree-children hidden" id="cat-empleo">
+                                                <label class="inegi-tree-leaf" for="ind-emp-1">
+                                                    <input type="checkbox" id="ind-emp-1" class="inegi-checkbox" value="EMP_PEA" data-nombre="Población económicamente activa (PEA)" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Población económicamente activa (PEA)</span>
+                                                </label>
+                                                <label class="inegi-tree-leaf" for="ind-emp-2">
+                                                    <input type="checkbox" id="ind-emp-2" class="inegi-checkbox" value="EMP_DESOCUP" data-nombre="Tasa de desocupación urbana estimada" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Tasa de desocupación urbana estimada</span>
+                                                </label>
+                                                <label class="inegi-tree-leaf" for="ind-emp-3">
+                                                    <input type="checkbox" id="ind-emp-3" class="inegi-checkbox" value="EMP_UNID_EC" data-nombre="Personal ocupado en comercio y servicios (DENUE)" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Personal ocupado en comercio y servicios (DENUE)</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hogares y Vivienda -->
+                                        <div class="inegi-tree-node" data-category="vivienda">
+                                            <div class="inegi-tree-header" onclick="toggleNodoInegi('cat-vivienda')">
+                                                <span class="inegi-expander" id="exp-cat-vivienda">+</span>
+                                                <i class="fa-solid fa-house text-slate-500 mr-1 text-[10px]"></i>
+                                                <span>Hogares y Vivienda</span>
+                                            </div>
+                                            <div class="inegi-tree-children hidden" id="cat-vivienda">
+                                                <label class="inegi-tree-leaf" for="ind-viv-1">
+                                                    <input type="checkbox" id="ind-viv-1" class="inegi-checkbox" value="VIV_HABITADAS" data-nombre="Total de viviendas particulares habitadas" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Total de viviendas particulares habitadas</span>
+                                                </label>
+                                                <label class="inegi-tree-leaf" for="ind-viv-2">
+                                                    <input type="checkbox" id="ind-viv-2" class="inegi-checkbox" value="VIV_AGUA_DREN" data-nombre="Viviendas con acceso a agua entubada y drenaje" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Viviendas con acceso a agua entubada y drenaje</span>
+                                                </label>
+                                                <label class="inegi-tree-leaf" for="ind-viv-3">
+                                                    <input type="checkbox" id="ind-viv-3" class="inegi-checkbox" value="VIV_PROM_OCUP" data-nombre="Promedio de ocupantes por cuarto" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Promedio de ocupantes por cuarto</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Población -->
+                                        <div class="inegi-tree-node" data-category="poblacion">
+                                            <div class="inegi-tree-header" onclick="toggleNodoInegi('cat-poblacion')">
+                                                <span class="inegi-expander" id="exp-cat-poblacion">+</span>
+                                                <i class="fa-solid fa-users text-slate-500 mr-1 text-[10px]"></i>
+                                                <span>Población</span>
+                                            </div>
+                                            <div class="inegi-tree-children hidden" id="cat-poblacion">
+                                                <label class="inegi-tree-leaf" for="ind-pob-1">
+                                                    <input type="checkbox" id="ind-pob-1" class="inegi-checkbox" value="POB_TOTAL_AGEB" data-nombre="Población total en el entorno censal (AGEB)" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Población total en el entorno censal (AGEB)</span>
+                                                </label>
+                                                <label class="inegi-tree-leaf" for="ind-pob-2">
+                                                    <input type="checkbox" id="ind-pob-2" class="inegi-checkbox" value="POB_IND_MASC" data-nombre="Relación hombres-mujeres (Índice de masculinidad)" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Relación hombres-mujeres (Índice de masculinidad)</span>
+                                                </label>
+                                                <label class="inegi-tree-leaf" for="ind-pob-3">
+                                                    <input type="checkbox" id="ind-pob-3" class="inegi-checkbox" value="POB_0_14" data-nombre="Población de 0 a 14 años de edad" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Población de 0 a 14 años de edad</span>
+                                                </label>
+                                                <label class="inegi-tree-leaf" for="ind-pob-4">
+                                                    <input type="checkbox" id="ind-pob-4" class="inegi-checkbox" value="POB_60_MAS" data-nombre="Población de 60 años y más" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Población de 60 años y más</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Salud y Seguridad Social -->
+                                        <div class="inegi-tree-node" data-category="salud">
+                                            <div class="inegi-tree-header" onclick="toggleNodoInegi('cat-salud')">
+                                                <span class="inegi-expander" id="exp-cat-salud">+</span>
+                                                <i class="fa-solid fa-notes-medical text-slate-500 mr-1 text-[10px]"></i>
+                                                <span>Salud y Seguridad Social</span>
+                                            </div>
+                                            <div class="inegi-tree-children hidden" id="cat-salud">
+                                                <label class="inegi-tree-leaf" for="ind-sal-1">
+                                                    <input type="checkbox" id="ind-sal-1" class="inegi-checkbox" value="SAL_DERECHOHAB" data-nombre="Población derechohabiente a servicios de salud" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Población derechohabiente a servicios de salud</span>
+                                                </label>
+                                                <label class="inegi-tree-leaf" for="ind-sal-2">
+                                                    <input type="checkbox" id="ind-sal-2" class="inegi-checkbox" value="SAL_DISCAPACIDAD" data-nombre="Población con alguna discapacidad o limitación" onchange="onCheckboxInegiChange(this)">
+                                                    <span>Población con alguna discapacidad o limitación</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 4. Pie de Acción -->
+                                <div class="inegi-footer">
+                                    <div class="inegi-footer-status">
+                                        <span id="inegi-coord-status"><i class="fa-solid fa-location-crosshairs mr-1"></i> Sin punto en mapa</span>
+                                        <span id="inegi-status-msg" class="text-hikred font-bold"></span>
+                                    </div>
+                                    <div class="inegi-btn-row">
+                                        <button type="button" class="inegi-btn-secondary" onclick="limpiarSeleccionInegi()">Limpiar</button>
+                                        <button type="button" id="btn-analizar-zona-inegi" class="inegi-btn-primary" disabled onclick="enviarAnalisisZonaInegi()">
+                                            <i class="fa-solid fa-chart-column mr-1"></i> Analizar Zona
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="consultarGisPpdu()" class="mt-2 w-full bg-hikred hover:bg-hikred-hover text-white text-[11px] font-semibold py-1.5 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"><i class="fa-solid fa-location-crosshairs"></i> Consultar GIS y PPDU de este punto</button>
+                    </div>
+                    <div id="section-upload" class="bg-slate-50 rounded-xl p-3 border border-slate-200 shadow-sm">
+                        <h2 class="text-xs font-bold uppercase text-slate-600 mb-2 tracking-wider"><i class="fa-solid fa-cloud-arrow-up mr-1 text-hikred"></i> Carga de Archivos</h2>
+                        <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center cursor-pointer hover:bg-slate-100 transition bg-white">
+                            <i class="fa-solid fa-file-video text-xl text-slate-400 mb-1"></i>
+                            <p class="text-xs text-slate-600 font-medium">Arrastra archivo (MP4, JPG, PDF, TXT)</p>
+                            <input type="file" id="file-input" class="hidden" accept=".pdf,.txt,.jpg,.jpeg,.png,.mp4,.mov,.avi,.mkv,.webm">
+                        </div>
+                        <div id="file-preview" class="hidden mt-2 p-2 bg-white border border-slate-200 rounded-lg items-center justify-between shadow-sm flex">
+                            <span id="file-name" class="text-xs text-slate-700 truncate max-w-[200px] font-medium"></span>
+                            <button id="btn-remove-file" class="text-red-500 hover:text-red-700 p-1 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                    <div id="section-webcam" class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col space-y-2 shadow-sm">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-bold uppercase text-slate-600 tracking-wider"><i class="fa-solid fa-camera mr-1 text-hikred"></i> Aforo Directo (Latencia 0ms)</h3>
+                            <span id="camStatus" class="text-[10px] text-slate-400 font-bold uppercase bg-slate-200 px-2 py-0.5 rounded">Inactiva</span>
+                        </div>
+                        <div class="relative w-full h-32 bg-black rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center">
+                            <video id="webcamVideo" autoplay playsinline muted class="hidden"></video>
+                            <img id="liveFeedImg" class="w-full h-full object-cover hidden" alt="Live YOLO Stream">
+                            <p id="camPlaceholder" class="text-[10px] text-slate-400 text-center px-4">Pulsa activar para transmisión instantánea.</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="btnToggleCam" onclick="toggleCamara()" class="flex-1 bg-hikred hover:bg-hikred-hover text-white text-xs font-semibold py-1.5 rounded-lg transition shadow-sm flex items-center justify-center gap-1 cursor-pointer"><i class="fa-solid fa-video"></i> <span>Activar Cámara</span></button>
+                            <button onclick="resetCamara()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-3 py-1.5 rounded-lg transition cursor-pointer" title="Reiniciar"><i class="fa-solid fa-rotate-right"></i></button>
+                        </div>
+                    </div>
+                </aside>
+
+                <main id="panel-chat" class="flex-1 flex flex-col bg-slate-100 h-full overflow-hidden">
+                    <div id="chat-history" class="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 custom-scrollbar">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-hikred flex items-center justify-center text-white shrink-0 shadow text-xs font-bold">🤖</div>
+                            <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-slate-200 max-w-[92%] text-xs md:text-sm leading-relaxed markdown-body">
+                                <p>Bienvenido al Asistente de Inteligencia Urbana URBIN. El sistema está restringido y especializado exclusivamente en la Zona Metropolitana de Guadalajara (ZMG): Guadalajara, Zapopan, San Pedro Tlaquepaque, Tlajomulco de Zúñiga, Tonalá, El Salto, Ixtlahuacán de los Membrillos, Juanacatlán y Zapotlanejo.</p>
+                                <p class="mt-2.5 text-slate-600">Selecciona un predio en el mapa ZMG para análisis territorial con cruce de zonificación, solicita dictámenes normativos (Código Urbano de Jalisco / POTmet), activa tu cámara para aforo o usa los botones de consulta rápida</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-white border-t border-slate-200 shrink-0 z-20 relative">
+                        <div id="loading-indicator" class="hidden absolute -top-9 left-2 text-[11px] font-semibold text-hikred flex items-center gap-1.5 bg-white/95 px-3 py-1 rounded-full shadow border border-slate-200">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i><span id="loading-text">Procesando solicitud...</span>
+                        </div>
+                        <form id="chat-form" class="relative flex items-end gap-2 bg-slate-50 rounded-xl border border-slate-300 p-1.5 focus-within:ring-2 ring-hikred focus-within:bg-white transition-all shadow-sm">
+                            <textarea id="chat-input" rows="1" class="w-full resize-none bg-transparent outline-none p-2 text-slate-900 text-xs sm:text-sm max-h-24" placeholder="Escribe tu consulta urbana o territorial en la ZMG..."></textarea>
+                            <button type="submit" class="bg-hikred hover:bg-hikred-hover text-white rounded-lg w-10 h-10 flex items-center justify-center shrink-0 transition shadow cursor-pointer"><i class="fa-solid fa-paper-plane text-sm"></i></button>
+                        </form>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VISOR YOLO PARA ARCHIVOS DE IMAGEN/VIDEO -->
+    <div id="yolo-modal" class="fixed inset-0 bg-slate-900/80 hidden z-[10005] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-3 md:p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-slate-800 text-xs sm:text-sm"><i class="fa-solid fa-eye text-hikred mr-1.5"></i> Análisis de Aforo Visual</h3>
+                <button onclick="cerrarYoloModal()" class="text-slate-500 hover:text-slate-800 p-1 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-4 md:p-6 overflow-y-auto flex-1 flex flex-col gap-4 bg-slate-900 custom-scrollbar">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div id="modalMediaContainer" class="bg-black rounded-xl overflow-hidden shadow-inner flex items-center justify-center min-h-[300px] max-h-[60vh] w-full"></div>
+                    <div class="flex flex-col gap-2">
+                        <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Desglose de Elementos Detectados</h4>
+                        <div id="yolo-counts" class="space-y-1.5 overflow-y-auto max-h-72 pr-1 custom-scrollbar"></div>
+                        <div class="mt-3">
+                            <button onclick="descargarExcelDirecto()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition shadow cursor-pointer"><i class="fa-solid fa-file-excel"></i> Descargar Excel (.xlsx)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS y SCRIPTS DEL FRONTEND (CARRUSEL DINÁMICO, BÚSQUEDA, MAPA, INEGI) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <script>
+        /* =========================================================
+           BLOQUE 1: CARRUSEL DINÁMICO DEL HERO CON FLECHAS Y TEXTO
+           ========================================================= */
+        const heroSlidesData = [
+            {
+                image: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?q=80&w=1920&auto=format&fit=crop",
+                badge: "1. Estadísticas",
+                title: "Explorador GIS y Contexto Demográfico INEGI",
+                desc: "Cruza polígonos metropolitanos de IMEPLAN con microdatos del censo INEGI y el DENUE al instante.",
+                targetId: "card-estadisticas",
+                btnText: "Ir a 1. Estadísticas",
+                btnIcon: "fa-chart-bar",
+                directAction: null
+            },
+            {
+                image: "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1920&auto=format&fit=crop",
+                badge: "2. Normativa & Código Urbano",
+                title: "Cumplimiento Automático y Validación Oficial",
+                desc: "Verifica aforos y proyectos frente al Código Urbano de Jalisco y obtén dictámenes con sustento técnico al momento.",
+                targetId: "card-normativa",
+                btnText: "Ir a 2. Normativa Urbana",
+                btnIcon: "fa-book",
+                directAction: null
+            },
+            {
+                image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1920&auto=format&fit=crop",
+                badge: "3. Recomendaciones & Visión Cero",
+                title: "Intervenciones Viales y Estructurales Fundamentadas",
+                desc: "Guías de diseño geométrico, banquetas accesibles y pacificación de tránsito listas para dictamen técnico y cabildo.",
+                targetId: "card-recomendaciones",
+                btnText: "Ir a 3. Recomendaciones",
+                btnIcon: "fa-lightbulb",
+                directAction: null
+            },
+            {
+                image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=1920&auto=format&fit=crop",
+                badge: "4. Toma de Decisiones & Presupuesto",
+                title: "Panel Ejecutivo de Priorización de Proyectos",
+                desc: "Evalúa indicadores multicriterio, compara escenarios de movilidad y asigna inversión pública con certidumbre.",
+                targetId: "card-decisiones",
+                btnText: "Ir a 4. Toma de Decisiones",
+                btnIcon: "fa-users-cog",
+                directAction: null
+            }
+        ];
+
+        // Precargar imágenes del carrusel
+        heroSlidesData.forEach(slide => {
+            const img = new Image();
+            img.src = slide.image;
+        });
+
+        let currentHeroIndex = 0;
+        let heroInterval = null;
+
+        function renderHeroSlide(index) {
+            currentHeroIndex = (index + heroSlidesData.length) % heroSlidesData.length;
+            const slide = heroSlidesData[currentHeroIndex];
+            const heroSection = document.getElementById('hero-section');
+            const badge = document.getElementById('hero-badge');
+            const title = document.getElementById('hero-title');
+            const desc = document.getElementById('hero-desc');
+            if (heroSection) {
+                heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url('${slide.image}')`;
+                heroSection.setAttribute('title', `Clic en la imagen para ir a: ${slide.badge}`);
+            }
+
+            if (badge) {
+                badge.style.opacity = '0';
+                setTimeout(() => { badge.textContent = slide.badge; badge.style.opacity = '1'; }, 150);
+            }
+            if (title) {
+                title.style.opacity = '0';
+                setTimeout(() => { title.textContent = slide.title; title.style.opacity = '1'; }, 150);
+            }
+            if (desc) {
+                desc.style.opacity = '0';
+                setTimeout(() => { desc.textContent = slide.desc; desc.style.opacity = '1'; }, 150);
+            }
+
+            document.querySelectorAll('.hero-dot').forEach((dot, idx) => {
+                if (idx === currentHeroIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function nextHeroSlide() {
+            renderHeroSlide(currentHeroIndex + 1);
+            resetHeroTimer();
+        }
+
+        function prevHeroSlide() {
+            renderHeroSlide(currentHeroIndex - 1);
+            resetHeroTimer();
+        }
+
+        function resetHeroTimer() {
+            if (heroInterval) clearInterval(heroInterval);
+            heroInterval = setInterval(() => {
+                renderHeroSlide(currentHeroIndex + 1);
+            }, 5000);
+        }
+
+        function ejecutarAccionHeroSlide() {
+            const slide = heroSlidesData[currentHeroIndex];
+            if (slide && slide.targetId) {
+                irAZona(slide.targetId, slide.directAction);
+            }
+        }
+
+        function irAZona(elementId, accionOpcional = null) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('ring-4', 'ring-hikred', 'ring-offset-4', 'shadow-2xl', 'scale-[1.02]');
+                setTimeout(() => {
+                    el.classList.remove('ring-4', 'ring-hikred', 'ring-offset-4', 'shadow-2xl', 'scale-[1.02]');
+                }, 2200);
+            }
+            if (accionOpcional) {
+                setTimeout(() => {
+                    abrirOlmosModal(accionOpcional);
+                }, 500);
+            }
+        }
+
+        function preguntarDesdeHero(pregunta) {
+            abrirOlmosModal('chat');
+            setTimeout(() => {
+                const input = document.getElementById('chat-input') || document.getElementById('user-input');
+                if (input) {
+                    input.value = pregunta;
+                    input.focus();
+                }
+            }, 450);
+        }
+
+        // Teclado para flechas izquierda / derecha
+        document.addEventListener('keydown', (e) => {
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+            if (e.key === 'ArrowLeft') {
+                prevHeroSlide();
+            } else if (e.key === 'ArrowRight') {
+                nextHeroSlide();
+            }
+        });
+
+        // Pausar rotación en hover para interactuar cómodamente
+        const heroSectionEl = document.getElementById('hero-section');
+        if (heroSectionEl) {
+            heroSectionEl.addEventListener('mouseenter', () => {
+                if (heroInterval) clearInterval(heroInterval);
+            });
+            heroSectionEl.addEventListener('mouseleave', () => {
+                resetHeroTimer();
+            });
+
+            // Gestos táctiles (swipe) en dispositivos móviles
+            let touchStartX = 0;
+            let touchEndX = 0;
+            heroSectionEl.addEventListener('touchstart', (e) => {
+                if (e.changedTouches && e.changedTouches[0]) {
+                    touchStartX = e.changedTouches[0].screenX;
+                }
+            }, { passive: true });
+            heroSectionEl.addEventListener('touchend', (e) => {
+                if (e.changedTouches && e.changedTouches[0]) {
+                    touchEndX = e.changedTouches[0].screenX;
+                    if (touchEndX < touchStartX - 50) {
+                        nextHeroSlide();
+                    } else if (touchEndX > touchStartX + 50) {
+                        prevHeroSlide();
+                    }
+                }
+            }, { passive: true });
+        }
+
+        // Iniciar rotación automática del Hero
+        resetHeroTimer();
+
+        // Búsqueda Documental Global
+        const searchIndex = [
+            { title: "Inicio y asistente territorial", desc: "Mapa, consulta urbana, ubicación y análisis de archivos con el API.", url: "index.html", tags: "inicio mapa api urbanbuild consulta" },
+            { title: "Estadísticas y análisis", desc: "Carga un archivo y consulta el resultado que devuelve el backend.", url: "estadisticas.html", tags: "estadisticas tráfico aforo video imagen conteo" },
+            { title: "Normatividad", desc: "Consulta fuentes disponibles a través del backend conectado.", url: "normatividad.html", tags: "normativa código urbano jalisco ley rag" },
+            { title: "Recomendaciones", desc: "Pregunta al API sobre normativa y evidencia territorial disponible.", url: "recomendaciones.html", tags: "recomendaciones intervención vialidad rag" },
+            { title: "Análisis para decisiones", desc: "Solicita análisis; no registra presupuestos ni autoriza obras.", url: "toma-de-decisiones.html", tags: "decisiones proyectos presupuesto" },
+            { title: "Estado del servicio", desc: "Consulta la conectividad del backend y su configuración reportada.", url: "panel-admin.html", tags: "api salud estado servicio" }
+        ];
+
+        function toggleSearchModal() {
+            const m = document.getElementById('search-modal');
+            m.classList.toggle('hidden');
+            if(!m.classList.contains('hidden')) { 
+                document.getElementById('search-input').focus(); 
+            } else {
+                document.getElementById('search-input').value = '';
+                document.getElementById('search-results').classList.add('hidden');
+            }
+        }
+
+        function performSearch() {
+            const q = document.getElementById('search-input').value.trim().toLowerCase();
+            const resultsContainer = document.getElementById('search-results');
+            const resultsList = document.getElementById('search-results-list');
+            
+            if(!q) {
+                resultsContainer.classList.add('hidden');
+                return;
+            }
+
+            resultsContainer.classList.remove('hidden');
+            resultsList.replaceChildren();
+
+            const results = searchIndex.filter(item => 
+                item.title.toLowerCase().includes(q) || 
+                item.desc.toLowerCase().includes(q) || 
+                item.tags.toLowerCase().includes(q)
+            );
+
+            if(results.length === 0) {
+                const item = document.createElement('li');
+                item.className = 'p-3 bg-gray-50 border border-gray-200 rounded text-center';
+                const message = document.createElement('p');
+                message.className = 'text-xs text-gray-500 font-semibold';
+                message.textContent = `No se encontraron resultados para "${q}".`;
+                const hint = document.createElement('p');
+                hint.className = 'text-[11px] text-gray-400 mt-1';
+                hint.textContent = 'Prueba con términos como mapa, consulta, normativa o tráfico.';
+                item.append(message, hint);
+                resultsList.appendChild(item);
+                return;
+            }
+
+            results.forEach(res => {
+                const item = document.createElement('li');
+                item.className = 'p-3 bg-gray-50 border border-gray-200 rounded hover:border-hikred transition';
+                const link = document.createElement('a');
+                link.href = res.url;
+                link.className = 'block';
+                const title = document.createElement('strong');
+                title.className = 'text-sm text-gray-900';
+                title.textContent = res.title;
+                const description = document.createElement('p');
+                description.className = 'text-xs text-gray-600 mt-1';
+                description.textContent = res.desc;
+                link.append(title, description);
+                item.appendChild(link);
+                resultsList.appendChild(item);
+            });
+        }
+
+        /* =========================================================
+           BLOQUE 2: SCRIPTS DE API Y RENDER (OLMOS AVANZADO)
+           ========================================================= */
+        const API_BASE = "/api";
+
+        async function actualizarEstadoApi() {
+            const badge = document.getElementById('api-status');
+            if (!badge) return;
+            try {
+                const response = await fetch(`${API_BASE}/health`, { cache: 'no-store' });
+                const status = response.ok ? await response.json() : null;
+                if (!status || status.status !== 'online') throw new Error('offline');
+                const fuentes = [
+                    status.gis_sources_configured ? 'GIS configurado' : 'GIS pendiente',
+                    status.vector_store_configured ? 'RAG configurado' : 'RAG pendiente'
+                ];
+                badge.textContent = `API en línea · ${fuentes.join(' · ')}`;
+                badge.classList.remove('text-red-300');
+                badge.classList.add('text-emerald-300');
+            } catch (_) {
+                badge.textContent = 'API sin conexión';
+                badge.classList.remove('text-emerald-300');
+                badge.classList.add('text-red-300');
+            }
+        }
+        actualizarEstadoApi();
+        
+        let sessionId = "session_" + Math.random().toString(36).substring(2, 9);
+        try {
+            sessionId = localStorage.getItem("pimus_session") || sessionId;
+            localStorage.setItem("pimus_session", sessionId);
+        } catch (_) {}
+
+        let mapOlmos = null;
+        let mapInitialized = false;
+        let currentFile = null;
+        let selectedLat = null;
+        let selectedLng = null;
+        let currentMarkerOlmos = null;
+        let ultimoConteoGlobal = {};
+
+        function abrirOlmosModal(tab = 'chat') {
+            const modal = document.getElementById('olmosModalContainer');
+            if (!modal) return;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            if (typeof cambiarTabMobile === 'function' && tab) {
+                cambiarTabMobile(tab);
+            }
+
+            if (window.innerWidth >= 768) {
+                const panelTools = document.getElementById('panel-tools');
+                const panelChat = document.getElementById('panel-chat');
+                const secMap = document.getElementById('section-map');
+                const secUpload = document.getElementById('section-upload');
+                const secWebcam = document.getElementById('section-webcam');
+                if (panelTools) panelTools.classList.remove('hidden');
+                if (panelChat) panelChat.classList.remove('hidden');
+                if (tab === 'gis' && secMap) {
+                    secMap.classList.remove('hidden');
+                    secMap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else if (tab === 'vision') {
+                    if (secUpload) secUpload.classList.remove('hidden');
+                    if (secWebcam) secWebcam.classList.remove('hidden');
+                }
+            }
+
+            if (!mapInitialized) {
+                setTimeout(() => {
+                    if (typeof initMapOlmos === 'function') {
+                        initMapOlmos();
+                        mapInitialized = true;
+                    }
+                }, 150);
+            } else if (mapOlmos) {
+                setTimeout(() => {
+                    mapOlmos.invalidateSize();
+                }, 150);
+            }
+
+            if (tab === 'chat') {
+                setTimeout(() => {
+                    const input = document.getElementById('chat-input') || document.getElementById('user-input');
+                    if (input) input.focus();
+                }, 200);
+            }
+        }
+
+        function abrirOlmosAdjuntar() {
+            abrirOlmosModal('vision');
+            setTimeout(() => {
+                const fileInput = document.getElementById('file-input');
+                if (fileInput) fileInput.click();
+            }, 250);
+        }
+
+        function cerrarOlmosModal() {
+            const modal = document.getElementById('olmosModalContainer');
+            if (modal) {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        function toggleOlmosModal() {
+            const modal = document.getElementById('olmosModalContainer');
+            if (!modal) return;
+            if (modal.classList.contains('hidden')) {
+                abrirOlmosModal('chat');
+            } else {
+                cerrarOlmosModal();
+            }
+        }
+
+        function cambiarTabMobile(tab) {
+            const panelTools = document.getElementById('panel-tools');
+            const panelChat = document.getElementById('panel-chat');
+            const secMap = document.getElementById('section-map');
+            const secUpload = document.getElementById('section-upload');
+            const secWebcam = document.getElementById('section-webcam');
+            const btnChat = document.getElementById('tab-btn-chat');
+            const btnGis = document.getElementById('tab-btn-gis');
+            const btnVision = document.getElementById('tab-btn-vision');
+
+            [btnChat, btnGis, btnVision].forEach(b => {
+                b.classList.remove('border-hikred', 'text-white');
+                b.classList.add('border-transparent');
+            });
+
+            if (tab === 'chat') {
+                btnChat.classList.add('border-hikred', 'text-white');
+                panelChat.classList.remove('hidden');
+                panelTools.classList.add('hidden');
+            } else if (tab === 'gis') {
+                btnGis.classList.add('border-hikred', 'text-white');
+                panelChat.classList.add('hidden');
+                panelTools.classList.remove('hidden');
+                secMap.classList.remove('hidden');
+                secUpload.classList.add('hidden');
+                secWebcam.classList.add('hidden');
+                setTimeout(() => mapOlmos.invalidateSize(), 200);
+            } else if (tab === 'vision') {
+                btnVision.classList.add('border-hikred', 'text-white');
+                panelChat.classList.add('hidden');
+                panelTools.classList.remove('hidden');
+                secMap.classList.add('hidden');
+                secUpload.classList.remove('hidden');
+                secWebcam.classList.remove('hidden');
+            }
+        }
+
+        const CAPAS_WMS_EXTRA = [];
+
+        let controlCapas = null;
+        const IMEPLAN_WMS = 'https://geoserver2.imeplan.mx/geoserver/sigmetro/wms';
+
+        async function cargarCapasPpdu() {
+            try {
+                const r = await fetch(`${IMEPLAN_WMS}?service=WMS&version=1.3.0&request=GetCapabilities`);
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const xml = new DOMParser().parseFromString(await r.text(), 'text/xml');
+                const capas = [...xml.getElementsByTagName('Layer')].map(l => {
+                    const hijos = [...l.children];
+                    const nombre = hijos.find(c => c.localName === 'Name')?.textContent?.trim();
+                    const titulo = hijos.find(c => c.localName === 'Title')?.textContent?.trim();
+                    return nombre ? { nombre, titulo: titulo || nombre } : null;
+                }).filter(c => c && /ppdu|plan.?parcial/i.test(`${c.nombre} ${c.titulo}`)).slice(0, 15);
+                if (!capas.length) return;
+                capas.forEach(c => {
+                    const layer = L.tileLayer.wms(IMEPLAN_WMS, { layers: c.nombre, format: 'image/png', transparent: true, opacity: 0.6 });
+                    controlCapas.addOverlay(layer, `PPDU · ${c.titulo}`);
+                    if (/guadalajara/i.test(c.nombre) && !mapOlmos.hasLayer(layer) && capas.length && !window.__ppduOn) { layer.addTo(mapOlmos); window.__ppduOn = true; }
+                });
+            } catch (_) {}
+        }
+
+        function initMapOlmos() {
+            const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
+            const visorUrbanoWMS = L.tileLayer.wms('https://mapa.guadalajara.gob.mx:8443/geoserver/ordenamiento/wms', { layers: 'ordenamiento:E3-Zonificación Primaria', format: 'image/png', transparent: true, opacity: 0.60 });
+            const overlays = { 'Zonificación primaria': visorUrbanoWMS };
+            const initial = [osmLayer, visorUrbanoWMS];
+            CAPAS_WMS_EXTRA.forEach(c => {
+                const layer = L.tileLayer.wms(c.url, { layers: c.layers, format: 'image/png', transparent: true, opacity: c.opacity ?? 0.6 });
+                overlays[c.nombre] = layer;
+                initial.push(layer);
+            });
+
+            mapOlmos = L.map('map', { center: [20.6668, -103.3868], zoom: 13, layers: initial });
+            controlCapas = L.control.layers({ 'OpenStreetMap': osmLayer }, overlays, { collapsed: true }).addTo(mapOlmos);
+            cargarCapasPpdu();
+            mapOlmos.on('click', async function (e) { actualizarUbicacion(e.latlng); });
+
+            L.Control.geocoder({ defaultMarkGeocoder: false, placeholder: "Buscar colonia..." }).on('markgeocode', function(e) {
+                let center = e.geocode.center;
+                mapOlmos.setView(center, 16);
+                actualizarUbicacion(center);
+            }).addTo(mapOlmos);
+        }
+
+        function consultarGisPpdu() {
+            if (!Number.isFinite(selectedLat) || !Number.isFinite(selectedLng)) {
+                alert('Primero haz clic en el mapa para seleccionar un predio.');
+                return;
+            }
+            if (window.innerWidth < 768) cambiarTabMobile('chat');
+            ejecutarEnvioConsulta(
+                `Para el punto (${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}) indica la zonificación, el Plan Parcial de Desarrollo Urbano (PPDU) o instrumento de planeación aplicable, usos de suelo, COS, CUS y restricciones. Cita la evidencia GIS y normativa recibida; si no hay dato de PPDU, dilo expresamente.`,
+                selectedLat, selectedLng
+            );
+        }
+
+        async function actualizarUbicacion(latlng) {
+            selectedLat = latlng.lat;
+            selectedLng = latlng.lng;
+            if (currentMarkerOlmos) mapOlmos.removeLayer(currentMarkerOlmos);
+            currentMarkerOlmos = L.marker(latlng).addTo(mapOlmos);
+            document.getElementById('coordsDisplay').innerText = `${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
+            if (typeof actualizarCoordenadasPanelInegi === 'function') {
+                actualizarCoordenadasPanelInegi(latlng.lat, latlng.lng);
+            }
+
+            let placeName = "Predio seleccionado";
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`);
+                const data = await response.json();
+                placeName = data.address.road || data.address.city || "predio";
+            } catch (e) {}
+
+            document.getElementById('chat-input').value = `Dictamen Territorial Integral para ${placeName} (${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}). Incluye zonificación, PPDU aplicable, COS, CUS y accesibilidad.`;
+        }
+
+        const fileInputOlmos = document.getElementById('file-input');
+        const dropZoneOlmos = document.getElementById('drop-zone');
+        const filePreviewOlmos = document.getElementById('file-preview');
+        const fileNameOlmos = document.getElementById('file-name');
+        const btnRemoveFileOlmos = document.getElementById('btn-remove-file');
+
+        function quitarArchivoAdjunto() {
+            currentFile = null;
+            if (fileInputOlmos) fileInputOlmos.value = '';
+            if (filePreviewOlmos) {
+                filePreviewOlmos.classList.add('hidden');
+                filePreviewOlmos.classList.remove('flex');
+            }
+            if (dropZoneOlmos) dropZoneOlmos.classList.remove('hidden');
+            const chip = document.getElementById('chat-file-chip');
+            if (chip) {
+                chip.classList.add('hidden');
+                chip.classList.remove('flex');
+            }
+        }
+
+        if(dropZoneOlmos && fileInputOlmos) {
+            dropZoneOlmos.addEventListener('click', () => fileInputOlmos.click());
+            fileInputOlmos.addEventListener('change', (e) => { if (e.target.files.length) handleFile(e.target.files[0]); });
+            if (btnRemoveFileOlmos) {
+                btnRemoveFileOlmos.addEventListener('click', quitarArchivoAdjunto);
+            }
+        }
+
+        function handleFile(file) {
+            const maxUploadBytes = 4 * 1024 * 1024;
+            if (file.size > maxUploadBytes) {
+                alert('Para procesar desde esta página, el archivo debe pesar 4 MB o menos.');
+                if (fileInputOlmos) fileInputOlmos.value = '';
+                return;
+            }
+            const extension = file.name.split('.').pop().toLowerCase();
+            if (!['pdf', 'txt', 'jpg', 'jpeg', 'png', 'mp4', 'mov', 'avi', 'mkv', 'webm'].includes(extension)) {
+                alert('Formato no admitido. Usa PDF, TXT, JPG, PNG, MP4, MOV, AVI, MKV o WEBM.');
+                if (fileInputOlmos) fileInputOlmos.value = '';
+                return;
+            }
+            currentFile = file;
+            if (fileNameOlmos) fileNameOlmos.textContent = file.name;
+            if (dropZoneOlmos) dropZoneOlmos.classList.add('hidden');
+            if (filePreviewOlmos) {
+                filePreviewOlmos.classList.remove('hidden');
+                filePreviewOlmos.classList.add('flex');
+            }
+            const chip = document.getElementById('chat-file-chip');
+            const chipName = document.getElementById('chat-file-chip-name');
+            if (chip && chipName) {
+                chipName.textContent = file.name;
+                chip.classList.remove('hidden');
+                chip.classList.add('flex');
+            }
+            if (window.innerWidth < 768) cambiarTabMobile('chat');
+        }
+
+        const chatFormOlmos = document.getElementById('chat-form');
+        const chatInputOlmos = document.getElementById('chat-input');
+        const chatHistoryOlmos = document.getElementById('chat-history');
+        const loadingIndicatorOlmos = document.getElementById('loading-indicator');
+        const loadingTextOlmos = document.getElementById('loading-text');
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
+        }
+
+        function limpiarTextoJson(texto) {
+            if (!texto) return "";
+            return texto.replace(/```(?:json)?[\s\S]*?```/ig, '').replace(/\{["']conteo.*?\}[\s\S]*?/g, '').trim();
+        }
+
+        function appendMessage(role, content, yoloData = null) {
+            const div = document.createElement('div');
+            div.className = "flex items-start gap-2 sm:gap-3";
+            const avatar = document.createElement('div');
+            const bubble = document.createElement('div');
+            if (role === 'user') {
+                div.classList.add('flex-row-reverse');
+                avatar.className = 'w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-white shrink-0 text-xs';
+                avatar.innerHTML = '<i class="fa-solid fa-user"></i>';
+                bubble.className = 'bg-hikred text-white p-3 rounded-2xl max-w-[80%] text-xs sm:text-sm whitespace-pre-wrap break-words shadow-sm';
+                bubble.textContent = content;
+            } else {
+                avatar.className = 'w-8 h-8 rounded-full bg-hikred flex items-center justify-center text-white shrink-0 text-xs shadow-sm font-bold';
+                avatar.textContent = '🤖';
+                bubble.className = 'bg-white text-slate-800 p-4 rounded-2xl border border-slate-200 w-full max-w-[85%] text-xs sm:text-sm markdown-body break-words';
+                const answer = document.createElement('div');
+                const rawText = limpiarTextoJson(String(content || ''));
+                if (typeof marked !== 'undefined') {
+                    answer.innerHTML = marked.parse(rawText);
+                } else {
+                    answer.textContent = rawText;
+                }
+                bubble.appendChild(answer);
+
+                if (yoloData && typeof yoloData.grafico_base64 === 'string' && /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(yoloData.grafico_base64)) {
+                    const graph = document.createElement('img');
+                    graph.src = yoloData.grafico_base64;
+                    graph.alt = 'Gráfica del conteo devuelto por el API';
+                    graph.className = 'mt-4 w-full rounded-xl border border-slate-200';
+                    bubble.appendChild(graph);
+                }
+
+                if (yoloData && yoloData.conteo && typeof yoloData.conteo === 'object' && Object.keys(yoloData.conteo).length > 0) {
+                    ultimoConteoGlobal = yoloData.conteo;
+                    const actions = document.createElement('div');
+                    actions.className = 'mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center gap-2';
+                    if ((yoloData.media_type === 'video' || yoloData.media_type === 'image') && typeof yoloData.media_base64 === 'string') {
+                        const preview = document.createElement('button');
+                        preview.type = 'button';
+                        preview.className = 'bg-red-50 hover:bg-red-100 text-hikred text-xs font-bold py-2 px-3 rounded-xl border border-red-200 shadow-sm cursor-pointer';
+                        preview.textContent = yoloData.media_type === 'video' ? 'Reproducir video analizado' : 'Ver imagen analizada';
+                        preview.addEventListener('click', () => abrirYoloModal(yoloData.media_base64, JSON.stringify(yoloData.conteo), yoloData.media_type));
+                        actions.appendChild(preview);
+                    }
+                    const excel = document.createElement('button');
+                    excel.type = 'button';
+                    excel.className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-3 rounded-xl shadow cursor-pointer';
+                    excel.textContent = 'Descargar Excel';
+                    excel.addEventListener('click', () => descargarExcelDirecto());
+                    actions.appendChild(excel);
+                    bubble.appendChild(actions);
+                }
+            }
+            div.append(avatar, bubble);
+            chatHistoryOlmos.appendChild(div);
+            chatHistoryOlmos.scrollTo({ top: chatHistoryOlmos.scrollHeight, behavior: 'smooth' });
+        }
+
+        async function ejecutarEnvioConsulta(texto, lat = null, lon = null) {
+            let mensajeUsuario = texto || "Analiza el archivo adjunto detalladamente.";
+            appendMessage('user', mensajeUsuario);
+            loadingIndicatorOlmos.classList.remove('hidden');
+
+            try {
+                let url, options;
+                if (currentFile) {
+                    loadingTextOlmos.textContent = "Procesando archivo...";
+                    url = `${API_BASE}/analizar`;
+                    const formData = new FormData();
+                    formData.append('pregunta', mensajeUsuario);
+                    formData.append('archivo', currentFile);
+                    formData.append('session_id', sessionId);
+                    if (Number.isFinite(lat) && Number.isFinite(lon)) {
+                        formData.append('lat', String(lat));
+                        formData.append('lon', String(lon));
+                    }
+                    options = { method: 'POST', body: formData };
+                } else {
+                    loadingTextOlmos.textContent = "Consultando inteligencia artificial...";
+                    url = `${API_BASE}/chat`;
+                    options = {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: mensajeUsuario, pregunta: mensajeUsuario, usar_vector_store: true, session_id: sessionId, lat, lon })
+                    };
+                }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 240000);
+                options.signal = controller.signal;
+
+                let response;
+                try {
+                    response = await fetch(url, options);
+                } finally {
+                    clearTimeout(timeoutId);
+                }
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || data.error || 'No se pudo completar la consulta.');
+
+                appendMessage('assistant', data.respuesta_texto || data.respuesta || data.reply || 'El API respondió sin texto.', {
+                    media_base64: data.media_base64,
+                    media_type: data.media_type,
+                    grafico_base64: data.grafico_base64,
+                    conteo: data.conteo,
+                    contexto_gis: data.contexto_gis,
+                    datos_normativos: data.datos_normativos
+                });
+            } catch (err) {
+                const message = err.name === 'AbortError'
+                    ? 'La consulta tardó demasiado. Intenta de nuevo con una pregunta o archivo más pequeño.'
+                    : `No se pudo conectar con el servicio: ${escapeHTML(err.message)}`;
+                appendMessage('assistant', message);
+            } finally {
+                loadingIndicatorOlmos.classList.add('hidden');
+                if (currentFile && btnRemoveFileOlmos) btnRemoveFileOlmos.click();
+            }
+        }
+
+        if(chatFormOlmos) {
+            chatFormOlmos.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const text = chatInputOlmos.value.trim();
+                if (!text && !currentFile) return;
+                chatInputOlmos.value = '';
+                ejecutarEnvioConsulta(text, selectedLat, selectedLng);
+            });
+        }
+
+        async function descargarExcelDirecto(conteoObj = null) {
+            const dataConteo = conteoObj || ultimoConteoGlobal;
+            if (!dataConteo || Object.keys(dataConteo).length === 0) return alert("No hay datos de conteo disponibles para exportar.");
+            try {
+                const resp = await fetch(`${API_BASE}/exportar_excel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ conteo: dataConteo, lat: selectedLat, lon: selectedLng })
+                });
+                if (resp.ok) {
+                    const blob = await resp.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "URBIN_Reporte_Estadistico.xlsx";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else { alert("Error al generar el reporte Excel."); }
+            } catch (e) { alert("No se pudo conectar con el servidor para exportar Excel."); }
+        }
+
+        let streamActivo = null;
+        let isProcessingFrame = false;
+
+        async function loopCamaraEnVivo() {
+            const video = document.getElementById('webcamVideo');
+            const liveImg = document.getElementById('liveFeedImg');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            while (streamActivo) {
+                if (video.videoWidth > 0 && video.videoHeight > 0 && !isProcessingFrame) {
+                    isProcessingFrame = true;
+                    const targetWidth = 320; 
+                    canvas.width = targetWidth;
+                    canvas.height = Math.round((targetWidth / video.videoWidth) * video.videoHeight);
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    await new Promise(resolve => {
+                        canvas.toBlob(async (blob) => {
+                            if (!blob || !streamActivo) { isProcessingFrame = false; return resolve(); }
+                            try {
+                                const resp = await fetch(`${API_BASE}/live_frame`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/octet-stream' },
+                                    body: blob
+                                });
+                                if (resp.ok && streamActivo) {
+                                    const buffer = await resp.arrayBuffer();
+                                    const bytes = new Uint8Array(buffer);
+                                    let binary = '';
+                                    for (let i = 0; i < bytes.byteLength; i++) { binary += String.fromCharCode(bytes[i]); }
+                                    liveImg.src = `data:image/jpeg;base64,${btoa(binary)}`;
+                                    liveImg.classList.remove('hidden');
+                                }
+                            } catch (e) {} finally {
+                                isProcessingFrame = false;
+                                resolve();
+                            }
+                        }, 'image/jpeg', 0.85);
+                    });
+                }
+                await new Promise(r => setTimeout(r, 60));
+            }
+        }
+
+        async function toggleCamara() {
+            const video = document.getElementById('webcamVideo');
+            const liveImg = document.getElementById('liveFeedImg');
+            const placeholder = document.getElementById('camPlaceholder');
+            const statusText = document.getElementById('camStatus');
+            const btn = document.getElementById('btnToggleCam');
+
+            if (streamActivo) {
+                streamActivo.getTracks().forEach(t => t.stop());
+                streamActivo = null;
+                isProcessingFrame = false;
+                video.pause();
+                video.srcObject = null;
+                liveImg.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                statusText.innerText = "INACTIVA";
+                statusText.classList.remove('text-green-600');
+                btn.innerHTML = `<i class="fa-solid fa-video"></i> <span>Activar Cámara</span>`;
+                return;
+            }
+            try {
+                streamActivo = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: { ideal: "environment" }, width: { ideal: 640 }, height: { ideal: 480 } }, audio: false 
+                });
+                video.srcObject = streamActivo;
+                video.setAttribute("playsinline", "true");
+                video.setAttribute("muted", "true");
+                await video.play();
+
+                placeholder.classList.add('hidden');
+                statusText.innerText = "● EN VIVO (0ms)";
+                statusText.classList.add('text-green-600');
+                btn.innerHTML = `<i class="fa-solid fa-stop"></i> <span>Detener Cámara</span>`;
+                loopCamaraEnVivo();
+            } catch (e) { alert("No se pudo iniciar la cámara. Verifica los permisos del navegador."); }
+        }
+
+        function resetCamara() { fetch(`${API_BASE}/live_reset`, { method: 'POST' }).catch(() => {}); }
+
+        function abrirYoloModal(mediaB64, countsJsonStr, mediaType) {
+            const modal = document.getElementById('yolo-modal');
+            const mediaContainer = document.getElementById('modalMediaContainer');
+            const countsDiv = document.getElementById('yolo-counts');
+            const safeVideo = mediaType === 'video' && typeof mediaB64 === 'string';
+            const safeImage = mediaType === 'image' && typeof mediaB64 === 'string';
+            if (!safeVideo && !safeImage) return;
+            mediaContainer.replaceChildren();
+            const media = document.createElement(safeVideo ? 'video' : 'img');
+            media.className = 'max-h-[55vh] max-w-full object-contain rounded-lg';
+            if (safeVideo) {
+                media.controls = true;
+                media.autoplay = true;
+                media.loop = true;
+                const source = document.createElement('source');
+                source.src = mediaB64;
+                source.type = 'video/mp4';
+                media.appendChild(source);
+            } else {
+                media.src = mediaB64;
+                media.alt = 'Resultado del análisis visual';
+            }
+            mediaContainer.appendChild(media);
+            countsDiv.replaceChildren();
+            try {
+                const counts = typeof countsJsonStr === 'string' ? JSON.parse(countsJsonStr) : countsJsonStr;
+                ultimoConteoGlobal = counts;
+                for (const [key, val] of Object.entries(counts)) {
+                    const row = document.createElement('div');
+                    row.className = 'bg-slate-800 p-2 rounded-lg flex justify-between items-center text-xs text-white';
+                    const label = document.createElement('span');
+                    label.className = 'capitalize';
+                    label.textContent = key;
+                    const amount = document.createElement('span');
+                    amount.className = 'bg-hikred px-2 py-0.5 rounded font-bold';
+                    amount.textContent = String(val);
+                    row.append(label, amount);
+                    countsDiv.appendChild(row);
+                }
+            } catch (e) {}
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function cerrarYoloModal() {
+            const modal = document.getElementById('yolo-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            const mediaContainer = document.getElementById('modalMediaContainer');
+            if (mediaContainer) {
+                const videos = mediaContainer.getElementsByTagName('video');
+                for (let video of videos) { video.pause(); }
+            }
+        }
+    
+        /* =========================================================
+           LÓGICA DEL PANEL DE INDICADORES INEGI (CONSTRUCTOR)
+           ========================================================= */
+        function togglePanelInegi() {
+            const panel = document.getElementById('panel-inegi-constructor');
+            const icon = document.getElementById('inegi-toggle-icon');
+            if (!panel) return;
+            const isCollapsed = panel.classList.toggle('inegi-collapsed');
+            if (icon) {
+                icon.className = isCollapsed
+                    ? "fa-solid fa-chevron-down text-[10px] transition-transform"
+                    : "fa-solid fa-chevron-up text-[10px] transition-transform";
+            }
+        }
+
+        function toggleNodoInegi(containerId) {
+            const container = document.getElementById(containerId);
+            const expander = document.getElementById('exp-' + containerId);
+            if (!container) return;
+            const isHidden = container.classList.toggle('hidden');
+            if (expander) {
+                expander.textContent = isHidden ? '+' : '-';
+            }
+        }
+
+        function onCheckboxInegiChange(checkbox) {
+            const leaf = checkbox.closest('.inegi-tree-leaf');
+            if (leaf) {
+                if (checkbox.checked) {
+                    leaf.classList.add('selected');
+                } else {
+                    leaf.classList.remove('selected');
+                }
+            }
+            actualizarContadorInegi();
+        }
+
+        function actualizarContadorInegi() {
+            const checked = document.querySelectorAll('.inegi-checkbox:checked');
+            const badge = document.getElementById('inegi-badge-count');
+            if (badge) badge.textContent = String(checked.length);
+            verificarBotonAnalizarInegi();
+        }
+
+        function actualizarCoordenadasPanelInegi(lat, lng) {
+            const status = document.getElementById('inegi-coord-status');
+            if (status) {
+                status.innerHTML = `<i class="fa-solid fa-check text-green-600 mr-1"></i> (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            }
+            verificarBotonAnalizarInegi();
+        }
+
+        function verificarBotonAnalizarInegi() {
+            const btn = document.getElementById('btn-analizar-zona-inegi');
+            if (!btn) return;
+            const hayCoordenadas = Number.isFinite(selectedLat) && Number.isFinite(selectedLng);
+            btn.disabled = !hayCoordenadas;
+        }
+
+        function limpiarSeleccionInegi() {
+            document.querySelectorAll('.inegi-checkbox').forEach(cb => {
+                cb.checked = false;
+                const leaf = cb.closest('.inegi-tree-leaf');
+                if (leaf) leaf.classList.remove('selected');
+            });
+            actualizarContadorInegi();
+        }
+
+        function filtrarArbolInegi() {
+            const input = document.getElementById('inegi-search-input');
+            const query = (input ? input.value : "").trim().toLowerCase();
+            const mode = (document.querySelector('input[name="inegi_match"]:checked')?.value) || 'all';
+            const leaves = document.querySelectorAll('.inegi-tree-leaf');
+
+            leaves.forEach(leaf => {
+                const text = leaf.textContent.toLowerCase();
+                let match = true;
+                if (query) {
+                    if (mode === 'exact') {
+                        match = text.includes(query);
+                    } else if (mode === 'any') {
+                        const words = query.split(/\s+/);
+                        match = words.some(w => text.includes(w));
+                    } else { // 'all'
+                        const words = query.split(/\s+/);
+                        match = words.every(w => text.includes(w));
+                    }
+                }
+                leaf.style.display = match ? 'flex' : 'none';
+
+                if (match && query) {
+                    let parent = leaf.closest('.inegi-tree-children');
+                    while (parent) {
+                        parent.classList.remove('hidden');
+                        const exp = document.getElementById('exp-' + parent.id);
+                        if (exp) exp.textContent = '-';
+                        const grandNode = parent.closest('.inegi-tree-node');
+                        parent = grandNode ? grandNode.parentElement.closest('.inegi-tree-children') : null;
+                    }
+                }
+            });
+        }
+
+        function ordenarIndicadoresInegi() {
+            const criteria = document.getElementById('inegi-sort-select')?.value || 'name';
+            const containers = document.querySelectorAll('.inegi-tree-children');
+            containers.forEach(container => {
+                const leaves = Array.from(container.querySelectorAll(':scope > .inegi-tree-leaf'));
+                if (leaves.length > 1) {
+                    leaves.sort((a, b) => {
+                        const nameA = (a.querySelector('span')?.textContent || '').trim();
+                        const nameB = (b.querySelector('span')?.textContent || '').trim();
+                        if (criteria === 'key') {
+                            const valA = a.querySelector('.inegi-checkbox')?.value || '';
+                            const valB = b.querySelector('.inegi-checkbox')?.value || '';
+                            return valA.localeCompare(valB);
+                        }
+                        return nameA.localeCompare(nameB);
+                    });
+                    leaves.forEach(l => container.appendChild(l));
+                }
+            });
+        }
+
+        async function enviarAnalisisZonaInegi() {
+            if (!Number.isFinite(selectedLat) || !Number.isFinite(selectedLng)) {
+                alert("Primero haz clic en el mapa para seleccionar las coordenadas de análisis.");
+                return;
+            }
+
+            const checkboxes = Array.from(document.querySelectorAll('.inegi-checkbox:checked'));
+            const listaIndicadores = checkboxes.map(cb => ({
+                id: cb.value,
+                nombre: cb.dataset.nombre || cb.value
+            }));
+
+            const btn = document.getElementById('btn-analizar-zona-inegi');
+            const msgStatus = document.getElementById('inegi-status-msg');
+            if (btn) btn.disabled = true;
+            if (msgStatus) msgStatus.textContent = "Procesando...";
+
+            try {
+                const payload = {
+                    lat: selectedLat,
+                    lng: selectedLng,
+                    indicadores: listaIndicadores.map(i => i.id)
+                };
+
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                await response.json();
+                if (msgStatus) msgStatus.textContent = "¡Listo!";
+                setTimeout(() => { if (msgStatus) msgStatus.textContent = ""; }, 3000);
+
+                const textoIndicadores = listaIndicadores.length > 0
+                    ? listaIndicadores.map(i => `• ${i.nombre}`).join('\n')
+                    : "Indicadores censales y demográficos estándar de la zona";
+
+                const promptConsulta = `Emite un Plan Parcial y Análisis Territorial Integral para el predio en (${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}).\n` +
+                    `Considera e integra en el diagnóstico los siguientes indicadores demográficos y urbanos seleccionados del Banco de Indicadores:\n${textoIndicadores}\n` +
+                    `Evalúa compatibilidad de uso de suelo, zonificación, infraestructura disponible y restricciones normativas.`;
+
+                if (window.innerWidth < 768) cambiarTabMobile('chat');
+                const inegiPanel = document.getElementById('panel-inegi-constructor');
+                if (inegiPanel && !inegiPanel.classList.contains('inegi-collapsed')) {
+                    togglePanelInegi();
+                }
+                ejecutarEnvioConsulta(promptConsulta, selectedLat, selectedLng);
+
+            } catch (err) {
+                if (msgStatus) msgStatus.textContent = "Error al conectar";
+                const promptConsulta = `Emite un Plan Parcial y Análisis Territorial para (${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}) integrando los indicadores seleccionados:\n` +
+                    listaIndicadores.map(i => `• ${i.nombre}`).join('\n');
+                const inegiPanel = document.getElementById('panel-inegi-constructor');
+                if (inegiPanel && !inegiPanel.classList.contains('inegi-collapsed')) {
+                    togglePanelInegi();
+                }
+                ejecutarEnvioConsulta(promptConsulta, selectedLat, selectedLng);
+            } finally {
+                verificarBotonAnalizarInegi();
+            }
+        }
+
+        const panelInegiElemento = document.getElementById('panel-inegi-constructor');
+        if (panelInegiElemento) {
+            ['click', 'dblclick', 'mousedown', 'pointerdown'].forEach(evt => {
+                panelInegiElemento.addEventListener(evt, e => e.stopPropagation());
+            });
+        }
+
+        /* =========================================================
+           INTERRUPTOR DE TEMA (CLARO / OSCURO)
+           ========================================================= */
+        function updateThemeUI(isDark) {
+            const icon = document.getElementById('theme-icon');
+            const btn = document.getElementById('theme-toggle');
+            if (icon) {
+                if (isDark) {
+                    icon.className = 'fas fa-sun text-base text-amber-400';
+                } else {
+                    icon.className = 'fas fa-moon text-base text-gray-600 dark:text-gray-200';
+                }
+            }
+            if (btn) {
+                btn.setAttribute('title', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+                btn.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const newTheme = isDark ? 'dark' : 'light';
+            try {
+                localStorage.setItem('urbanbuild_theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            } catch (e) {}
+            updateThemeUI(isDark);
+        }
+
+        // Sincronizar el estado visual de los iconos al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            updateThemeUI(isDark);
+        });
+
+        // Escuchar cambios de preferencia del sistema
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                const savedTheme = localStorage.getItem('urbanbuild_theme') || localStorage.getItem('theme');
+                if (!savedTheme) {
+                    if (e.matches) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                    updateThemeUI(e.matches);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

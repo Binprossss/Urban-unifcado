@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normativa y Base RAG | UrbanBuild</title>
+    
+    <!-- Google Fonts: Open Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Inicialización inmediata del tema antes del render
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('urbanbuild_theme') || localStorage.getItem('theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Open Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        hikred: {
+                            DEFAULT: '#c9122f', 
+                            hover: '#a00e25',
+                            light: '#fce8eb'
+                        },
+                        hikgray: {
+                            800: '#2d2d2d',
+                            900: '#1a1a1a', 
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Open Sans', sans-serif; }
+        html.dark { color-scheme: dark; }
+        html.dark body { background-color: #0b0f19; color: #f1f5f9; }
+        html.dark nav { background-color: #0f172a !important; border-color: #1e293b !important; }
+        html.dark nav a.text-black { color: #ffffff !important; }
+        html.dark nav a.text-gray-600 { color: #cbd5e1 !important; }
+        html.dark #mobile-nav-menu { background-color: #0f172a !important; border-color: #1e293b !important; }
+        html.dark #mobile-nav-menu a { color: #cbd5e1 !important; }
+        html.dark .bg-white { background-color: #131c2e !important; border-color: #1e293b !important; color: #f1f5f9 !important; }
+        html.dark .bg-gray-50 { background-color: #0b0f19 !important; }
+        html.dark .text-gray-900 { color: #ffffff !important; }
+        html.dark .text-gray-800 { color: #f1f5f9 !important; }
+        html.dark .text-gray-600 { color: #94a3b8 !important; }
+        html.dark .text-gray-500 { color: #94a3b8 !important; }
+        html.dark .border-gray-200 { border-color: #1e293b !important; }
+    </style>
+</head>
+<body class="bg-white dark:bg-slate-950 text-gray-800 dark:text-slate-100 antialiased transition-colors duration-200">
+
+    <!-- Top Utility Bar -->
+    <div class="bg-hikgray-900 border-b border-gray-800 text-xs text-gray-400 py-1.5 hidden md:block">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center font-semibold text-[11px]">
+            <div class="flex items-center gap-3">
+                <span class="text-white"><i class="fas fa-map-location-dot text-hikred mr-1.5"></i> Ámbito: <strong>Zona Metropolitana de Guadalajara (9 Municipios)</strong></span>
+                <span class="text-gray-600">|</span>
+                <span class="text-red-300 bg-red-950/80 px-2 py-0.5 rounded border border-red-800/80">RAG Normativo: Jalisco & IMEPLAN</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="index.html#soporte" class="hover:text-white transition">SOPORTE</a>
+                <a href="index.html#partners" class="hover:text-white transition">IMEPLAN / POTmet</a>
+                <a href="panel-admin.html" class="hover:text-hikred transition flex items-center gap-1">
+                    <i class="fas fa-shield-halved text-hikred"></i> ADMINISTRACIÓN
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegación Principal -->
+    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50" aria-label="Navegación principal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="text-3xl font-bold tracking-tighter">
+                    <a href="index.html" class="text-black hover:opacity-90">Urban</a><a href="login.html" class="text-hikred hover:underline">Build</a>
+                </div>
+                
+                <div class="hidden md:flex space-x-7 items-center text-sm font-semibold">
+                    <a href="index.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Inicio</a>
+                    <a href="https://urbanbuilding.vercel.app" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-hikred transition-colors py-2 flex items-center gap-1">
+                        Captura de Datos <i class="fas fa-arrow-up-right-from-square text-[10px] text-gray-400"></i>
+                    </a>
+                    <a href="estadisticas.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Estadísticas</a>
+                    <a href="normatividad.html" aria-current="page" class="text-hikred py-2 border-b-2 border-hikred">Normativa</a>
+                    <a href="recomendaciones.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Recomendaciones</a>
+                    <a href="toma-de-decisiones.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Toma de Decisiones</a>
+                </div>
+
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- Interruptor de Tema al lado de Iniciar Sesión -->
+                    <button id="theme-toggle" onclick="toggleTheme()" type="button" 
+                            class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-gray-200 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none cursor-pointer flex items-center justify-center border border-gray-200 dark:border-slate-700" 
+                            title="Alternar entre modo claro y oscuro" aria-label="Alternar tema">
+                        <i id="theme-icon" class="fas fa-moon text-base"></i>
+                        <span class="sr-only">Alternar tema</span>
+                    </button>
+
+                    <!-- Botón de Iniciar Sesión / Administración (no cambia si estás logeado o no) -->
+                    <a href="login.html" id="btn-iniciar-sesion" 
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-100 hover:text-hikred dark:hover:text-hikred border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 transition shadow-xs focus:outline-none" 
+                       title="Iniciar Sesión / Portal de Administración">
+                        <i class="fas fa-user-shield text-hikred text-sm"></i>
+                        <span class="hidden sm:inline">Iniciar Sesión</span>
+                    </a>
+
+                    <button type="button" onclick="document.getElementById('mobile-nav-menu').classList.toggle('hidden')" class="md:hidden text-gray-700 dark:text-gray-200 hover:text-hikred transition p-2" aria-label="Abrir menú" aria-controls="mobile-nav-menu">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú Móvil -->
+        <div id="mobile-nav-menu" class="hidden md:hidden border-t border-gray-200 bg-white">
+            <div class="px-4 py-3 flex flex-col space-y-1">
+                <a href="index.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Inicio</a>
+                <a href="https://urbanbuilding.vercel.app" target="_blank" rel="noopener noreferrer" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Captura de Datos</a>
+                <a href="estadisticas.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Estadísticas</a>
+                <a href="normatividad.html" class="py-2.5 text-sm font-bold text-hikred">Normativa</a>
+                <a href="recomendaciones.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Recomendaciones</a>
+                <a href="toma-de-decisiones.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Toma de Decisiones</a>
+                <a href="panel-admin.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred flex items-center gap-1.5 border-t border-gray-100 pt-3">
+                    <i class="fas fa-user-shield text-hikred"></i> Portal de Administración
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 text-center max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-900 uppercase">Normativa y Base de Conocimiento RAG</h2>
+                <div class="w-16 h-1 bg-hikred mx-auto mt-4 mb-4"></div>
+                <p class="text-gray-600">Instrumentos legales oficiales de Jalisco, Guadalajara y normatividad de accesibilidad para consulta y descarga directa.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <a href="pdf/Codigo-Urbano.pdf" download="Codigo-Urbano.pdf" class="bg-white p-6 border border-gray-200 rounded-sm shadow-sm hover:shadow-md transition flex items-start space-x-4 group">
+                    <div class="text-hikred text-3xl mt-1"><i class="fas fa-file-pdf"></i></div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 text-base uppercase mb-1 group-hover:text-hikred transition">Código Urbano para el Estado de Jalisco</h3>
+                        <p class="text-xs text-hikred font-mono mb-2">Ámbito Estatal</p>
+                        <p class="text-xs text-gray-600 mb-3">Normas para ordenar asentamientos humanos, reservas territoriales y desarrollo urbano</p>
+                        <span class="inline-flex items-center text-xs font-semibold text-hikred"><i class="fas fa-download mr-1"></i> Descargar PDF</span>
+                    </div>
+                </a>
+
+                <a href="pdf/Ley-Movilidad.pdf" download="Ley-Movilidad.pdf" class="bg-white p-6 border border-gray-200 rounded-sm shadow-sm hover:shadow-md transition flex items-start space-x-4 group">
+                    <div class="text-hikred text-3xl mt-1"><i class="fas fa-file-pdf"></i></div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 text-base uppercase mb-1 group-hover:text-hikred transition">Ley de Movilidad, Seguridad Vial y Transporte</h3>
+                        <p class="text-xs text-hikred font-mono mb-2">Ámbito Estatal</p>
+                        <p class="text-xs text-gray-600 mb-3">Garantiza el derecho humano a la movilidad, seguridad vial e infraestructura</p>
+                        <span class="inline-flex items-center text-xs font-semibold text-hikred"><i class="fas fa-download mr-1"></i> Descargar PDF</span>
+                    </div>
+                </a>
+
+                <a href="pdf/Reglamento-Zonificacion.pdf" download="Reglamento-Zonificacion.pdf" class="bg-white p-6 border border-gray-200 rounded-sm shadow-sm hover:shadow-md transition flex items-start space-x-4 group">
+                    <div class="text-hikred text-3xl mt-1"><i class="fas fa-file-pdf"></i></div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 text-base uppercase mb-1 group-hover:text-hikred transition">Reglamento Estatal de Zonificación</h3>
+                        <p class="text-xs text-hikred font-mono mb-2">Ámbito Estatal</p>
+                        <p class="text-xs text-gray-600 mb-3">Normas técnicas y procedimientos para la planeación y regulación del ordenamiento territorial</p>
+                        <span class="inline-flex items-center text-xs font-semibold text-hikred"><i class="fas fa-download mr-1"></i> Descargar PDF</span>
+                    </div>
+                </a>
+
+
+                <a href="pdf/Ley-Inclusion.pdf" download="Ley-Inclusion.pdf" class="bg-white p-6 border border-gray-200 rounded-sm shadow-sm hover:shadow-md transition flex items-start space-x-4 group">
+                    <div class="text-hikred text-3xl mt-1"><i class="fas fa-file-pdf"></i></div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 text-base uppercase mb-1 group-hover:text-hikred transition">Ley para la Inclusión y Desarrollo Integral</h3>
+                        <p class="text-xs text-hikred font-mono mb-2">Ámbito Estatal</p>
+                        <p class="text-xs text-gray-600 mb-3">Garantiza derechos humanos, diseño universal e inclusión social de personas con discapacidad</p>
+                        <span class="inline-flex items-center text-xs font-semibold text-hikred"><i class="fas fa-download mr-1"></i> Descargar PDF</span>
+                    </div>
+                </a>
+
+
+                <a href="pdf/Discapacitados.pdf" download="Discapacitados.pdf" class="bg-white p-6 border border-gray-200 rounded-sm shadow-sm hover:shadow-md transition flex items-start space-x-4 group md:col-span-2 lg:col-span-2">
+                    <div class="text-hikred text-3xl mt-1"><i class="fas fa-file-pdf"></i></div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 text-base uppercase mb-1 group-hover:text-hikred transition">Reglamento de Acceso a Espacios Públicos para Personas con Discapacidad</h3>
+                        <p class="text-xs text-hikred font-mono mb-2">Municipio de Guadalajara</p>
+                        <p class="text-xs text-gray-600 mb-3">Especificaciones arquitectónicas y eliminación de barreras en edificios y espacios públicos municipales</p>
+                        <span class="inline-flex items-center text-xs font-semibold text-hikred"><i class="fas fa-download mr-1"></i> Descargar PDF</span>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <a href="index.html" class="inline-flex items-center text-sm font-semibold text-hikred hover:underline">
+                    <i class="fas fa-arrow-left mr-2"></i> Regresar a la página principal
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-hikgray-800 text-gray-400 py-12 border-t-4 border-hikred">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs">
+            <p>&copy; 2026 UrbanBuild. Todos los derechos reservados. Escuela Politécnica de Guadalajara.</p>
+        </div>
+    </footer>
+
+    <script>
+        /* =========================================================
+           INTERRUPTOR DE TEMA (CLARO / OSCURO)
+           ========================================================= */
+        function updateThemeUI(isDark) {
+            const icon = document.getElementById('theme-icon');
+            const btn = document.getElementById('theme-toggle');
+            if (icon) {
+                if (isDark) {
+                    icon.className = 'fas fa-sun text-base text-amber-400';
+                } else {
+                    icon.className = 'fas fa-moon text-base text-gray-600 dark:text-gray-200';
+                }
+            }
+            if (btn) {
+                btn.setAttribute('title', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+                btn.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const newTheme = isDark ? 'dark' : 'light';
+            try {
+                localStorage.setItem('urbanbuild_theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            } catch (e) {}
+            updateThemeUI(isDark);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            updateThemeUI(isDark);
+        });
+    </script>
+</body>
+</html>

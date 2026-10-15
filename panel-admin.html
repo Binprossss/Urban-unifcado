@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración Pro | UrbanBuild</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Inicialización inmediata del tema antes del render
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('urbanbuild_theme') || localStorage.getItem('theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Open Sans"', 'sans-serif'] },
+                    colors: {
+                        hikred: { DEFAULT: '#c9122f', hover: '#a00e25', light: '#fce8eb' },
+                        hikgray: { 800: '#2d2d2d', 900: '#1a1a1a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html.dark { color-scheme: dark; }
+        html.dark body { background-color: #0b0f19; color: #f1f5f9; }
+        html.dark main { background-color: #0b0f19 !important; }
+        html.dark header { background-color: #0f172a !important; border-color: #1e293b !important; color: #ffffff !important; }
+        html.dark header h2 { color: #ffffff !important; }
+        html.dark .bg-white { background-color: #131c2e !important; border-color: #1e293b !important; color: #f1f5f9 !important; }
+        html.dark .bg-gray-50 { background-color: #0b0f19 !important; }
+        html.dark .bg-gray-100 { background-color: #0b0f19 !important; }
+        html.dark .text-gray-900 { color: #ffffff !important; }
+        html.dark .text-gray-800 { color: #f1f5f9 !important; }
+        html.dark .text-gray-700 { color: #cbd5e1 !important; }
+        html.dark .text-gray-600, html.dark .text-gray-500 { color: #94a3b8 !important; }
+        html.dark .border-gray-200 { border-color: #1e293b !important; }
+        html.dark .border-gray-300 { border-color: #334155 !important; }
+        html.dark input, html.dark select, html.dark textarea { background-color: #0b0f19 !important; border-color: #334155 !important; color: #ffffff !important; }
+    </style>
+
+    <script>
+        // Validación de sesión de administración (sincronizada con el servidor y localStorage)
+        if (localStorage.getItem('urbanbuild_role') !== 'admin') {
+            fetch('/api/sesion', { credentials: 'same-origin', cache: 'no-store' })
+                .then(r => r.ok ? r.json() : { autenticado: false })
+                .then(s => {
+                    if (s.autenticado) {
+                        localStorage.setItem('urbanbuild_role', 'admin');
+                    } else {
+                        window.location.href = 'login.html?redirect=panel-admin.html';
+                    }
+                })
+                .catch(() => {
+                    window.location.href = 'login.html?redirect=panel-admin.html';
+                });
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('urbanbuild_role');
+            fetch('/api/logout', { method: 'POST', credentials: 'same-origin', keepalive: true })
+                .finally(() => {
+                    window.location.href = 'index.html';
+                });
+        }
+    </script>
+</head>
+<body class="bg-gray-100 text-gray-800 antialiased flex h-screen overflow-hidden">
+
+    <div id="sidebar-overlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-hikgray-900 text-white flex flex-col justify-between transform -translate-x-full md:translate-x-0 md:static transition-transform duration-300 h-full shadow-xl">
+        <div>
+            <div class="h-20 flex items-center justify-between px-6 border-b border-gray-700 bg-black/20">
+                <span class="text-2xl font-bold tracking-tighter text-white">
+                    Urban<span class="text-hikred">Build</span> <span class="text-[10px] bg-hikred px-1.5 py-0.5 rounded ml-1">PRO</span>
+                </span>
+                <button onclick="toggleMobileSidebar()" class="md:hidden text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <nav class="p-4 space-y-1.5 text-sm font-semibold" id="sidebar-nav">
+                <button id="btn-config" onclick="switchTab('config')" class="w-full flex items-center space-x-3 bg-hikred text-white p-3 rounded-md transition shadow-sm">
+                    <i class="fas fa-cogs w-5 text-center"></i> <span class="text-left">Configuración General</span>
+                </button>
+                <button id="btn-editor" onclick="switchTab('editor')" class="w-full flex items-center space-x-3 hover:bg-gray-800 text-gray-400 hover:text-white p-3 rounded-md transition">
+                    <i class="fas fa-edit w-5 text-center"></i> <span class="text-left">Editor Web Principal</span>
+                </button>
+                <!-- BOTÓN DE ROBOT EN EL SIDEBAR PARA ABRIR EDICIÓN DIRECTA EN INDEX -->
+                <button onclick="abrirEdicionEnVivo()" class="w-full flex items-center space-x-3 hover:bg-gray-800 text-gray-400 hover:text-white p-3 rounded-md transition">
+                    <i class="fas fa-robot w-5 text-center text-hikred"></i> <span class="text-left">Edición en Vivo (Index)</span>
+                </button>
+                <button id="btn-rag" onclick="switchTab('rag')" class="w-full flex items-center space-x-3 hover:bg-gray-800 text-gray-400 hover:text-white p-3 rounded-md transition">
+                    <i class="fas fa-file-pdf w-5 text-center"></i> <span class="text-left">Gestión Normativa (RAG)</span>[cite: 1]
+                </button>
+                <button id="btn-api" onclick="switchTab('api')" class="w-full flex items-center space-x-3 hover:bg-gray-800 text-gray-400 hover:text-white p-3 rounded-md transition">
+                    <i class="fas fa-network-wired w-5 text-center"></i> <span class="text-left">Gestión de APIs</span>
+                </button>
+                <button id="btn-users" onclick="switchTab('users')" class="w-full flex items-center space-x-3 hover:bg-gray-800 text-gray-400 hover:text-white p-3 rounded-md transition">
+                    <i class="fas fa-users w-5 text-center"></i> <span class="text-left">Gestión de Usuarios</span>
+                </button>
+                <button id="btn-logs" onclick="switchTab('logs')" class="w-full flex items-center space-x-3 hover:bg-gray-800 text-gray-400 hover:text-white p-3 rounded-md transition">
+                    <i class="fas fa-terminal w-5 text-center"></i> <span class="text-left">Logs del Sistema</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-700">
+            <button onclick="cerrarSesion()" class="w-full flex items-center justify-center space-x-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 p-2.5 rounded-md transition">
+                <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-y-auto bg-gray-100">
+        <header class="bg-white shadow-sm h-20 flex items-center justify-between px-6 md:px-8 z-30 border-b border-gray-200 sticky top-0">
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleMobileSidebar()" class="md:hidden text-gray-700 hover:text-hikred text-xl focus:outline-none"><i class="fas fa-bars"></i></button>
+                <h2 id="header-title" class="text-lg md:text-xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-cogs text-hikred mr-2"></i> Configuración General
+                </h2>
+            </div>
+            <div class="flex items-center space-x-3">
+                <!-- Interruptor de Tema en Panel de Administración -->
+                <button id="theme-toggle" onclick="toggleTheme()" type="button" 
+                        class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-gray-200 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none cursor-pointer flex items-center justify-center border border-gray-200 dark:border-slate-700" 
+                        title="Alternar entre modo claro y oscuro" aria-label="Alternar tema">
+                    <i id="theme-icon" class="fas fa-moon text-base"></i>
+                </button>
+                <div class="flex items-center space-x-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-3.5 py-1.5 rounded-full">
+                    <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-xs font-bold text-gray-700 dark:text-gray-200">Admin_GDL</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 md:gap-6">
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 border-t-4 border-t-blue-500">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Carga de Servidor (CPU)</h4>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-xl font-bold text-gray-900" id="stat-cpu">18.4%</span> 
+                        <span class="text-blue-500 text-sm bg-blue-50 p-2 rounded-full"><i class="fas fa-microchip"></i></span>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 border-t-4 border-t-green-500">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Documentos RAG</h4>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-xl font-bold text-gray-900" id="stat-doc-count">4 Activos</span> 
+                        <span class="text-green-600 text-xs font-bold bg-green-50 px-2.5 py-1 rounded-full"><i class="fas fa-database mr-1"></i> Sync</span>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 border-t-4 border-t-purple-500">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">APIs Activas</h4>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-xl font-bold text-gray-900" id="stat-api-count">2 Conectadas</span> 
+                        <span class="text-purple-600 text-sm bg-purple-50 p-2 rounded-full"><i class="fas fa-network-wired"></i></span>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 border-t-4 border-t-amber-500">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Sesiones Activas</h4>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-xl font-bold text-gray-900">5 Usuarios</span> 
+                        <span class="text-amber-600 text-sm bg-amber-50 p-2 rounded-full"><i class="fas fa-user-friends"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-content-container" class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 md:p-8">
+                
+                <!-- SECCIÓN CONFIGURACIÓN GENERAL -->
+                <div id="section-config" class="block space-y-6">
+                    <div class="border-b border-gray-200 pb-3 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Parámetros del Sistema</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Define el comportamiento global del asistente y umbrales de tráfico.</p>
+                        </div>
+                        <div class="space-x-2">
+                            <button onclick="exportarConfiguracion()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-xs font-bold border border-gray-300 transition"><i class="fas fa-download mr-1"></i> Exportar Config</button>
+                        </div>
+                    </div>
+                    <form class="space-y-6" onsubmit="event.preventDefault(); guardarConfiguracion();">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tono del Asistente Virtual</label>
+                                <select id="cfg-tono" class="w-full bg-gray-50 border border-gray-300 text-gray-800 p-2.5 rounded-md text-sm focus:ring-2 focus:ring-hikred focus:outline-none">
+                                    <option value="Adaptativo">Adaptativo (Técnico y Ciudadano)</option>
+                                    <option value="Tecnico">Estrictamente Técnico (Solo Peritos)</option>
+                                    <option value="Simplificado">Simplificado (Solo Ciudadanos)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Umbral de Alerta Crítica</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="number" id="cfg-umbral" class="w-full md:w-32 bg-gray-50 border border-gray-300 text-gray-800 p-2.5 rounded-md text-sm focus:ring-2 focus:ring-hikred focus:outline-none" value="1500">
+                                    <span class="text-xs font-semibold text-gray-500 whitespace-nowrap">vehículos/h</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end pt-4 border-t border-gray-200">
+                            <button type="submit" class="bg-hikred hover:bg-hikred-hover text-white px-6 py-2.5 rounded-md font-bold shadow transition flex items-center text-sm">
+                                <i class="fas fa-save mr-2"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- SECCIÓN EDITOR WEB PRINCIPAL (INDEX.HTML) -->
+                <div id="section-editor" class="hidden space-y-6">
+                    <div class="border-b border-gray-200 pb-3 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Editor Web Principal (index.html)</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Modifica los textos principales de la página de inicio de forma segura.</p>
+                        </div>
+                        <a href="index.html" target="_blank" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-xs font-bold border border-gray-300 transition flex items-center">
+                            <i class="fas fa-external-link-alt mr-1"></i> Ver Página en Vivo
+                        </a>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-700 mb-1">Insignia / Subtítulo Hero</label>
+                            <input type="text" id="admin-cms-badge" class="w-full bg-gray-50 border border-gray-300 text-gray-800 p-3 rounded-md text-sm focus:outline-none focus:border-hikred">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-700 mb-1">Título Principal (H1)</label>
+                            <input type="text" id="admin-cms-title" class="w-full bg-gray-50 border border-gray-300 text-gray-800 p-3 rounded-md text-sm focus:outline-none focus:border-hikred">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-gray-700 mb-1">Descripción de la Sección</label>
+                            <textarea id="admin-cms-desc" rows="3" class="w-full bg-gray-50 border border-gray-300 text-gray-800 p-3 rounded-md text-sm focus:outline-none focus:border-hikred"></textarea>
+                        </div>
+                        <div class="flex justify-end pt-4 border-t border-gray-200">
+                            <button onclick="guardarCMSIndex()" class="bg-hikred hover:bg-hikred-hover text-white px-6 py-2.5 rounded-md font-bold shadow transition flex items-center text-sm">
+                                <i class="fas fa-sync-alt mr-2"></i> Guardar y Sincronizar index.html
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN RAG -->
+                <div id="section-rag" class="hidden space-y-6">
+                    <div class="border-b border-gray-200 pb-3">
+                        <h3 class="text-lg font-bold text-gray-800">Base de Conocimiento RAG</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Administra los reglamentos vectorizados que alimentan al modelo de IA[cite: 1].</p>
+                    </div>
+                    <div class="space-y-3" id="rag-document-list">
+                    </div>
+                    <div class="border-t border-gray-200 pt-6 mt-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Agregar Nuevo Reglamento (Vectorización)</label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="new-doc-name" placeholder="Ej. Reglamento de Imagen Urbana y Construcción" class="flex-1 bg-gray-50 border border-gray-300 text-gray-800 p-2.5 rounded-md text-sm focus:outline-none focus:border-hikred">
+                            <button onclick="agregarDocumentoRAG()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-md font-bold text-xs uppercase tracking-wider transition">Subir y Procesar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN APIS -->
+                <div id="section-api" class="hidden space-y-6">
+                    <div class="flex justify-between items-center border-b border-gray-200 pb-3">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Gestión de Endpoints y APIs</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Administra las conexiones con servicios externos y microservicios.</p>
+                        </div>
+                        <button onclick="abrirModalAPI()" class="bg-black text-white px-4 py-2 text-xs font-bold rounded-md hover:bg-gray-800 transition flex items-center">
+                            <i class="fas fa-plus mr-1.5"></i> Nueva API
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
+                                <tr>
+                                    <th class="p-3 font-semibold rounded-l-md">Servicio / Nombre</th>
+                                    <th class="p-3 font-semibold">Endpoint URL</th>
+                                    <th class="p-3 font-semibold">Estado</th>
+                                    <th class="p-3 font-semibold rounded-r-md text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="api-table-body" class="divide-y divide-gray-100">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN USUARIOS -->
+                <div id="section-users" class="hidden space-y-6">
+                    <div class="flex justify-between items-center border-b border-gray-200 pb-3">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Control de Accesos y Roles</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Asigna permisos a peritos, operadores y administradores.</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <input type="text" id="user-search" oninput="filtrarUsuarios()" placeholder="Buscar usuario..." class="bg-gray-50 border border-gray-300 px-3 py-1.5 rounded text-xs focus:outline-none focus:border-hikred">
+                            <button onclick="abrirModalUsuario()" class="bg-black text-white px-4 py-2 text-xs font-bold rounded-md hover:bg-gray-800 transition flex items-center">
+                                <i class="fas fa-user-plus mr-1.5"></i> Nuevo
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
+                                <tr>
+                                    <th class="p-3 font-semibold rounded-l-md">Usuario</th>
+                                    <th class="p-3 font-semibold">Rol</th>
+                                    <th class="p-3 font-semibold">Estado</th>
+                                    <th class="p-3 font-semibold rounded-r-md text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body" class="divide-y divide-gray-100">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN LOGS -->
+                <div id="section-logs" class="hidden space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-200 pb-3 gap-3">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Consola de Auditoría Pro</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Monitoreo y eventos detallados del núcleo de la plataforma.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="flex bg-gray-200 p-1 rounded text-xs font-semibold">
+                                <button onclick="filtrarLogs('ALL')" id="filter-all" class="px-2.5 py-1 rounded bg-white shadow-sm text-gray-800 transition">Todos</button>
+                                <button onclick="filtrarLogs('INFO')" id="filter-info" class="px-2.5 py-1 rounded text-gray-600 hover:text-gray-900 transition">Info</button>
+                                <button onclick="filtrarLogs('WARN')" id="filter-warn" class="px-2.5 py-1 rounded text-gray-600 hover:text-gray-900 transition">Warn</button>
+                                <button onclick="filtrarLogs('ERROR')" id="filter-error" class="px-2.5 py-1 rounded text-gray-600 hover:text-gray-900 transition">Error</button>
+                            </div>
+                            <input type="text" id="log-search" oninput="renderizarLogs()" placeholder="Filtrar texto..." class="bg-gray-50 border border-gray-300 px-3 py-1.5 rounded text-xs focus:outline-none focus:border-hikred">
+                            <button onclick="descargarLogs()" title="Descargar Log" class="bg-gray-800 hover:bg-gray-900 text-white px-3 py-1.5 rounded text-xs font-bold transition"><i class="fas fa-download"></i></button>
+                            <button onclick="limpiarLogs()" title="Limpiar Consola" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold transition"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div id="system-logs-box" class="bg-gray-900 text-gray-200 font-mono text-xs p-4 rounded-lg h-80 overflow-y-auto space-y-1.5 shadow-inner border border-gray-800">
+                    </div>
+
+                    <!-- SECCIÓN: PREGUNTAS SIN RESPUESTA O FUERA DE DOMINIO -->
+                    <div class="mt-6 border-t border-gray-200 pt-5">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                                    <i class="fas fa-clipboard-question text-amber-600"></i> Registro de Preguntas Sin Resolver o Rechazadas
+                                </h4>
+                                <p class="text-xs text-gray-500 mt-0.5">Captura las consultas de usuarios que no pudieron responderse por falta de documentos RAG o por estar fuera de dominio/ZMG.</p>
+                            </div>
+                            <button onclick="cargarPreguntasSinRespuesta()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded font-semibold transition flex items-center gap-1.5 border border-gray-300">
+                                <i class="fas fa-rotate"></i> Actualizar Registro
+                            </button>
+                        </div>
+                        <div id="box-preguntas-sin-respuesta" class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs space-y-2 max-h-56 overflow-y-auto">
+                            <p class="text-gray-400 italic text-center py-2">Haz clic en "Actualizar Registro" para consultar las preguntas registradas.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div id="successMsg" class="hidden fixed bottom-6 right-6 bg-green-600 text-white px-5 py-3 rounded-lg shadow-xl font-semibold text-sm flex items-center space-x-2 z-50">
+                <i class="fas fa-check-circle text-lg"></i> <span id="success-text">Cambios guardados con éxito.</span>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODALES -->
+    <div id="modal-usuario" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-gray-200 w-full max-w-md rounded-lg shadow-2xl p-6 relative border-t-4 border-hikred">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-user-shield text-hikred mr-2"></i> Registrar Nuevo Usuario</h3>
+            <div class="space-y-4 text-sm">
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Nombre de Usuario:</label>
+                    <input type="text" id="modal-username" placeholder="ej. perito_gonzalez" class="w-full bg-gray-50 border border-gray-300 text-gray-800 p-2.5 rounded focus:outline-none focus:border-hikred">
+                </div>
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Rol de Acceso:</label>
+                    <select id="modal-rol" class="w-full bg-gray-50 border border-gray-300 text-gray-800 p-2.5 rounded focus:outline-none focus:border-hikred">
+                        <option value="Admin">Admin (Control Total)</option>
+                        <option value="Editor">Editor / Perito (Gestión RAG)</option>
+                        <option value="Observador">Observador (Solo Lectura)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button onclick="cerrarModalUsuario()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded text-xs uppercase">Cancelar</button>
+                    <button onclick="guardarNuevoUsuario()" class="px-4 py-2 bg-hikred hover:bg-hikred-hover text-white font-bold rounded text-xs uppercase shadow">Crear Usuario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-api" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-gray-200 w-full max-w-md rounded-lg shadow-2xl p-6 relative border-t-4 border-hikred">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-network-wired text-hikred mr-2"></i> Registrar Nueva API</h3>
+            <div class="space-y-4 text-sm">
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">Nombre del Servicio:</label>
+                    <input type="text" id="modal-api-nombre" placeholder="ej. Servidor Visión IA" class="w-full bg-gray-50 border border-gray-300 text-gray-800 p-2.5 rounded focus:outline-none focus:border-hikred">
+                </div>
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">URL Endpoint:</label>
+                    <input type="text" id="modal-api-url" placeholder="https://api.urbanbuild.com/v1/..." class="w-full bg-gray-50 border border-gray-300 text-gray-800 p-2.5 rounded focus:outline-none focus:border-hikred">
+                </div>
+                <div>
+                    <label class="block font-semibold text-gray-700 mb-1">API Key / Token:</label>
+                    <input type="password" id="modal-api-key" placeholder="Clave secreta" class="w-full bg-gray-50 border border-gray-300 text-gray-800 p-2.5 rounded focus:outline-none focus:border-hikred">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button onclick="cerrarModalAPI()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded text-xs uppercase">Cancelar</button>
+                    <button onclick="guardarNuevaAPI()" class="px-4 py-2 bg-hikred hover:bg-hikred-hover text-white font-bold rounded text-xs uppercase shadow">Guardar API</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let documentosRAG = JSON.parse(localStorage.getItem('urban_rag_docs')) || [
+            { id: 1, nombre: 'Código Urbano del Estado de Jalisco' },
+            { id: 2, nombre: 'Ley de Movilidad y Transporte Sostenible' },
+            { id: 3, nombre: 'Reglamento de Zonificación y Usos de Suelo' }
+        ];
+
+        let apisSistema = JSON.parse(localStorage.getItem('urban_apis')) || [
+            { id: 1, nombre: 'Core IA Principal', url: 'https://api.urbanbuild.com/v1/', estado: 'Activo' },
+            { id: 2, nombre: 'Visión por Computadora (Vercel)', url: 'https://urbanbuilding.vercel.app/api', estado: 'Activo' }
+        ];
+
+        let usuariosSistema = JSON.parse(localStorage.getItem('urban_users')) || [
+            { id: 1, user: 'admin_gdl', rol: 'Admin', estado: 'Activo' },
+            { id: 2, user: 'perito_urbano', rol: 'Editor', estado: 'Activo' }
+        ];
+
+        let systemLogs = JSON.parse(localStorage.getItem('urban_system_logs')) || [
+            { time: '09:30:12', type: 'INFO', text: 'SYSTEM: Núcleo RAG iniciado correctamente con fuentes vectoriales estables.' },
+            { time: '09:32:05', type: 'INFO', text: 'AUTH: Sesión administrativa validada para el usuario "admin_gdl".' },
+            { time: '09:40:15', type: 'WARN', text: 'TRAFFIC: Saturación temporal detectada en nodo Av. Principal (>1,450 veh/h).' },
+            { time: '09:45:00', type: 'ERROR', text: 'API: Fallo de enlace secundario con microservicio de visión por 300ms.' }
+        ];
+
+        let currentLogFilter = 'ALL';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarRAG();
+            renderizarAPIs();
+            renderizarUsuarios();
+            cargarConfiguracionGuardada();
+            cargarCMSIndex();
+            renderizarLogs();
+            
+            setInterval(() => {
+                const randomCpu = (15 + Math.random() * 12).toFixed(1) + '%';
+                const cpuEl = document.getElementById('stat-cpu');
+                if(cpuEl) cpuEl.innerText = randomCpu;
+            }, 5000);
+        });
+
+        function abrirEdicionEnVivo() {
+            localStorage.setItem('urban_auto_edit', 'true');
+            window.location.href = 'index.html';
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function switchTab(tabId) {
+            const sections = ['config', 'editor', 'rag', 'api', 'users', 'logs'];
+            const titles = {
+                'config': '<i class="fas fa-cogs text-hikred mr-2"></i> Configuración General',
+                'editor': '<i class="fas fa-edit text-hikred mr-2"></i> Editor Web Principal (index.html)',
+                'rag': '<i class="fas fa-file-pdf text-hikred mr-2"></i> Gestión Normativa (RAG)',
+                'api': '<i class="fas fa-network-wired text-hikred mr-2"></i> Gestión de APIs',
+                'users': '<i class="fas fa-users text-hikred mr-2"></i> Gestión de Usuarios',
+                'logs': '<i class="fas fa-terminal text-hikred mr-2"></i> Logs del Sistema'
+            };
+
+            sections.forEach(id => {
+                const sec = document.getElementById('section-' + id);
+                const btn = document.getElementById('btn-' + id);
+                if(sec) sec.classList.add('hidden');
+                if(btn) btn.className = "w-full flex items-center space-x-3 hover:bg-gray-800 text-gray-400 hover:text-white p-3 rounded-md transition";
+            });
+
+            const activeSection = document.getElementById('section-' + tabId);
+            if(activeSection) activeSection.classList.remove('hidden');
+
+            const activeBtn = document.getElementById('btn-' + tabId);
+            if(activeBtn) activeBtn.className = "w-full flex items-center space-x-3 bg-hikred text-white p-3 rounded-md transition shadow-sm";
+
+            document.getElementById('header-title').innerHTML = titles[tabId];
+
+            if(window.innerWidth < 768) {
+                toggleMobileSidebar();
+            }
+        }
+
+        function mostrarToast(mensaje) {
+            const toast = document.getElementById('successMsg');
+            document.getElementById('success-text').innerText = mensaje;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function registrarLog(texto, type = 'INFO') {
+            const hora = new Date().toTimeString().split(' ')[0];
+            systemLogs.push({ time: hora, type: type, text: texto });
+            localStorage.setItem('urban_system_logs', JSON.stringify(systemLogs));
+            renderizarLogs();
+        }
+
+        function filtrarLogs(tipo) {
+            currentLogFilter = tipo;
+            ['all', 'info', 'warn', 'error'].forEach(t => {
+                const btn = document.getElementById('filter-' + t);
+                if(btn) {
+                    btn.className = t === tipo.toLowerCase() ? "px-2.5 py-1 rounded bg-white shadow-sm text-gray-800 transition" : "px-2.5 py-1 rounded text-gray-600 hover:text-gray-900 transition";
+                }
+            });
+            renderizarLogs();
+        }
+
+        function renderizarLogs() {
+            const box = document.getElementById('system-logs-box');
+            const searchTxt = document.getElementById('log-search').value.toLowerCase();
+            box.innerHTML = '';
+
+            const filtrados = systemLogs.filter(log => {
+                const matchType = currentLogFilter === 'ALL' || log.type === currentLogFilter;
+                const matchText = log.text.toLowerCase().includes(searchTxt) || log.time.includes(searchTxt);
+                return matchType && matchText;
+            });
+
+            if(filtrados.length === 0) {
+                box.innerHTML = '<div class="text-gray-500 italic text-center py-4">No se encontraron registros en la consola con los filtros actuales.</div>';
+                return;
+            }
+
+            filtrados.forEach(log => {
+                let colorClass = 'text-green-400';
+                let badgeBg = 'bg-green-900/50 text-green-300 border-green-700';
+                if(log.type === 'WARN') {
+                    colorClass = 'text-amber-400';
+                    badgeBg = 'bg-amber-900/50 text-amber-300 border-amber-700';
+                } else if(log.type === 'ERROR') {
+                    colorClass = 'text-red-400';
+                    badgeBg = 'bg-red-900/50 text-red-300 border-red-700';
+                }
+
+                box.innerHTML += `
+                    <div class="flex items-start space-x-2 border-b border-gray-800/60 pb-1">
+                        <span class="text-gray-500">[${log.time}]</span>
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeBg}">${log.type}</span>
+                        <span class="${colorClass} flex-1">${log.text}</span>
+                    </div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function descargarLogs() {
+            const logContent = systemLogs.map(l => `[${l.time}] [${l.type}] ${l.text}`).join('\n');
+            const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(logContent);
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `urbanbuild_system_logs_${Date.now()}.log`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            mostrarToast("Logs exportados correctamente.");
+        }
+
+        async function cargarPreguntasSinRespuesta() {
+            const box = document.getElementById('box-preguntas-sin-respuesta');
+            if (!box) return;
+            box.innerHTML = '<p class="text-gray-400 italic text-center py-2"><i class="fas fa-spinner fa-spin mr-1"></i> Consultando registro del servidor...</p>';
+            try {
+                const res = await fetch('/api/admin/preguntas-sin-respuesta');
+                if (!res.ok) {
+                    box.innerHTML = '<p class="text-amber-700 bg-amber-50 p-2 rounded text-center">Inicia sesión con credenciales de administrador para ver el registro del servidor.</p>';
+                    return;
+                }
+                const data = await res.json();
+                if (!data.preguntas || data.preguntas.length === 0) {
+                    box.innerHTML = '<p class="text-gray-500 italic text-center py-2">No se han registrado preguntas sin resolver o rechazadas recientemente.</p>';
+                    return;
+                }
+                box.innerHTML = data.preguntas.map(p => {
+                    const motivoLabel = p.motivo === 'fuera_zmg' ? 'Fuera de ZMG' : (p.motivo === 'fuera_dominio' ? 'Dominio No Urbano' : 'Sin Datos RAG');
+                    const badgeColor = p.motivo === 'fuera_zmg' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800';
+                    const fecha = new Date(p.timestamp).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    return `
+                        <div class="p-2 bg-white border border-gray-200 rounded flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5">
+                            <div class="flex-1">
+                                <span class="font-medium text-gray-800">"${escapeHTML(p.pregunta)}"</span>
+                                <div class="text-[10px] text-gray-400 mt-0.5">${fecha} • IP: ${escapeHTML(p.ip)}</div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor} shrink-0">${motivoLabel}</span>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                box.innerHTML = `<p class="text-red-500 text-center py-2">Error al conectar con la API: ${escapeHTML(err.message)}</p>`;
+            }
+        }
+
+        function exportarConfiguracion() {
+            const configData = {
+                configuracion: {
+                    tono: localStorage.getItem('urban_cfg_tono'),
+                    umbral: localStorage.getItem('urban_cfg_umbral')
+                },
+                rag: documentosRAG,
+                apis: apisSistema,
+                usuarios: usuariosSistema
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(configData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "urbanbuild_config_backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            registrarLog("SYSTEM: Resguardo de configuración exportado en formato JSON.", "INFO");
+            mostrarToast("Backup exportado con éxito.");
+        }
+
+        function guardarConfiguracion() {
+            const tono = document.getElementById('cfg-tono').value;
+            const umbral = document.getElementById('cfg-umbral').value;
+            localStorage.setItem('urban_cfg_tono', tono);
+            localStorage.setItem('urban_cfg_umbral', umbral);
+            registrarLog(`CONFIG: Parámetros actualizados (Tono: ${tono}, Umbral: ${umbral})`, "INFO");
+            mostrarToast('Configuración guardada con éxito.');
+        }
+
+        function cargarConfiguracionGuardada() {
+            if(localStorage.getItem('urban_cfg_tono')) {
+                document.getElementById('cfg-tono').value = localStorage.getItem('urban_cfg_tono');
+            }
+            if(localStorage.getItem('urban_cfg_umbral')) {
+                document.getElementById('cfg-umbral').value = localStorage.getItem('urban_cfg_umbral');
+            }
+        }
+
+        // Lógica del CMS para index.html
+        function cargarCMSIndex() {
+            const cmsData = JSON.parse(localStorage.getItem('urban_cms_index.html')) || {
+                badge: "Sistema de Movilidad Inteligente",
+                title: "Inteligencia Artificial para un Futuro Seguro",
+                desc: "De los datos a mejores ciudades. Analizamos la movilidad urbana en tiempo real para generar recomendaciones de intervención basadas en normativa vigente."
+            };
+            document.getElementById('admin-cms-badge').value = cmsData.badge;
+            document.getElementById('admin-cms-title').value = cmsData.title;
+            document.getElementById('admin-cms-desc').value = cmsData.desc;
+        }
+
+        function guardarCMSIndex() {
+            const data = {
+                badge: document.getElementById('admin-cms-badge').value,
+                title: document.getElementById('admin-cms-title').value,
+                desc: document.getElementById('admin-cms-desc').value
+            };
+            localStorage.setItem('urban_cms_index.html', JSON.stringify(data));
+            registrarLog("CMS: Contenido de index.html actualizado y sincronizado.", "INFO");
+            mostrarToast("¡Página principal (index.html) actualizada con éxito!");
+        }
+
+        function renderizarRAG() {
+            const container = document.getElementById('rag-document-list');
+            container.innerHTML = '';
+            documentosRAG.forEach(doc => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center p-4 border border-gray-200 rounded-md bg-gray-50">
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-800">${doc.nombre}</h4>
+                            <p class="text-xs text-green-600 font-bold mt-1"><i class="fas fa-check-circle"></i> Vectorizado y Activo</p>
+                        </div>
+                        <button onclick="eliminarDocumentoRAG(${doc.id})" class="text-red-500 hover:text-red-700 p-2"><i class="fas fa-trash-alt"></i></button>
+                    </div>`;
+            });
+            document.getElementById('stat-doc-count').innerText = documentosRAG.length + ' Activos';
+            localStorage.setItem('urban_rag_docs', JSON.stringify(documentosRAG));
+        }
+
+        function agregarDocumentoRAG() {
+            const input = document.getElementById('new-doc-name');
+            if(!input.value.trim()) return alert('Ingrese un nombre válido para el documento.');
+            documentosRAG.push({ id: Date.now(), nombre: input.value.trim() });
+            registrarLog(`RAG: Reglamento vectorizado: "${input.value.trim()}"`, "INFO");
+            input.value = '';
+            renderizarRAG();
+            mostrarToast('Documento añadido a la IA.');
+        }
+
+        function eliminarDocumentoRAG(id) {
+            documentosRAG = documentosRAG.filter(d => d.id !== id);
+            registrarLog(`RAG: Fuente ID ${id} removida del sistema.`, "WARN");
+            renderizarRAG();
+            mostrarToast('Documento eliminado.');
+        }
+
+        function renderizarAPIs() {
+            const tbody = document.getElementById('api-table-body');
+            tbody.innerHTML = '';
+            apisSistema.forEach(api => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-3 font-bold text-gray-900">${api.nombre}</td>
+                        <td class="p-3 text-gray-600 font-mono text-xs">${api.url}</td>
+                        <td class="p-3 text-green-600 font-bold text-xs"><i class="fas fa-circle text-[10px] mr-1"></i> ${api.estado}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="eliminarAPI(${api.id})" class="text-gray-400 hover:text-red-600 transition"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+            document.getElementById('stat-api-count').innerText = apisSistema.length + ' Conectadas';
+            localStorage.setItem('urban_apis', JSON.stringify(apisSistema));
+        }
+
+        function abrirModalAPI() {
+            document.getElementById('modal-api').classList.remove('hidden');
+        }
+
+        function cerrarModalAPI() {
+            document.getElementById('modal-api').classList.add('hidden');
+        }
+
+        function guardarNuevaAPI() {
+            const nombre = document.getElementById('modal-api-nombre').value.trim();
+            const url = document.getElementById('modal-api-url').value.trim();
+            if(!nombre || !url) return alert('Por favor, completa los campos obligatorios.');
+            
+            apisSistema.push({ id: Date.now(), nombre, url, estado: 'Activo' });
+            registrarLog(`API: Agregado nuevo endpoint "${nombre}" (${url})`, "INFO");
+            document.getElementById('modal-api-nombre').value = '';
+            document.getElementById('modal-api-url').value = '';
+            document.getElementById('modal-api-key').value = '';
+            cerrarModalAPI();
+            renderizarAPIs();
+            mostrarToast('API registrada exitosamente.');
+        }
+
+        function eliminarAPI(id) {
+            apisSistema = apisSistema.filter(a => a.id !== id);
+            registrarLog(`API: Endpoint ID ${id} eliminado.`, "WARN");
+            renderizarAPIs();
+            mostrarToast('API eliminada del sistema.');
+        }
+
+        function renderizarUsuarios(filtro = '') {
+            const tbody = document.getElementById('user-table-body');
+            tbody.innerHTML = '';
+            const filtrados = usuariosSistema.filter(u => u.user.toLowerCase().includes(filtro.toLowerCase()));
+            
+            filtrados.forEach(u => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-3 font-bold text-gray-900">${u.user}</td>
+                        <td class="p-3"><span class="bg-hikred/10 text-hikred px-2.5 py-1 rounded-full text-xs font-bold">${u.rol}</span></td>
+                        <td class="p-3 text-green-600 font-bold text-xs"><i class="fas fa-circle text-[10px] mr-1"></i> ${u.estado}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="eliminarUsuario(${u.id})" class="text-gray-400 hover:text-red-600 transition"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+            localStorage.setItem('urban_users', JSON.stringify(usuariosSistema));
+        }
+
+        function filtrarUsuarios() {
+            const query = document.getElementById('user-search').value;
+            renderizarUsuarios(query);
+        }
+
+        function abrirModalUsuario() {
+            document.getElementById('modal-usuario').classList.remove('hidden');
+        }
+
+        function cerrarModalUsuario() {
+            document.getElementById('modal-usuario').classList.add('hidden');
+        }
+
+        function guardarNuevoUsuario() {
+            const user = document.getElementById('modal-username').value.trim();
+            const rol = document.getElementById('modal-rol').value;
+            if(!user) return alert('Por favor, ingresa el nombre de usuario.');
+            
+            usuariosSistema.push({ id: Date.now(), user, rol, estado: 'Activo' });
+            registrarLog(`USER: Alta de usuario "${user}" (${rol})`, "INFO");
+            document.getElementById('modal-username').value = '';
+            cerrarModalUsuario();
+            renderizarUsuarios();
+            mostrarToast('Usuario registrado exitosamente.');
+        }
+
+        function eliminarUsuario(id) {
+            usuariosSistema = usuariosSistema.filter(u => u.id !== id);
+            registrarLog(`USER: Baja de usuario ID ${id}`, "WARN");
+            renderizarUsuarios();
+            mostrarToast('Usuario eliminado del sistema.');
+        }
+
+        function limpiarLogs() {
+            systemLogs = [{ time: new Date().toTimeString().split(' ')[0], type: 'INFO', text: 'SYSTEM: Consola depurada por el administrador.' }];
+            localStorage.setItem('urban_system_logs', JSON.stringify(systemLogs));
+            renderizarLogs();
+        }
+
+        /* =========================================================
+           INTERRUPTOR DE TEMA (CLARO / OSCURO)
+           ========================================================= */
+        function updateThemeUI(isDark) {
+            const icon = document.getElementById('theme-icon');
+            const btn = document.getElementById('theme-toggle');
+            if (icon) {
+                if (isDark) {
+                    icon.className = 'fas fa-sun text-base text-amber-400';
+                } else {
+                    icon.className = 'fas fa-moon text-base text-gray-600 dark:text-gray-200';
+                }
+            }
+            if (btn) {
+                btn.setAttribute('title', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+                btn.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const newTheme = isDark ? 'dark' : 'light';
+            try {
+                localStorage.setItem('urbanbuild_theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            } catch (e) {}
+            updateThemeUI(isDark);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            updateThemeUI(isDark);
+        });
+    </script>
+</body>
+</html>

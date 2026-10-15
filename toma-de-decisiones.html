@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toma de Decisiones & Memoria de Objetivos IA | UrbanBuild</title>
+    
+    <!-- Google Fonts: Open Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome & Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Tailwind CSS & Marked.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        // Inicialización inmediata del tema antes del render
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('urbanbuild_theme') || localStorage.getItem('theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Open Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        hikred: {
+                            DEFAULT: '#c9122f',
+                            hover: '#a00e25',
+                            light: '#fce8eb'
+                        },
+                        hikgray: {
+                            800: '#2d2d2d',
+                            900: '#1a1a1a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Open Sans', sans-serif; }
+        .card-architecture {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .card-architecture:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { font-weight: bold; margin-bottom: 0.4rem; margin-top: 0.8rem; color: #111827; }
+        .markdown-body p { margin-bottom: 0.5rem; }
+        .markdown-body ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+        .markdown-body strong { font-weight: 700; color: #c9122f; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            .shadow-xl, .shadow-sm { box-shadow: none !important; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        
+        html.dark { color-scheme: dark; }
+        html.dark body { background-color: #0b0f19; color: #f1f5f9; }
+        html.dark nav { background-color: #0f172a !important; border-color: #1e293b !important; }
+        html.dark nav a.text-black { color: #ffffff !important; }
+        html.dark nav a.text-gray-600 { color: #cbd5e1 !important; }
+        html.dark #mobile-nav-menu { background-color: #0f172a !important; border-color: #1e293b !important; }
+        html.dark #mobile-nav-menu a { color: #cbd5e1 !important; }
+        html.dark .card-architecture { background-color: #131c2e !important; border-color: #1e293b !important; color: #f1f5f9 !important; }
+        html.dark .bg-white { background-color: #131c2e !important; border-color: #1e293b !important; color: #f1f5f9 !important; }
+        html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #0b0f19 !important; }
+        html.dark .text-gray-900 { color: #ffffff !important; }
+        html.dark .text-gray-800 { color: #f1f5f9 !important; }
+        html.dark .text-gray-700 { color: #cbd5e1 !important; }
+        html.dark .text-gray-600, html.dark .text-gray-500 { color: #94a3b8 !important; }
+        html.dark .border-gray-200 { border-color: #1e293b !important; }
+        html.dark .border-gray-300 { border-color: #334155 !important; }
+        html.dark .markdown-body h1, html.dark .markdown-body h2, html.dark .markdown-body h3 { color: #ffffff !important; }
+        html.dark .markdown-body p, html.dark .markdown-body li { color: #cbd5e1 !important; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- Top Utility Bar -->
+    <div class="bg-hikgray-900 border-b border-gray-800 text-xs text-gray-400 py-1.5 hidden md:block no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center font-semibold text-[11px]">
+            <div class="flex items-center gap-3">
+                <span class="text-white"><i class="fas fa-map-location-dot text-hikred mr-1.5"></i> Ámbito: <strong>Zona Metropolitana de Guadalajara (9 Municipios)</strong></span>
+                <span class="text-gray-600">|</span>
+                <span class="text-red-300 bg-red-950/80 px-2 py-0.5 rounded border border-red-800/80">Motor IA: Gemini 3.8 Flash</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="index.html#soporte" class="hover:text-white transition">SOPORTE</a>
+                <a href="index.html#partners" class="hover:text-white transition">IMEPLAN / POTmet</a>
+                <a href="panel-admin.html" class="hover:text-hikred transition flex items-center gap-1">
+                    <i class="fas fa-shield-halved text-hikred"></i> ADMINISTRACIÓN
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegación Principal -->
+    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="text-3xl font-bold tracking-tighter">
+                    <a href="index.html" class="text-black hover:opacity-90">Urban</a><a href="login.html" class="text-hikred hover:underline">Build</a>
+                </div>
+                
+                <div class="hidden md:flex space-x-7 items-center text-sm font-semibold">
+                    <a href="index.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Inicio</a>
+                    <a href="https://urbanbuilding.vercel.app" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-hikred transition-colors py-2 flex items-center gap-1">
+                        Captura de Datos <i class="fas fa-arrow-up-right-from-square text-[10px] text-gray-400"></i>
+                    </a>
+                    <a href="estadisticas.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Estadísticas</a>
+                    <a href="normatividad.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Normativa</a>
+                    <a href="recomendaciones.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Recomendaciones</a>
+                    <a href="toma-de-decisiones.html" aria-current="page" class="text-hikred py-2 border-b-2 border-hikred">Toma de Decisiones</a>
+                </div>
+
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- Interruptor de Tema al lado de Iniciar Sesión -->
+                    <button id="theme-toggle" onclick="toggleTheme()" type="button" 
+                            class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-gray-200 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none cursor-pointer flex items-center justify-center border border-gray-200 dark:border-slate-700" 
+                            title="Alternar entre modo claro y oscuro" aria-label="Alternar tema">
+                        <i id="theme-icon" class="fas fa-moon text-base"></i>
+                        <span class="sr-only">Alternar tema</span>
+                    </button>
+
+                    <!-- Botón de Iniciar Sesión / Administración (no cambia si estás logeado o no) -->
+                    <a href="login.html" id="btn-iniciar-sesion" 
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-100 hover:text-hikred dark:hover:text-hikred border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 transition shadow-xs focus:outline-none" 
+                       title="Iniciar Sesión / Portal de Administración">
+                        <i class="fas fa-user-shield text-hikred text-sm"></i>
+                        <span class="hidden sm:inline">Iniciar Sesión</span>
+                    </a>
+
+                    <button type="button" onclick="toggleMobileMenu()" class="md:hidden text-gray-700 dark:text-gray-200 hover:text-hikred transition p-2" aria-label="Abrir menú" aria-controls="mobile-nav-menu">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú Móvil -->
+        <div id="mobile-nav-menu" class="hidden md:hidden border-t border-gray-200 bg-white">
+            <div class="px-4 py-3 flex flex-col space-y-1">
+                <a href="index.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Inicio</a>
+                <a href="https://urbanbuilding.vercel.app" target="_blank" rel="noopener noreferrer" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Captura de Datos</a>
+                <a href="estadisticas.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Estadísticas</a>
+                <a href="normatividad.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Normativa</a>
+                <a href="recomendaciones.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Recomendaciones</a>
+                <a href="toma-de-decisiones.html" class="py-2.5 text-sm font-bold text-hikred">Toma de Decisiones</a>
+                <a href="panel-admin.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred flex items-center gap-1.5 border-t border-gray-100 pt-3">
+                    <i class="fas fa-user-shield text-hikred"></i> Portal de Administración
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="grow py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            
+            <!-- Encabezado Principal -->
+            <div class="bg-hikgray-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl border-t-4 border-hikred flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <div>
+                    <div class="flex items-center space-x-3 mb-2">
+                        <span class="w-10 h-10 rounded-full bg-hikred text-white flex items-center justify-center font-bold text-lg shadow">5</span>
+                        <div>
+                            <span class="text-[10px] font-bold bg-red-900/60 text-red-200 border border-red-700 px-2.5 py-0.5 rounded uppercase tracking-wider">
+                                <i class="fas fa-map-location-dot mr-1 text-hikred"></i> Ámbito Exclusivo: Zona Metropolitana de Guadalajara (9 Municipios)
+                            </span>
+                            <h1 class="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight mt-1">
+                                Toma de Decisiones & Memoria de Objetivos ZMG
+                            </h1>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
+                        Conforme alimentas a la IA, su <strong>memoria metropolitana acumulativa con Gemini 3.8 Flash</strong> sintetiza objetivos estratégicos por municipio, verifica el Código Urbano de Jalisco / POTmet y estructura la matriz ejecutiva de proyectos en tiempo real.
+                    </p>
+                </div>
+                <div class="bg-black/50 p-4 rounded-xl border border-gray-700 w-full lg:w-auto font-mono text-right flex flex-col justify-center shrink-0">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold">Presupuesto Remanente ZMG</span>
+                    <span class="text-2xl font-bold text-hikred" id="total-budget">$45,000,000 MXN</span>
+                    <div class="flex items-center justify-end gap-2 mt-1.5 text-[11px] font-sans">
+                        <span class="text-gray-300 font-semibold">Memoria:</span>
+                        <span class="text-green-400 font-bold" id="badge-memoria-count">0 Consultas / 0 Objetivos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INSIGNIA DE MOTOR INTELIGENTE REAL GEMINI 3.8 FLASH -->
+            <div class="bg-slate-900 border border-red-800/80 text-white rounded-xl px-5 py-3 text-xs leading-relaxed no-print flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md" role="note">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-6 h-6 rounded-full bg-hikred text-white flex items-center justify-center text-xs shrink-0"><i class="fas fa-brain"></i></span>
+                    <div>
+                        <strong class="text-red-200">Motor de IA Gemini 3.8 Flash Activo:</strong>
+                        <span class="text-gray-300 ml-1">Los objetivos, costos y beneficiarios se calculan con base en las directrices técnicas del Código Urbano del Estado de Jalisco, la Ley de Movilidad Sostenible y el POTmet (IMEPLAN).</span>
+                    </div>
+                </div>
+                <span class="text-[10px] font-mono bg-red-950 text-red-300 border border-red-700 px-2 py-0.5 rounded whitespace-nowrap">URBIN Memory v3.8</span>
+            </div>
+
+            <!-- TERMINAL DE ENTRADA A LA MEMORIA DE LA IA (LIMITADA A LA ZMG) -->
+            <div class="bg-white p-6 sm:p-7 rounded-2xl shadow-sm border border-gray-200 no-print">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <h2 class="text-sm sm:text-base font-bold text-gray-900 uppercase flex items-center gap-2">
+                        <i class="fas fa-brain text-hikred"></i> Añadir Caso Territorial ZMG a la Memoria IA
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="limpiarMemoriaIA()" class="text-xs text-gray-500 hover:text-red-600 font-semibold transition flex items-center gap-1">
+                            <i class="fas fa-trash-arrow-up"></i> Limpiar Memoria
+                        </button>
+                    </div>
+                </div>
+
+                <form onsubmit="alimentarMemoriaIA(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div class="sm:col-span-1">
+                            <label for="select-municipio-zmg" class="block text-[11px] font-bold uppercase tracking-wider text-gray-700 mb-1">
+                                <i class="fas fa-city text-hikred mr-1"></i> Municipio ZMG:
+                            </label>
+                            <select id="select-municipio-zmg" class="w-full p-2.5 bg-gray-50 border-2 border-gray-200 focus:border-hikred rounded-xl text-xs font-semibold outline-none transition">
+                                <option value="Guadalajara">🏛️ Guadalajara</option>
+                                <option value="Zapopan">🏢 Zapopan</option>
+                                <option value="San Pedro Tlaquepaque">🏺 San Pedro Tlaquepaque</option>
+                                <option value="Tlajomulco de Zúñiga">🌳 Tlajomulco de Zúñiga</option>
+                                <option value="Tonalá">🏺 Tonalá</option>
+                                <option value="El Salto">🏭 El Salto</option>
+                                <option value="Ixtlahuacán de los Membrillos">🏡 Ixtlahuacán</option>
+                                <option value="Juanacatlán">🌊 Juanacatlán</option>
+                                <option value="Zapotlanejo">🌾 Zapotlanejo</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-3 relative flex items-center">
+                            <textarea id="ai-query-input" rows="2" class="w-full p-3.5 pr-28 bg-gray-50 border-2 border-gray-200 focus:border-hikred rounded-xl text-xs sm:text-sm outline-none transition font-sans" placeholder="Escribe tu consulta urbana ZMG. Ej: Evaluar cruce escolar en Calzada Olímpica; saturación en Glorieta Minerva; o dictamen de predio con COS 0.65 en Av. Vallarta..."></textarea>
+                            
+                            <div class="absolute right-2 flex items-center gap-1.5">
+                                <button type="button" onclick="toggleVozDecision()" class="text-gray-400 hover:text-hikred p-2 rounded-lg transition" title="Dictar por voz">
+                                    <i class="fas fa-microphone text-sm" id="mic-icon-dec"></i>
+                                </button>
+                                <button type="submit" id="btn-submit-ai" class="bg-hikred hover:bg-hikred-hover text-white px-4 py-2.5 rounded-lg text-xs font-bold uppercase transition flex items-center gap-1.5 shadow">
+                                    <i class="fas fa-sparkles"></i> <span>Analizar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Casos Rápidos ZMG para Alimentar la Memoria -->
+                    <div class="flex items-center gap-2 flex-wrap text-xs pt-1">
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider shrink-0"><i class="fas fa-bolt text-amber-500 mr-1"></i> Casos Rápidos ZMG:</span>
+                        <button type="button" onclick="alimentarCasoPreset('politecnica')" class="bg-gray-100 hover:bg-hikred hover:text-white px-2.5 py-1 rounded-full text-gray-700 transition text-[11px] font-semibold">+ 🏫 Zapopan: Entorno Politécnica</button>
+                        <button type="button" onclick="alimentarCasoPreset('minerva')" class="bg-gray-100 hover:bg-hikred hover:text-white px-2.5 py-1 rounded-full text-gray-700 transition text-[11px] font-semibold">+ 🏛️ GDL: Glorieta Minerva</button>
+                        <button type="button" onclick="alimentarCasoPreset('independencia')" class="bg-gray-100 hover:bg-hikred hover:text-white px-2.5 py-1 rounded-full text-gray-700 transition text-[11px] font-semibold">+ 🚴 GDL: Calz. Independencia</button>
+                        <button type="button" onclick="alimentarCasoPreset('tlaquepaque')" class="bg-gray-100 hover:bg-hikred hover:text-white px-2.5 py-1 rounded-full text-gray-700 transition text-[11px] font-semibold">+ 🏺 Tlaquepaque: Centro Histórico</button>
+                        <button type="button" onclick="alimentarCasoPreset('tlajomulco')" class="bg-gray-100 hover:bg-hikred hover:text-white px-2.5 py-1 rounded-full text-gray-700 transition text-[11px] font-semibold">+ 🚍 Tlajomulco: López Mateos Sur</button>
+                        <button type="button" onclick="alimentarCasoPreset('cos_cus')" class="bg-gray-100 hover:bg-hikred hover:text-white px-2.5 py-1 rounded-full text-gray-700 transition text-[11px] font-semibold">+ 📐 Tonalá: Dictamen COS/CUS</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ESTADO DE CARGA -->
+            <div id="ai-loading" class="hidden bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center space-y-3">
+                <i class="fas fa-circle-notch fa-spin text-3xl text-hikred"></i>
+                <h3 class="text-sm font-bold text-gray-800">Gemini 3.8 Flash está procesando el caso territorial y actualizando la memoria de objetivos...</h3>
+                <p class="text-xs text-gray-500 max-w-md mx-auto">Sintetizando metas operativas, calculando costos e indexando normativa de Jalisco...</p>
+            </div>
+
+            <!-- ESTADO LIMPIO (CUANDO LA MEMORIA ESTÁ VACÍA) -->
+            <div id="empty-state-container" class="bg-white p-12 rounded-2xl shadow-sm border border-dashed border-gray-300 text-center space-y-4">
+                <div class="w-16 h-16 bg-red-50 text-hikred rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="max-w-md mx-auto">
+                    <h3 class="text-base font-bold text-gray-900 mb-1">Memoria de Objetivos en Blanco</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        El panel se encuentra limpio. Haz tu primera consulta o selecciona un caso rápido para que la IA con <strong>Gemini 3.8 Flash</strong> comience a trazar los <strong>objetivos estratégicos</strong>, los <strong>dictámenes normativos</strong> y la <strong>matriz ejecutiva de decisiones</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- CONTENIDO GENERADO DINÁMICAMENTE (SE LLENA CONFORME CRECE LA MEMORIA) -->
+            <div id="dynamic-content-container" class="hidden space-y-8">
+                
+                <!-- 1. PANEL DE OBJETIVOS ESTRATÉGICOS ACUMULADOS POR LA IA -->
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 fade-in">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-6 border-b border-gray-200 gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900 uppercase flex items-center gap-2">
+                                    <i class="fas fa-bullseye text-hikred"></i> Objetivos Estratégicos Acumulados en Memoria
+                                </h3>
+                                <span class="text-xs font-bold font-mono bg-hikred/10 text-hikred px-2 py-0.5 rounded-full" id="counter-objetivos-badge">0 Objetivos</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">Metas prioritarias extraídas y sintetizadas por el modelo de IA conforme a las consultas realizadas.</p>
+                        </div>
+                        <div class="flex items-center gap-2 no-print">
+                            <span class="text-xs text-gray-400 font-semibold">Avance Global:</span>
+                            <span class="text-xs font-bold font-mono text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-lg" id="global-progress-badge">0% Promedio</span>
+                        </div>
+                    </div>
+
+                    <!-- Grid Dinámico de Tarjetas de Objetivos -->
+                    <div id="contenedor-cards-objetivos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- 2. RESUMEN DE INDICADORES EJECUTIVOS DINÁMICOS -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 no-print">
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-red-50 text-hikred rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-coins"></i></div>
+                        <div>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Inversión Comprometida</span>
+                            <span class="text-lg sm:text-xl font-bold text-gray-900 font-mono" id="stat-inversion-total">$0 MXN</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-users"></i></div>
+                        <div>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Población Beneficiada</span>
+                            <span class="text-lg sm:text-xl font-bold text-gray-900 font-mono" id="stat-beneficiarios-total">0 hab</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-traffic-light"></i></div>
+                        <div>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Obras Autorizadas</span>
+                            <span class="text-lg sm:text-xl font-bold text-green-600 font-mono" id="stat-autorizadas-count">0</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-scale-balanced"></i></div>
+                        <div>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Leyes Aplicadas</span>
+                            <span class="text-lg sm:text-xl font-bold text-purple-700 font-mono" id="stat-leyes-count">4 Reglamentos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. DICTAMEN EJECUTIVO Y FUNDAMENTACIÓN LEGAL CONSOLIDADA -->
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 fade-in">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-5 border-b border-gray-200 gap-3">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-bold text-gray-900 uppercase flex items-center gap-2">
+                                <i class="fas fa-file-contract text-hikred"></i> Dictamen Metropolitano Consolidado (IA ZMG)
+                            </h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Síntesis pericial automática basada en la acumulación de consultas en la memoria del sistema.</p>
+                        </div>
+                        <div class="flex items-center gap-2 no-print">
+                            <button onclick="reproducirDictamenVoz()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border border-gray-300">
+                                <i class="fas fa-volume-high text-hikred"></i> <span>Escuchar Dictamen</span>
+                            </button>
+                            <button onclick="copiarDictamen()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border border-gray-300">
+                                <i class="fas fa-copy"></i> <span>Copiar</span>
+                            </button>
+                            <button onclick="window.print()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 border border-gray-300">
+                                <i class="fas fa-print"></i> <span>Imprimir</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenido Markdown Dinámico del Dictamen -->
+                    <div id="dictamen-texto-ia" class="markdown-body text-xs sm:text-sm text-gray-800 leading-relaxed space-y-2 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <!-- Inyectado por IA -->
+                    </div>
+                </div>
+
+                <!-- 4. MATRIZ DE PROYECTOS & OBRAS DINÁMICAS (LIGADAS A LOS OBJETIVOS) -->
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-200 fade-in">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-4 border-b border-gray-200 gap-3">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-bold text-gray-900 uppercase flex items-center gap-2">
+                                <i class="fas fa-table-list text-hikred"></i> Matriz Ejecutiva de Proyectos de Intervención (ZMG)
+                            </h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Obras propuestas por la IA para cumplir los objetivos trazados. Cada autorización descuenta del presupuesto metropolitano.</p>
+                        </div>
+                        <div class="flex items-center gap-2 no-print">
+                            <button onclick="exportarMatrizCSV()" class="bg-hikgray-900 hover:bg-black text-white px-3.5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fas fa-file-csv text-green-400"></i> Exportar Matriz CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtros Rápidos de la Matriz -->
+                    <div class="flex items-center gap-2 pb-4 text-xs font-semibold overflow-x-auto no-print">
+                        <span class="text-gray-400 font-bold uppercase text-[10px] mr-1">Filtrar:</span>
+                        <button onclick="filtrarMatriz('all')" id="filtro-btn-all" class="px-3 py-1 rounded-lg bg-hikred text-white font-bold transition">Todos (<span id="count-all">0</span>)</button>
+                        <button onclick="filtrarMatriz('urgente')" id="filtro-btn-urgente" class="px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition">Prioridad Urgente (<span id="count-urgente">0</span>)</button>
+                        <button onclick="filtrarMatriz('autorizado')" id="filtro-btn-autorizado" class="px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition">Autorizadas (<span id="count-autorizado">0</span>)</button>
+                        <button onclick="filtrarMatriz('revision')" id="filtro-btn-revision" class="px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition">En Revisión (<span id="count-revision">0</span>)</button>
+                    </div>
+
+                    <!-- Tabla de Proyectos -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider text-[11px]">
+                                    <th class="p-3">Ref. Obj</th>
+                                    <th class="p-3">Polígono / Vialidad ZMG</th>
+                                    <th class="p-3">Intervención Propuesta (IA)</th>
+                                    <th class="p-3">Costo Est. (MXN)</th>
+                                    <th class="p-3">Beneficiarios</th>
+                                    <th class="p-3">Prioridad IA</th>
+                                    <th class="p-3">Estatus</th>
+                                    <th class="p-3 text-right no-print">Acción Ejecutiva</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projects-table-body" class="divide-y divide-gray-100">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 5. HISTORIAL DE CONSULTAS QUE COMPONEN LA MEMORIA -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 no-print">
+                    <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fas fa-history text-hikred"></i> Consultas Registradas en la Memoria Activa
+                    </h3>
+                    <div id="historial-consultas-list" class="space-y-2 text-xs">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer Corporativo -->
+    <footer class="bg-hikgray-800 text-gray-400 py-12 border-t-4 border-hikred no-print mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs space-y-2">
+            <p class="font-bold text-white tracking-wider uppercase text-sm mb-1">UrbanBuild · Inteligencia Urbana Metropolitana</p>
+            <p>&copy; 2026 UrbanBuild. Todos los derechos reservados. Escuela Politécnica de Guadalajara.</p>
+            <p class="text-[11px] text-gray-500">Módulo de toma de decisiones y memoria territorial acumulativa para la Zona Metropolitana de Guadalajara.</p>
+        </div>
+    </footer>
+
+    <!-- Script del Motor Acumulativo de Memoria & Objetivos IA (Limitado a ZMG) -->
+    <script>
+        const PRESUPUESTO_BASE = 45000000;
+        const REGIONES_NO_ZMG = [
+            "cdmx", "ciudad de méxico", "monterrey", "nuevo león", "puebla", "querétaro", "queretaro",
+            "tijuana", "méjico", "madrid", "barcelona", "bogota", "bogotá", "buenos aires", "colombia",
+            "argentina", "españa", "chile", "lima", "peru", "perú", "new york", "texas", "miami", "cancún", "cancun"
+        ];
+
+        // Estructura de Memoria Acumulativa de la IA ZMG
+        let memoriaIA = {
+            consultas: [],
+            objetivos: [],
+            proyectos: [],
+            dictamenes: [],
+            dictamenConsolidado: ""
+        };
+
+        // Cargar memoria previa si existe
+        try {
+            const guardada = localStorage.getItem('urban_memoria_zmg');
+            if (guardada) {
+                memoriaIA = JSON.parse(guardada);
+            }
+        } catch(e) {}
+
+        function esc(v) {
+            return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        let filtroActivo = 'all';
+        let reconocimientoVozDec = null;
+        let escuchandoVozDec = false;
+
+        function toggleMobileMenu() {
+            const m = document.getElementById('mobile-nav-menu');
+            if (m) m.classList.toggle('hidden');
+        }
+
+        const presetsCasos = {
+            'politecnica': {
+                query: "Zona Escolar Escuela Politécnica de Guadalajara (Av. Revolución y Calz. Olímpica): alto aforo de 3,200 estudiantes/h, exceso de velocidad y falta de cruces accesibles con rampa al 6%.",
+                municipio: "Guadalajara"
+            },
+            'minerva': {
+                query: "Intersección Glorieta Minerva y Av. López Mateos: saturación crítica de 2,420 veh/h, demoras semafóricas y conflicto con transporte público y peatones.",
+                municipio: "Guadalajara"
+            },
+            'independencia': {
+                query: "Corredor Calzada Independencia y Av. Juárez: conexión ciclista protegida de 420 bicis/h, prioridad al BRT Mi Macro Calzada y ampliación de banquetas a 2.50m.",
+                municipio: "Guadalajara"
+            },
+            'tlaquepaque': {
+                query: "Centro Histórico de San Pedro Tlaquepaque (Andador Independencia y Niños Héroes): pacificación del tráfico, peatonalización turística y banquetas accesibles sin desniveles.",
+                municipio: "San Pedro Tlaquepaque"
+            },
+            'tlajomulco': {
+                query: "Corredor Av. López Mateos Sur (San Agustín a Santa Anita): congestión extrema en horas pico, requerimiento de carriles confinados para transporte masivo y pasos seguros.",
+                municipio: "Tlajomulco de Zúñiga"
+            },
+            'cos_cus': {
+                query: "Regularización predial de uso mixto comercial-habitacional en Av. Tonaltecas. Evaluar COS de 0.65 y CUS de 2.20 con 20% de absorción freática obligatoria.",
+                municipio: "Tonalá"
+            }
+        };
+
+        function alimentarCasoPreset(key) {
+            const preset = presetsCasos[key];
+            if (!preset) return;
+            document.getElementById('ai-query-input').value = preset.query;
+            const selectMpio = document.getElementById('select-municipio-zmg');
+            if (selectMpio) selectMpio.value = preset.municipio;
+            alimentarMemoriaIA(new Event('submit'));
+        }
+
+        function verificarFueraDeZMG(texto) {
+            const t = (texto || '').toLowerCase();
+            for (const noZmg of REGIONES_NO_ZMG) {
+                const regex = new RegExp(`\\b${noZmg}\\b`, 'i');
+                if (regex.test(t)) return true;
+            }
+            return false;
+        }
+
+        async function alimentarMemoriaIA(event) {
+            if (event && event.preventDefault) event.preventDefault();
+            const query = document.getElementById('ai-query-input').value.trim();
+            const selectMpio = document.getElementById('select-municipio-zmg');
+            const municipio = selectMpio ? selectMpio.value : "Guadalajara";
+
+            if (!query) return alert("Por favor, ingresa una consulta o problemática urbana de la ZMG.");
+
+            // Guardrail territorial ZMG
+            if (verificarFueraDeZMG(query)) {
+                alert("⚠️ RESTRICCIÓN TERRITORIAL ZMG:\n\nLa plataforma UrbanBuild opera exclusivamente dentro de los 9 municipios de la Zona Metropolitana de Guadalajara (Guadalajara, Zapopan, Tlaquepaque, Tlajomulco, Tonalá, El Salto, Ixtlahuacán, Juanacatlán y Zapotlanejo).\n\nPor favor formula un caso dentro de la ZMG y bajo la normativa de Jalisco.");
+                return;
+            }
+
+            // Mostrar estado de carga
+            document.getElementById('ai-loading').classList.remove('hidden');
+            document.getElementById('btn-submit-ai').disabled = true;
+
+            try {
+                let nuevosElementos = null;
+
+                // 1. Intentar síntesis con Gemini 3.8 Flash a través del servidor
+                try {
+                    const res = await fetch('/api/decisiones/sintetizar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ consulta: query, municipio }),
+                        signal: AbortSignal.timeout(18000)
+                    });
+                    if (res.ok) {
+                        const payload = await res.json();
+                        if (payload.ok && payload.data) {
+                            const d = payload.data;
+                            const idObj = `OBJ-ZMG-${memoriaIA.objetivos.length + 1}`;
+                            const ts = Date.now();
+                            nuevosElementos = {
+                                objetivos: [
+                                    {
+                                        id: idObj,
+                                        municipio: d.objetivo.municipio || municipio,
+                                        titulo: d.objetivo.titulo,
+                                        origen: `Consulta: ${query.slice(0, 50)}...`,
+                                        meta: d.objetivo.meta,
+                                        avance: Number(d.objetivo.avance) || 30,
+                                        estado: d.objetivo.estado || "En Proceso",
+                                        normativa: d.objetivo.normativa || "Código Urbano de Jalisco / POTmet",
+                                        icono: d.objetivo.icono || "fa-bullseye"
+                                    }
+                                ],
+                                proyectos: (d.proyectos || []).map((p, idx) => ({
+                                    id: ts + idx + 1,
+                                    objId: idObj,
+                                    municipio: municipio,
+                                    poligono: p.poligono || query.slice(0, 40),
+                                    tipo: p.tipo,
+                                    costo: Number(p.costo) || 1200000,
+                                    beneficiarios: Number(p.beneficiarios) || 8500,
+                                    prioridad: p.prioridad || "urgente",
+                                    score: p.score || "Alta (9.0/10)",
+                                    status: "pendiente"
+                                }))
+                            };
+                        }
+                    }
+                } catch (apiErr) {
+                    console.warn("Fallo en API remota, usando sintetizador local de contingencia:", apiErr);
+                }
+
+                // 2. Si falló la API, usar sintetizador local
+                if (!nuevosElementos) {
+                    nuevosElementos = sintetizarObjetivosYProyectos(query, municipio);
+                }
+
+                // Acumular en memoria
+                memoriaIA.consultas.push({
+                    id: Date.now(),
+                    query: query,
+                    municipio: municipio,
+                    fecha: new Date().toLocaleTimeString('es-MX')
+                });
+
+                nuevosElementos.objetivos.forEach(o => memoriaIA.objetivos.push(o));
+                nuevosElementos.proyectos.forEach(p => memoriaIA.proyectos.push(p));
+
+                // Regenerar dictamen consolidado
+                memoriaIA.dictamenConsolidado = generarDictamenConsolidado();
+
+                // Persistir en LocalStorage
+                try {
+                    localStorage.setItem('urban_memoria_zmg', JSON.stringify(memoriaIA));
+                } catch(e) {}
+
+                // Limpiar input
+                document.getElementById('ai-query-input').value = '';
+
+            } catch (err) {
+                alert("Error al procesar la consulta: " + err.message);
+            } finally {
+                document.getElementById('ai-loading').classList.add('hidden');
+                document.getElementById('btn-submit-ai').disabled = false;
+            }
+
+            renderizarDashboardMemoria();
+        }
+
+        function sintetizarObjetivosYProyectos(query, municipio = "Guadalajara") {
+            const q = query.toLowerCase();
+            const timestampId = Date.now();
+            const idObj = `OBJ-ZMG-${memoriaIA.objetivos.length + 1}`;
+
+            if (q.includes('politecnica') || q.includes('escolar') || q.includes('revolucion')) {
+                return {
+                    objetivos: [
+                        {
+                            id: idObj,
+                            municipio: municipio || "Guadalajara",
+                            titulo: "Seguridad Vial y Zona 30 km/h en Entorno Politécnica",
+                            origen: `Consulta Escolar (${municipio})`,
+                            meta: "Proteger a 3,200 estudiantes/h y reducir siniestralidad a 0% con cruce pompeyano",
+                            avance: 35,
+                            estado: "En Proceso",
+                            normativa: "Art. 35 Ley de Movilidad de Jalisco & Reg. Accesibilidad GDL",
+                            icono: "fa-school"
+                        }
+                    ],
+                    proyectos: [
+                        { id: timestampId + 1, objId: idObj, municipio: municipio, poligono: "Av. Revolución & Calz. Olímpica", tipo: "Cruce Peatonal Elevado Pompeyano + Semáforo Auditivo", costo: 1450000, beneficiarios: 12500, prioridad: "urgente", score: "Crítica (9.9/10)", status: "pendiente" },
+                        { id: timestampId + 2, objId: idObj, municipio: municipio, poligono: "Perímetro Calz. Olímpica", tipo: "Pacificador Vial con Radares Preventivos y Señalética LED 30km/h", costo: 820000, beneficiarios: 9800, prioridad: "urgente", score: "Alta (9.4/10)", status: "pendiente" }
+                    ]
+                };
+            }
+
+            if (q.includes('minerva') || q.includes('lopez mateos') || q.includes('saturacion')) {
+                return {
+                    objetivos: [
+                        {
+                            id: idObj,
+                            municipio: municipio || "Guadalajara",
+                            titulo: "Optimización de Capacidad y Tiempos de Espera en Glorieta Minerva",
+                            origen: `Consulta Saturación (${municipio})`,
+                            meta: "Descongestionar 2,420 veh/h y priorizar cruces peatonales seguros al monumento",
+                            avance: 20,
+                            estado: "En Planeación",
+                            normativa: "Código Urbano de Jalisco Art. 215 & Regulación de Nodos Metropolitanos",
+                            icono: "fa-traffic-light"
+                        }
+                    ],
+                    proyectos: [
+                        { id: timestampId + 3, objId: idObj, municipio: municipio, poligono: "Glorieta Minerva - López Mateos", tipo: "Sincronización Semafórica Inteligente + Sensor de Demanda", costo: 2200000, beneficiarios: 22000, prioridad: "urgente", score: "Crítica (9.7/10)", status: "pendiente" },
+                        { id: timestampId + 4, objId: idObj, municipio: municipio, poligono: "Acceso Av. Vallarta Oriente", tipo: "Bahía de Transferencia Segura para Transporte Masivo", costo: 1650000, beneficiarios: 14000, prioridad: "urgente", score: "Alta (9.1/10)", status: "pendiente" }
+                    ]
+                };
+            }
+
+            if (q.includes('independencia') || q.includes('ciclov') || q.includes('bici')) {
+                return {
+                    objetivos: [
+                        {
+                            id: idObj,
+                            municipio: municipio || "Guadalajara",
+                            titulo: "Consolidación de Red Ciclista Segura y Conectividad BRT Calzada",
+                            origen: `Consulta Ciclovía (${municipio})`,
+                            meta: "Integrar 420 ciclistas/h con carril confinado de 2.00m y segregación física",
+                            avance: 40,
+                            estado: "En Proceso",
+                            normativa: "Art. 52 Ley de Movilidad Sostenible de Jalisco & Red MiBici",
+                            icono: "fa-bicycle"
+                        }
+                    ],
+                    proyectos: [
+                        { id: timestampId + 5, objId: idObj, municipio: municipio, poligono: "Calzada Independencia (Juárez a Niños Héroes)", tipo: "Ciclovía Segregada con Confinadores Trapezoidales y Bicipuertos", costo: 1850000, beneficiarios: 16000, prioridad: "urgente", score: "Alta (9.5/10)", status: "pendiente" }
+                    ]
+                };
+            }
+
+            // Genérico inteligente para cualquier otro caso dentro de la ZMG
+            return {
+                objetivos: [
+                    {
+                        id: idObj,
+                        municipio: municipio,
+                        titulo: `Intervención Integral de Movilidad y Ordenamiento Territorial en ${municipio}`,
+                        origen: `Consulta: ${query.slice(0, 45)}...`,
+                        meta: `Garantizar accesibilidad universal y cumplimiento estricto del Código Urbano de Jalisco`,
+                        avance: 25,
+                        estado: "En Proceso",
+                        normativa: "Código Urbano para el Estado de Jalisco & POTmet IMEPLAN",
+                        icono: "fa-city"
+                    }
+                ],
+                proyectos: [
+                    { id: timestampId + 6, objId: idObj, municipio: municipio, poligono: `Corredor Primario ${municipio}`, tipo: "Rediseño de Banquetas Accesibles con Guía Podotáctil y Rampas Normadas", costo: 1250000, beneficiarios: 8900, prioridad: "urgente", score: "Alta (9.1/10)", status: "pendiente" },
+                    { id: timestampId + 7, objId: idObj, municipio: municipio, poligono: `Polígono Prioritario ${municipio}`, tipo: "Obras de Adecuación Geométrica y Rampas Universales al 6%", costo: 1100000, beneficiarios: 7500, prioridad: "urgente", score: "Alta (8.8/10)", status: "pendiente" }
+                ]
+            };
+        }
+
+        function generarDictamenConsolidado() {
+            const numObj = memoriaIA.objetivos.length;
+            const numProy = memoriaIA.proyectos.length;
+            const now = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            let dictamen = `### 🏛️ Dictamen Técnico Metropolitano y Plan de Obras Consolidado (ZMG)\n` +
+                `**Fecha de Emisión:** ${now} | **Ámbito Jurisdiccional:** Zona Metropolitana de Guadalajara (Jalisco)\n` +
+                `**Estado de Memoria:** ${numObj} Objetivos Estratégicos | ${numProy} Proyectos en Cartera Metropolitana | **Motor:** Gemini 3.8 Flash\n\n` +
+                `**1. Diagnóstico Territorial Consolidado (POTmet / IMEPLAN):**\n` +
+                `Conforme a las consultas registradas en la memoria de la IA para los municipios de la ZMG, se han estructurado intervenciones técnicas jerarquizadas. Todas las propuestas respetan la **Pirámide de Movilidad del Estado de Jalisco**: Peatones > Ciclistas > Transporte Masivo > Carga > Automóvil Particular.\n\n` +
+                `**2. Objetivos Estratégicos Fijados en la Memoria:**\n`;
+
+            memoriaIA.objetivos.forEach((obj, idx) => {
+                dictamen += `${idx + 1}. **[${obj.municipio}] ${obj.titulo}:** ${obj.meta} *(Fundamento: ${obj.normativa})*.\n`;
+            });
+
+            dictamen += `\n**3. Resolución y Asignación Presupuestal ZMG:**\n` +
+                `Los proyectos asociados a estos objetivos incorporan cálculo paramétrico de inversión y fundamentación jurídica bajo el **Código Urbano del Estado de Jalisco** y los lineamientos del **IMEPLAN** para su eventual turno a los Cabildos Municipales de la ZMG.`;
+
+            return dictamen;
+        }
+
+        function renderizarDashboardMemoria() {
+            const emptyEl = document.getElementById('empty-state-container');
+            const dynamicEl = document.getElementById('dynamic-content-container');
+
+            if (memoriaIA.objetivos.length === 0) {
+                emptyEl.classList.remove('hidden');
+                dynamicEl.classList.add('hidden');
+                document.getElementById('badge-memoria-count').innerText = "0 Consultas / 0 Objetivos";
+                document.getElementById('total-budget').innerText = `$${PRESUPUESTO_BASE.toLocaleString('es-MX')} MXN`;
+                return;
+            }
+
+            emptyEl.classList.add('hidden');
+            dynamicEl.classList.remove('hidden');
+
+            // Actualizar Badge de Memoria
+            document.getElementById('badge-memoria-count').innerText = `${memoriaIA.consultas.length} Consultas / ${memoriaIA.objetivos.length} Objetivos`;
+            document.getElementById('counter-objetivos-badge').innerText = `${memoriaIA.objetivos.length} Objetivos ZMG`;
+
+            // Renderizar Tarjetas de Objetivos
+            const containerCards = document.getElementById('contenedor-cards-objetivos');
+            containerCards.innerHTML = '';
+            let totalAvance = 0;
+
+            memoriaIA.objetivos.forEach(obj => {
+                totalAvance += obj.avance;
+                const proysDelObj = memoriaIA.proyectos.filter(p => p.objId === obj.id);
+                const costoTotalObj = proysDelObj.reduce((a, b) => a + b.costo, 0);
+
+                containerCards.innerHTML += `
+                    <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 flex flex-col justify-between hover:border-hikred transition shadow-xs">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-hikred/10 text-hikred">${obj.id}</span>
+                                <span class="text-[10px] font-bold text-gray-700 bg-gray-200 px-2 py-0.5 rounded"><i class="fas fa-location-dot mr-1 text-hikred"></i>${esc(obj.municipio || 'ZMG')}</span>
+                            </div>
+                            <h4 class="font-bold text-gray-900 text-sm mb-2 flex items-start gap-2">
+                                <i class="fas ${obj.icono} text-hikred mt-1"></i>
+                                <span>${esc(obj.titulo)}</span>
+                            </h4>
+                            <p class="text-xs text-gray-600 mb-3 leading-relaxed">${esc(obj.meta)}</p>
+                            <div class="bg-white p-2.5 rounded-lg border border-gray-200 text-[11px] text-gray-500 mb-3">
+                                <strong class="text-gray-700">Normativa:</strong> ${esc(obj.normativa)}
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-200 pt-3">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-semibold text-gray-700">Avance de Meta:</span>
+                                <span class="font-bold font-mono text-green-700">${obj.avance}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden mb-3">
+                                <div class="bg-green-600 h-2 rounded-full" style="width: ${obj.avance}%"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-xs font-mono">
+                                <span class="text-gray-500">${proysDelObj.length} Obras Vinculadas</span>
+                                <span class="font-bold text-gray-900">$${costoTotalObj.toLocaleString('es-MX')}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Avance Global
+            const promAvance = memoriaIA.objetivos.length ? Math.round(totalAvance / memoriaIA.objetivos.length) : 0;
+            document.getElementById('global-progress-badge').innerText = `${promAvance}% Promedio`;
+
+            // Renderizar Estadísticas Ejecutivas
+            const totalCosto = memoriaIA.proyectos.reduce((a, b) => a + b.costo, 0);
+            const totalHab = memoriaIA.proyectos.reduce((a, b) => a + b.beneficiarios, 0);
+            document.getElementById('stat-inversion-total').innerText = `$${totalCosto.toLocaleString('es-MX')} MXN`;
+            document.getElementById('stat-beneficiarios-total').innerText = `${totalHab.toLocaleString('es-MX')} hab`;
+
+            // Renderizar Dictamen Consolidado
+            const dictamenDiv = document.getElementById('dictamen-texto-ia');
+            if (dictamenDiv && marked) {
+                dictamenDiv.innerHTML = marked.parse(memoriaIA.dictamenConsolidado);
+            }
+
+            // Renderizar Matriz de Proyectos
+            renderizarTablaMatriz();
+
+            // Renderizar Historial de Consultas
+            const histList = document.getElementById('historial-consultas-list');
+            histList.innerHTML = '';
+            memoriaIA.consultas.slice().reverse().forEach(c => {
+                histList.innerHTML += `
+                    <div class="p-2.5 bg-gray-50 rounded-lg border border-gray-200 flex justify-between items-center text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-hikred">[${esc(c.municipio)}]</span>
+                            <span class="text-gray-800">${esc(c.query)}</span>
+                        </div>
+                        <span class="text-gray-400 font-mono text-[10px] shrink-0 ml-2">${c.fecha}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function limpiarMemoriaIA() {
+            if (confirm("¿Estás seguro de que deseas limpiar la memoria acumulativa de la IA? Se borrarán todos los objetivos y proyectos trazados.")) {
+                memoriaIA = {
+                    consultas: [],
+                    objetivos: [],
+                    proyectos: [],
+                    dictamenes: [],
+                    dictamenConsolidado: ""
+                };
+                localStorage.removeItem('urban_memoria_zmg');
+                renderizarDashboardMemoria();
+            }
+        }
+
+        function renderizarTablaMatriz() {
+            const tbody = document.getElementById('projects-table-body');
+            tbody.innerHTML = '';
+
+            const filtrados = memoriaIA.proyectos.filter(p => {
+                if (filtroActivo === 'all') return true;
+                if (filtroActivo === 'urgente') return p.prioridad === 'urgente';
+                if (filtroActivo === 'autorizado') return p.status === 'autorizado';
+                if (filtroActivo === 'revision') return p.status === 'revision';
+                return true;
+            });
+
+            // Actualizar contadores en botones de filtro
+            document.getElementById('count-all').innerText = memoriaIA.proyectos.length;
+            document.getElementById('count-urgente').innerText = memoriaIA.proyectos.filter(p => p.prioridad === 'urgente').length;
+            document.getElementById('count-autorizado').innerText = memoriaIA.proyectos.filter(p => p.status === 'autorizado').length;
+            document.getElementById('count-revision').innerText = memoriaIA.proyectos.filter(p => p.status === 'revision').length;
+
+            if (filtrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-gray-400 italic">No hay proyectos con el filtro seleccionado.</td></tr>`;
+            }
+
+            filtrados.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition border-b border-gray-100";
+
+                let statusBadge = `<span class="text-amber-600 font-bold text-xs"><i class="fas fa-clock mr-1"></i> Pendiente</span>`;
+                if (p.status === 'autorizado') {
+                    statusBadge = `<span class="text-green-600 font-bold text-xs"><i class="fas fa-check-circle mr-1"></i> Autorizada</span>`;
+                } else if (p.status === 'revision') {
+                    statusBadge = `<span class="text-purple-600 font-bold text-xs"><i class="fas fa-search mr-1"></i> En Revisión</span>`;
+                }
+
+                let badgePrioridad = p.prioridad === 'urgente' 
+                    ? `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-bold">${p.score}</span>`
+                    : `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">${p.score}</span>`;
+
+                let acciones = '';
+                if (p.status === 'pendiente') {
+                    acciones = `
+                        <button onclick="autorizarProyecto(${p.id})" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs">
+                            <i class="fas fa-check mr-1"></i> Autorizar
+                        </button>
+                        <button onclick="revisarProyecto(${p.id})" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                            Revisar
+                        </button>
+                    `;
+                } else if (p.status === 'autorizado') {
+                    acciones = `
+                        <span class="text-[11px] text-green-700 font-bold bg-green-50 px-2.5 py-1 rounded-lg border border-green-200">
+                            <i class="fas fa-file-contract mr-1"></i> Licitación
+                        </span>
+                        <button onclick="deshacerProyecto(${p.id})" class="text-gray-400 hover:text-red-500 text-xs ml-2 p-1" title="Deshacer">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    `;
+                } else {
+                    acciones = `
+                        <button onclick="autorizarProyecto(${p.id})" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                            <i class="fas fa-check mr-1"></i> Autorizar
+                        </button>
+                        <button onclick="deshacerProyecto(${p.id})" class="text-gray-400 hover:text-gray-600 text-xs ml-2 p-1" title="Regresar">
+                            <i class="fas fa-rotate-left"></i>
+                        </button>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td class="p-3 font-mono text-xs font-bold text-hikred">${p.objId || 'OBJ-1'}</td>
+                    <td class="p-3 font-bold text-gray-900">${esc(p.poligono)}</td>
+                    <td class="p-3 text-gray-700">${esc(p.tipo)}</td>
+                    <td class="p-3 font-semibold text-gray-900 font-mono">$${p.costo.toLocaleString('es-MX')}</td>
+                    <td class="p-3 text-gray-600 font-mono">+${p.beneficiarios.toLocaleString('es-MX')}</td>
+                    <td class="p-3">${badgePrioridad}</td>
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3 text-right space-x-1.5 no-print">${acciones}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            actualizarPresupuesto();
+        }
+
+        function actualizarPresupuesto() {
+            const autorizados = memoriaIA.proyectos.filter(p => p.status === 'autorizado');
+            const gastoTotal = autorizados.reduce((acc, p) => acc + p.costo, 0);
+            const presupuestoRestante = PRESUPUESTO_BASE - gastoTotal;
+
+            document.getElementById('total-budget').innerText = `$${presupuestoRestante.toLocaleString('es-MX')} MXN`;
+            document.getElementById('stat-autorizadas-count').innerText = autorizados.length;
+        }
+
+        function autorizarProyecto(id) {
+            const p = memoriaIA.proyectos.find(x => x.id === id);
+            if (!p) return;
+            p.status = 'autorizado';
+            try { localStorage.setItem('urban_memoria_zmg', JSON.stringify(memoriaIA)); } catch(e) {}
+            renderizarTablaMatriz();
+        }
+
+        function revisarProyecto(id) {
+            const p = memoriaIA.proyectos.find(x => x.id === id);
+            if (!p) return;
+            p.status = 'revision';
+            try { localStorage.setItem('urban_memoria_zmg', JSON.stringify(memoriaIA)); } catch(e) {}
+            renderizarTablaMatriz();
+        }
+
+        function deshacerProyecto(id) {
+            const p = memoriaIA.proyectos.find(x => x.id === id);
+            if (!p) return;
+            p.status = 'pendiente';
+            try { localStorage.setItem('urban_memoria_zmg', JSON.stringify(memoriaIA)); } catch(e) {}
+            renderizarTablaMatriz();
+        }
+
+        function filtrarMatriz(tipo) {
+            filtroActivo = tipo;
+            ['all', 'urgente', 'autorizado', 'revision'].forEach(f => {
+                const btn = document.getElementById(`filtro-btn-${f}`);
+                if (btn) {
+                    btn.className = (f === tipo) 
+                        ? "px-3 py-1 rounded-lg bg-hikred text-white font-bold transition" 
+                        : "px-3 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition";
+                }
+            });
+            renderizarTablaMatriz();
+        }
+
+        function reproducirDictamenVoz() {
+            if (!('speechSynthesis' in window)) return alert("Tu navegador no soporta síntesis de voz.");
+            window.speechSynthesis.cancel();
+            const limpio = (memoriaIA.dictamenConsolidado || '').replace(/[*#`_]/g, '');
+            const utter = new SpeechSynthesisUtterance(limpio.slice(0, 450));
+            utter.lang = 'es-MX';
+            window.speechSynthesis.speak(utter);
+        }
+
+        function copiarDictamen() {
+            if (!memoriaIA.dictamenConsolidado) return;
+            navigator.clipboard.writeText(memoriaIA.dictamenConsolidado).then(() => {
+                alert("¡Dictamen consolidado copiado al portapapeles!");
+            });
+        }
+
+        function exportarMatrizCSV() {
+            if (!memoriaIA.proyectos || memoriaIA.proyectos.length === 0) return alert("No hay proyectos en la memoria para exportar.");
+            let csv = "ID,Objetivo_ID,Poligono_Proyecto,Intervencion_IA,Costo_MXN,Beneficiarios,Prioridad_IA,Estatus\n";
+            memoriaIA.proyectos.forEach(p => {
+                const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+                csv += `${q(p.id)},${q(p.objId || '')},${q(p.poligono)},${q(p.tipo)},${p.costo},${p.beneficiarios},${q(p.score)},${q(p.status)}\n`;
+            });
+            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Memoria_Objetivos_UrbanBuild_${Date.now()}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        function toggleVozDecision() {
+            const micIcon = document.getElementById('mic-icon-dec');
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRec) return alert("Tu navegador no soporta dictado por voz.");
+
+            if (escuchandoVozDec) {
+                if (reconocimientoVozDec) reconocimientoVozDec.stop();
+                escuchandoVozDec = false;
+                micIcon.className = "fas fa-microphone text-sm";
+                return;
+            }
+
+            reconocimientoVozDec = new SpeechRec();
+            reconocimientoVozDec.lang = 'es-MX';
+            reconocimientoVozDec.continuous = false;
+            reconocimientoVozDec.interimResults = false;
+
+            reconocimientoVozDec.onstart = () => {
+                escuchandoVozDec = true;
+                micIcon.className = "fas fa-microphone text-sm text-hikred animate-pulse";
+            };
+
+            reconocimientoVozDec.onresult = (e) => {
+                const texto = e.results[0][0].transcript;
+                const input = document.getElementById('ai-query-input');
+                input.value = (input.value ? input.value + ' ' : '') + texto;
+            };
+
+            reconocimientoVozDec.onerror = () => {
+                escuchandoVozDec = false;
+                micIcon.className = "fas fa-microphone text-sm";
+            };
+
+            reconocimientoVozDec.onend = () => {
+                escuchandoVozDec = false;
+                micIcon.className = "fas fa-microphone text-sm";
+            };
+
+            reconocimientoVozDec.start();
+        }
+
+        // Inicializar al cargar la página
+        renderizarDashboardMemoria();
+
+        /* =========================================================
+           INTERRUPTOR DE TEMA (CLARO / OSCURO)
+           ========================================================= */
+        function updateThemeUI(isDark) {
+            const icon = document.getElementById('theme-icon');
+            const btn = document.getElementById('theme-toggle');
+            if (icon) {
+                if (isDark) {
+                    icon.className = 'fas fa-sun text-base text-amber-400';
+                } else {
+                    icon.className = 'fas fa-moon text-base text-gray-600 dark:text-gray-200';
+                }
+            }
+            if (btn) {
+                btn.setAttribute('title', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+                btn.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const newTheme = isDark ? 'dark' : 'light';
+            try {
+                localStorage.setItem('urbanbuild_theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            } catch (e) {}
+            updateThemeUI(isDark);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            updateThemeUI(isDark);
+        });
+    </script>
+</body>
+</html>

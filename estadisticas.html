@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas y Análisis de Movilidad | UrbanBuild (Hikvision ITS)</title>
+    
+    <!-- Google Fonts: Open Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome & Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Inicialización inmediata del tema antes del render
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('urbanbuild_theme') || localStorage.getItem('theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Open Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+                    colors: {
+                        hikred: { DEFAULT: '#c9122f', hover: '#a00e25', light: '#fce8eb' },
+                        hikgray: { 800: '#2d2d2d', 900: '#1a1a1a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Open Sans', sans-serif; }
+        .vms-panel {
+            background: linear-gradient(180deg, #1e2430 0%, #0d131f 100%);
+            border: 1px solid #2d3748;
+        }
+        html.dark { color-scheme: dark; }
+        html.dark body { background-color: #0b0f19; color: #f1f5f9; }
+        html.dark nav { background-color: #0f172a !important; border-color: #1e293b !important; }
+        html.dark nav a.text-black { color: #ffffff !important; }
+        html.dark nav a.text-gray-600 { color: #cbd5e1 !important; }
+        html.dark #mobile-nav-menu { background-color: #0f172a !important; border-color: #1e293b !important; }
+        html.dark #mobile-nav-menu a { color: #cbd5e1 !important; }
+        html.dark .bg-white { background-color: #131c2e !important; border-color: #1e293b !important; color: #f1f5f9 !important; }
+        html.dark .bg-gray-50 { background-color: #0b0f19 !important; }
+        html.dark .bg-gray-100 { background-color: #0b0f19 !important; }
+        html.dark .text-gray-900 { color: #ffffff !important; }
+        html.dark .text-gray-800 { color: #f1f5f9 !important; }
+        html.dark .text-gray-700 { color: #cbd5e1 !important; }
+        html.dark .text-gray-600 { color: #94a3b8 !important; }
+        html.dark .text-gray-500 { color: #94a3b8 !important; }
+        html.dark .border-gray-200 { border-color: #1e293b !important; }
+        html.dark .border-gray-300 { border-color: #334155 !important; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 antialiased min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- Top Utility Bar (Hikvision México) -->
+    <div class="bg-[#1f2429] text-gray-300 text-xs py-1.5 border-b border-gray-700 hidden md:block">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center text-[11px]">
+            <div class="flex items-center gap-4">
+                <span><i class="fas fa-globe text-hikred mr-1"></i> <strong>México</strong> / Español</span>
+                <span class="text-gray-600">|</span>
+                <span class="text-gray-400">Telemetría YOLOv8 en Vivo · Nodo Guadalajara</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="hover:text-white transition">Inicio</a>
+                <span class="text-gray-600">|</span>
+                <span class="text-hikred font-bold">Escuela Politécnica de Guadalajara</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="text-3xl font-bold tracking-tighter">
+                    <a href="index.html" class="text-black hover:opacity-90">Urban</a><a href="login.html" class="text-hikred hover:underline">Build</a>
+                    <span class="text-[9px] uppercase tracking-widest bg-black text-white px-1.5 py-0.5 rounded font-mono ml-2 font-bold">ITS AIoT</span>
+                </div>
+                
+                <div class="hidden md:flex space-x-7 items-center text-sm font-semibold">
+                    <a href="index.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Inicio</a>
+                    <a href="https://urbanbuilding.vercel.app" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-hikred transition-colors py-2 flex items-center gap-1">
+                        Captura de Datos <i class="fas fa-arrow-up-right-from-square text-[10px] text-gray-400"></i>
+                    </a>
+                    <a href="estadisticas.html" aria-current="page" class="text-hikred py-2 border-b-2 border-hikred">Estadísticas</a>
+                    <a href="normatividad.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Normativa</a>
+                    <a href="recomendaciones.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Recomendaciones</a>
+                    <a href="toma-de-decisiones.html" class="text-gray-600 hover:text-hikred transition-colors py-2">Toma de Decisiones</a>
+                </div>
+
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- Interruptor de Tema al lado de Iniciar Sesión -->
+                    <button id="theme-toggle" onclick="toggleTheme()" type="button" 
+                            class="p-2 sm:p-2.5 rounded-lg text-gray-600 dark:text-gray-200 hover:text-hikred dark:hover:text-hikred hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none cursor-pointer flex items-center justify-center border border-gray-200 dark:border-slate-700" 
+                            title="Alternar entre modo claro y oscuro" aria-label="Alternar tema">
+                        <i id="theme-icon" class="fas fa-moon text-base"></i>
+                        <span class="sr-only">Alternar tema</span>
+                    </button>
+
+                    <!-- Botón de Iniciar Sesión / Administración (no cambia si estás logeado o no) -->
+                    <a href="login.html" id="btn-iniciar-sesion" 
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-100 hover:text-hikred dark:hover:text-hikred border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 transition shadow-xs focus:outline-none" 
+                       title="Iniciar Sesión / Portal de Administración">
+                        <i class="fas fa-user-shield text-hikred text-sm"></i>
+                        <span class="hidden sm:inline">Iniciar Sesión</span>
+                    </a>
+
+                    <button type="button" onclick="document.getElementById('mobile-nav-menu').classList.toggle('hidden')" class="md:hidden text-gray-700 dark:text-gray-200 hover:text-hikred transition p-2" aria-label="Abrir menú" aria-controls="mobile-nav-menu">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú Móvil -->
+        <div id="mobile-nav-menu" class="hidden md:hidden border-t border-gray-200 bg-white">
+            <div class="px-4 py-3 flex flex-col space-y-1">
+                <a href="index.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Inicio</a>
+                <a href="https://urbanbuilding.vercel.app" target="_blank" rel="noopener noreferrer" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Captura de Datos</a>
+                <a href="estadisticas.html" class="py-2.5 text-sm font-bold text-hikred">Estadísticas</a>
+                <a href="normatividad.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Normativa</a>
+                <a href="recomendaciones.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Recomendaciones</a>
+                <a href="toma-de-decisiones.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred">Toma de Decisiones</a>
+                <a href="panel-admin.html" class="py-2.5 text-sm font-semibold text-gray-700 hover:text-hikred flex items-center gap-1.5 border-t border-gray-100 pt-3">
+                    <i class="fas fa-user-shield text-hikred"></i> Portal de Administración
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            
+            <!-- Banner Header -->
+            <div class="bg-hikgray-900 text-white p-8 rounded-lg shadow-xl border-t-4 border-hikred flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <div class="flex items-center space-x-3 mb-2">
+                        <span class="w-10 h-10 rounded-full bg-hikred text-white flex items-center justify-center font-bold text-lg shadow">2</span>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold uppercase tracking-wider">Estadísticas y Análisis de Movilidad</h1>
+                    </div>
+                    <p class="text-gray-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
+                        Conteo en tiempo real generado por visión computacional YOLOv8 sobre cámaras DeepinView de alta velocidad en la Zona Metropolitana de Guadalajara.
+                    </p>
+                </div>
+                <div class="bg-black/50 p-4 rounded-lg border border-gray-700 text-xs font-mono">
+                    <span class="text-gray-400 block mb-1">NODO METROPOLITANO ACTIVO:</span>
+                    <select id="nodo-select" class="bg-black text-white px-3 py-1.5 rounded border border-gray-600 font-bold outline-none cursor-pointer" onchange="cambiarNodo(this.value)">
+                        <option value="gdl-01">Av. Vallarta & Av. de las Américas</option>
+                        <option value="gdl-02">Glorieta Minerva & Av. López Mateos</option>
+                        <option value="gdl-03">Calzada Independencia & Av. Juárez</option>
+                        <option value="gdl-04">Av. Revolución & Calzada Olímpica (Politécnica)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Resumen de Indicadores Clave -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-center">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase tracking-widest block font-bold">Aforo Vehicular</span>
+                    <span class="text-2xl font-bold text-hikred mt-1 block" id="stat-aforo">1,848 veh/h</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase tracking-widest block font-bold">Flujo Peatonal</span>
+                    <span class="text-2xl font-bold text-gray-900 mt-1 block" id="stat-peatones">1,256 peat/h</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase tracking-widest block font-bold">Ciclistas / Micromov</span>
+                    <span class="text-2xl font-bold text-emerald-600 mt-1 block" id="stat-ciclistas">317 cic/h</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <span class="text-xs text-gray-500 uppercase tracking-widest block font-bold">Transporte Público</span>
+                    <span class="text-2xl font-bold text-purple-600 mt-1 block" id="stat-buses">94 bus/h</span>
+                </div>
+            </div>
+
+            <!-- GRÁFICO 1: CRUCES ACUMULADOS (AUTOS Y PERSONAS) -->
+            <div class="vms-panel p-6 rounded-xl shadow-2xl text-white">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-gray-700 gap-3">
+                    <div>
+                        <h3 class="text-base font-bold uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-chart-line text-hikred"></i> Cruces Acumulados — AUTOS y PERSONAS (Nodo #26)
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Monitoreo continuo en ventana de 60 segundos con detección de dirección</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleCrucesAnim()" id="btn-anim-cruces" class="px-3 py-1.5 rounded bg-hikred hover:bg-hikred-hover text-white text-xs font-bold transition flex items-center gap-1.5">
+                            <i class="fas fa-play" id="icon-anim-cruces"></i> <span id="txt-anim-cruces">Reproducir</span>
+                        </button>
+                        <span class="text-xs font-mono bg-black/60 px-2.5 py-1.5 rounded border border-gray-700 text-rose-400">
+                            t: <strong id="lbl-segundo-cruces">60s</strong> / 60s
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Slider Scrub -->
+                <div class="mt-4 flex items-center gap-3">
+                    <span class="text-xs font-mono text-gray-400">0s</span>
+                    <input type="range" id="slider-cruces" min="0" max="60" value="60" oninput="actualizarCrucesPorSegundo(Number(this.value))" class="flex-1 h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-hikred">
+                    <span class="text-xs font-mono text-gray-400">60s</span>
+                </div>
+
+                <!-- Gráficos Gemelos -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+                    <!-- Autos -->
+                    <div class="bg-black/60 p-4 rounded-lg border border-gray-800">
+                        <div class="flex justify-between items-center mb-2 text-xs">
+                            <strong class="text-gray-200 uppercase"><i class="fas fa-car text-sky-400 mr-1.5"></i> Cruces acumulados — AUTOS</strong>
+                            <div class="font-mono text-[11px] space-x-2">
+                                <span class="text-sky-400">autos_in: <strong id="val-autos-in">2</strong></span>
+                                <span class="text-amber-400">autos_out: <strong id="val-autos-out">8</strong></span>
+                                <span class="text-emerald-400">autos_mid: <strong id="val-autos-mid">1</strong></span>
+                            </div>
+                        </div>
+                        <div class="w-full overflow-x-auto">
+                            <svg viewBox="0 0 540 220" class="w-full h-auto max-h-56" id="svg-autos"></svg>
+                        </div>
+                    </div>
+
+                    <!-- Personas -->
+                    <div class="bg-black/60 p-4 rounded-lg border border-gray-800">
+                        <div class="flex justify-between items-center mb-2 text-xs">
+                            <strong class="text-gray-200 uppercase"><i class="fas fa-walking text-hikred mr-1.5"></i> Cruces acumulados — PERSONAS</strong>
+                            <div class="font-mono text-[11px] space-x-2">
+                                <span class="text-sky-400">personas_in: <strong id="val-personas-in">9</strong></span>
+                                <span class="text-amber-400">personas_out: <strong id="val-personas-out">2</strong></span>
+                            </div>
+                        </div>
+                        <div class="w-full overflow-x-auto">
+                            <svg viewBox="0 0 540 220" class="w-full h-auto max-h-56" id="svg-personas"></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRÁFICO 2: CONTEO DE OBJETOS POR SEGUNDO (ejm1) -->
+            <div class="vms-panel p-6 rounded-xl shadow-2xl text-white">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-gray-700 gap-3">
+                    <div>
+                        <h3 class="text-base font-bold uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-cubes text-teal-400"></i> Conteo de Objetos por Segundo — ejm1
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Clasificación multiclase de autos, bicicletas, buses, camiones, motos y personas</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 text-xs font-mono" id="legend-objects"></div>
+                </div>
+
+                <div class="mt-4 bg-black/60 p-4 rounded-lg border border-gray-800 overflow-x-auto">
+                    <svg viewBox="0 0 800 280" class="w-full h-auto min-w-[580px] max-h-72" id="svg-objects"></svg>
+                </div>
+            </div>
+
+            <!-- GRÁFICO 3: ANÁLISIS POR CARRIL Y COMPOSICIÓN (212470_medium) -->
+            <div class="vms-panel p-6 rounded-xl shadow-2xl text-white">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-gray-700 gap-3">
+                    <div>
+                        <h3 class="text-base font-bold uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-project-diagram text-amber-400"></i> Análisis por Carril y Composición Vehicular — 212470_medium
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Desglose de vehículos acumulados entre carriles de salida (OUT) e ingreso (IN)</p>
+                    </div>
+                    <span class="text-xs font-mono bg-black/60 px-3 py-1.5 rounded border border-gray-700 text-amber-400">
+                        Total Detectado: 24 Vehículos
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+                    <!-- Barras Total por carril -->
+                    <div class="bg-black/60 p-4 rounded-lg border border-gray-800">
+                        <h4 class="text-xs font-bold uppercase mb-2">Total por carril</h4>
+                        <svg viewBox="0 0 320 200" class="w-full h-auto max-h-48" id="svg-lanes-bar"></svg>
+                    </div>
+
+                    <!-- Barras Composición -->
+                    <div class="bg-black/60 p-4 rounded-lg border border-gray-800">
+                        <h4 class="text-xs font-bold uppercase mb-2">Composición por tipo de vehículo</h4>
+                        <svg viewBox="0 0 320 200" class="w-full h-auto max-h-48" id="svg-lanes-comp"></svg>
+                    </div>
+
+                    <!-- Líneas Acumulado por segundo -->
+                    <div class="bg-black/60 p-4 rounded-lg border border-gray-800">
+                        <h4 class="text-xs font-bold uppercase mb-2">Acumulado por segundo (0 a 30s)</h4>
+                        <svg viewBox="0 0 360 200" class="w-full h-auto max-h-48" id="svg-lanes-step"></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer con Botón de Regreso -->
+            <div class="text-center pt-4">
+                <a href="index.html" class="inline-flex items-center gap-2 bg-black hover:bg-gray-800 text-white font-bold text-xs uppercase px-6 py-3.5 rounded shadow-lg transition">
+                    <i class="fas fa-arrow-left text-hikred"></i> Regresar a la Página Principal (index.html)
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer Corporativo Hikvision -->
+    <footer class="bg-hikgray-900 text-gray-400 py-8 border-t-4 border-hikred mt-auto text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-2">
+            <p>&copy; 2026 UrbanBuild Systems · Escuela Politécnica de Guadalajara. Todos los derechos reservados.</p>
+            <p class="text-gray-500 font-mono text-[11px]">Plataforma de Inteligencia Urbana y Movilidad | Basada en tecnología Hikvision ITS</p>
+        </div>
+    </footer>
+
+    <!-- Scripts de Datos y Renderizado de Gráficas Reales -->
+    <script>
+        // Datos reales de cruces acumulados (0-60s)
+        const crucesData = [
+            { s: 0, a_in: 0, a_out: 1, a_mid: 0, p_in: 0, p_out: 0 },
+            { s: 2, a_in: 2, a_out: 1, a_mid: 0, p_in: 0, p_out: 0 },
+            { s: 5, a_in: 2, a_out: 3, a_mid: 0, p_in: 0, p_out: 0 },
+            { s: 8, a_in: 2, a_out: 3, a_mid: 0, p_in: 1, p_out: 0 },
+            { s: 9, a_in: 2, a_out: 4, a_mid: 0, p_in: 1, p_out: 0 },
+            { s: 19, a_in: 2, a_out: 4, a_mid: 0, p_in: 3, p_out: 0 },
+            { s: 20, a_in: 2, a_out: 4, a_mid: 0, p_in: 4, p_out: 0 },
+            { s: 25, a_in: 2, a_out: 4, a_mid: 0, p_in: 5, p_out: 0 },
+            { s: 29, a_in: 2, a_out: 4, a_mid: 0, p_in: 6, p_out: 0 },
+            { s: 30, a_in: 2, a_out: 4, a_mid: 0, p_in: 7, p_out: 1 },
+            { s: 31, a_in: 2, a_out: 5, a_mid: 0, p_in: 7, p_out: 1 },
+            { s: 35, a_in: 2, a_out: 5, a_mid: 0, p_in: 7, p_out: 2 },
+            { s: 36, a_in: 2, a_out: 5, a_mid: 0, p_in: 8, p_out: 2 },
+            { s: 40, a_in: 2, a_out: 6, a_mid: 0, p_in: 8, p_out: 2 },
+            { s: 43, a_in: 2, a_out: 6, a_mid: 1, p_in: 8, p_out: 2 },
+            { s: 49, a_in: 2, a_out: 6, a_mid: 1, p_in: 9, p_out: 2 },
+            { s: 56, a_in: 2, a_out: 7, a_mid: 1, p_in: 9, p_out: 2 },
+            { s: 58, a_in: 2, a_out: 8, a_mid: 1, p_in: 9, p_out: 2 },
+            { s: 60, a_in: 2, a_out: 8, a_mid: 1, p_in: 9, p_out: 2 }
+        ];
+
+        // Datos reales de conteo multiclase (0-7s)
+        const objectsData = [
+            { s: 0, auto: 1.2, bici: 0.0, bus: 1.0, cam: 5.2, moto: 0.0, per: 0.0 },
+            { s: 1, auto: 1.9, bici: 1.0, bus: 1.0, cam: 3.8, moto: 1.0, per: 0.0 },
+            { s: 2, auto: 2.0, bici: 0.0, bus: 1.0, cam: 3.5, moto: 1.0, per: 1.0 },
+            { s: 3, auto: 1.0, bici: 0.0, bus: 0.0, cam: 4.1, moto: 1.0, per: 1.0 },
+            { s: 4, auto: 1.7, bici: 0.0, bus: 1.0, cam: 3.1, moto: 0.0, per: 0.0 },
+            { s: 5, auto: 1.4, bici: 0.0, bus: 1.0, cam: 1.9, moto: 0.0, per: 0.0 },
+            { s: 6, auto: 2.3, bici: 0.0, bus: 1.0, cam: 1.2, moto: 0.0, per: 0.0 },
+            { s: 7, auto: 4.4, bici: 0.0, bus: 1.0, cam: 2.4, moto: 0.0, per: 0.0 }
+        ];
+
+        let animInterval = null;
+        let isPlayingCruces = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCrucesAutos(60);
+            renderCrucesPersonas(60);
+            renderObjectsChart();
+            renderLanesCharts();
+        });
+
+        function toggleCrucesAnim() {
+            isPlayingCruces = !isPlayingCruces;
+            const btn = document.getElementById('btn-anim-cruces');
+            const icon = document.getElementById('icon-anim-cruces');
+            const txt = document.getElementById('txt-anim-cruces');
+            const slider = document.getElementById('slider-cruces');
+
+            if (isPlayingCruces) {
+                icon.className = 'fas fa-pause';
+                txt.innerText = 'Pausar';
+                animInterval = setInterval(() => {
+                    let val = Number(slider.value);
+                    if (val >= 60) val = 0;
+                    else val += 1;
+                    slider.value = val;
+                    actualizarCrucesPorSegundo(val);
+                }, 200);
+            } else {
+                icon.className = 'fas fa-play';
+                txt.innerText = 'Reproducir';
+                clearInterval(animInterval);
+            }
+        }
+
+        function actualizarCrucesPorSegundo(seg) {
+            document.getElementById('lbl-segundo-cruces').innerText = seg + 's';
+            renderCrucesAutos(seg);
+            renderCrucesPersonas(seg);
+        }
+
+        function renderCrucesAutos(maxSec) {
+            const svg = document.getElementById('svg-autos');
+            const pts = crucesData.filter(d => d.s <= maxSec);
+            const last = pts[pts.length - 1] || crucesData[0];
+            document.getElementById('val-autos-in').innerText = last.a_in;
+            document.getElementById('val-autos-out').innerText = last.a_out;
+            document.getElementById('val-autos-mid').innerText = last.a_mid;
+
+            const w = 540, h = 220, padL = 35, padB = 30, padT = 20, padR = 20;
+            const gw = w - padL - padR, gh = h - padT - padB;
+            const getX = s => padL + (s / 60) * gw;
+            const getY = v => padT + gh - (v / 8) * gh;
+
+            let grid = '';
+            [0, 2, 4, 6, 8].forEach(v => {
+                const y = getY(v);
+                grid += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#2d3748" stroke-dasharray="3,3"/><text x="${padL - 6}" y="${y + 3}" fill="#718096" font-size="9" text-anchor="end" font-family="monospace">${v}</text>`;
+            });
+            [0, 10, 20, 30, 40, 50, 60].forEach(s => {
+                const x = getX(s);
+                grid += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${h - padB}" stroke="#1a202c"/><text x="${x}" y="${h - padB + 14}" fill="#718096" font-size="9" text-anchor="middle" font-family="monospace">${s}</text>`;
+            });
+
+            const makeStep = key => {
+                if (pts.length === 0) return '';
+                let d = `M ${getX(pts[0].s)} ${getY(pts[0][key])}`;
+                for (let i = 1; i < pts.length; i++) {
+                    d += ` L ${getX(pts[i].s)} ${getY(pts[i - 1][key])} L ${getX(pts[i].s)} ${getY(pts[i][key])}`;
+                }
+                return d;
+            };
+
+            let dots = pts.map(p => `
+                <circle cx="${getX(p.s)}" cy="${getY(p.a_in)}" r="2.5" fill="#38bdf8"/>
+                <circle cx="${getX(p.s)}" cy="${getY(p.a_out)}" r="2.5" fill="#f59e0b"/>
+                <circle cx="${getX(p.s)}" cy="${getY(p.a_mid)}" r="2.5" fill="#10b981"/>
+            `).join('');
+
+            svg.innerHTML = `
+                ${grid}
+                <path d="${makeStep('a_in')}" fill="none" stroke="#38bdf8" stroke-width="2"/>
+                <path d="${makeStep('a_out')}" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                <path d="${makeStep('a_mid')}" fill="none" stroke="#10b981" stroke-width="2"/>
+                ${dots}
+            `;
+        }
+
+        function renderCrucesPersonas(maxSec) {
+            const svg = document.getElementById('svg-personas');
+            const pts = crucesData.filter(d => d.s <= maxSec);
+            const last = pts[pts.length - 1] || crucesData[0];
+            document.getElementById('val-personas-in').innerText = last.p_in;
+            document.getElementById('val-personas-out').innerText = last.p_out;
+
+            const w = 540, h = 220, padL = 35, padB = 30, padT = 20, padR = 20;
+            const gw = w - padL - padR, gh = h - padT - padB;
+            const getX = s => padL + (s / 60) * gw;
+            const getY = v => padT + gh - (v / 10) * gh;
+
+            let grid = '';
+            [0, 2, 4, 6, 8, 10].forEach(v => {
+                const y = getY(v);
+                grid += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#2d3748" stroke-dasharray="3,3"/><text x="${padL - 6}" y="${y + 3}" fill="#718096" font-size="9" text-anchor="end" font-family="monospace">${v}</text>`;
+            });
+            [0, 10, 20, 30, 40, 50, 60].forEach(s => {
+                const x = getX(s);
+                grid += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${h - padB}" stroke="#1a202c"/><text x="${x}" y="${h - padB + 14}" fill="#718096" font-size="9" text-anchor="middle" font-family="monospace">${s}</text>`;
+            });
+
+            const makeStep = key => {
+                if (pts.length === 0) return '';
+                let d = `M ${getX(pts[0].s)} ${getY(pts[0][key])}`;
+                for (let i = 1; i < pts.length; i++) {
+                    d += ` L ${getX(pts[i].s)} ${getY(pts[i - 1][key])} L ${getX(pts[i].s)} ${getY(pts[i][key])}`;
+                }
+                return d;
+            };
+
+            let dots = pts.map(p => `
+                <circle cx="${getX(p.s)}" cy="${getY(p.p_in)}" r="2.5" fill="#38bdf8"/>
+                <circle cx="${getX(p.s)}" cy="${getY(p.p_out)}" r="2.5" fill="#f59e0b"/>
+            `).join('');
+
+            svg.innerHTML = `
+                ${grid}
+                <path d="${makeStep('p_in')}" fill="none" stroke="#38bdf8" stroke-width="2"/>
+                <path d="${makeStep('p_out')}" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                ${dots}
+            `;
+        }
+
+        function renderObjectsChart() {
+            const svg = document.getElementById('svg-objects');
+            const legend = document.getElementById('legend-objects');
+            const classes = [
+                { k: 'auto', lbl: 'Auto', c: '#f87171', fill: 'rgba(248,113,113,0.2)' },
+                { k: 'bici', lbl: 'Bicicleta', c: '#4ade80', fill: 'rgba(74,222,128,0.2)' },
+                { k: 'bus', lbl: 'Bus', c: '#c084fc', fill: 'rgba(192,132,252,0.2)' },
+                { k: 'cam', lbl: 'Camión', c: '#2dd4bf', fill: 'rgba(45,212,191,0.2)' },
+                { k: 'moto', lbl: 'Motocicleta', c: '#fbbf24', fill: 'rgba(251,191,36,0.2)' },
+                { k: 'per', lbl: 'Persona', c: '#60a5fa', fill: 'rgba(96,165,250,0.2)' }
+            ];
+
+            legend.innerHTML = classes.map(c => `
+                <span class="flex items-center gap-1.5 px-2 py-1 rounded bg-black/40 border border-gray-800">
+                    <span class="w-2.5 h-2.5 rounded-full" style="background:${c.c}"></span> ${c.lbl}
+                </span>
+            `).join('');
+
+            const w = 800, h = 280, padL = 40, padB = 35, padT = 20, padR = 25;
+            const gw = w - padL - padR, gh = h - padT - padB;
+            const getX = s => padL + (s / 7) * gw;
+            const getY = v => padT + gh - (v / 5.5) * gh;
+
+            let grid = '';
+            [0, 1, 2, 3, 4, 5].forEach(v => {
+                const y = getY(v);
+                grid += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#2d3748" stroke-dasharray="3,3"/><text x="${padL - 6}" y="${y + 3}" fill="#718096" font-size="10" text-anchor="end" font-family="monospace">${v}</text>`;
+            });
+            [0, 1, 2, 3, 4, 5, 6, 7].forEach(s => {
+                const x = getX(s);
+                grid += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${h - padB}" stroke="#1a202c"/><text x="${x}" y="${h - padB + 16}" fill="#718096" font-size="10" text-anchor="middle" font-family="monospace">${s}s</text>`;
+            });
+
+            let paths = classes.map(c => {
+                const line = objectsData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(d.s)} ${getY(d[c.k])}`).join(' ');
+                const area = `${line} L ${getX(7)} ${getY(0)} L ${getX(0)} ${getY(0)} Z`;
+                const dots = objectsData.map(d => `<circle cx="${getX(d.s)}" cy="${getY(d[c.k])}" r="3" fill="${c.c}"/>`).join('');
+                return `<path d="${area}" fill="${c.fill}"/><path d="${line}" fill="none" stroke="${c.c}" stroke-width="2.2"/>${dots}`;
+            }).join('');
+
+            svg.innerHTML = grid + paths;
+        }
+
+        function renderLanesCharts() {
+            // 1. Barras Total
+            const svgBar = document.getElementById('svg-lanes-bar');
+            const lanes = [
+                { l: 'Carril Izq 1 (OUT)', v: 2, c: '#10b981' },
+                { l: 'Carril Izq 2 (OUT)', v: 3, c: '#059669' },
+                { l: 'Carril Der 1 (IN)',  v: 9, c: '#facc15' },
+                { l: 'Carril Der 2 (IN)',  v: 10, c: '#f59e0b' }
+            ];
+            let bars = lanes.map((d, i) => {
+                const x = 35 + i * 68 + 10;
+                const h = (d.v / 10) * 130;
+                const y = 160 - h;
+                return `
+                    <rect x="${x}" y="${y}" width="42" height="${h}" fill="${d.c}" rx="2"/>
+                    <text x="${x + 21}" y="${y - 4}" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle" font-family="monospace">${d.v}</text>
+                    <text x="${x + 21}" y="180" fill="#94a3b8" font-size="7" text-anchor="end" transform="rotate(-15, ${x + 21}, 180)">${d.l}</text>
+                `;
+            }).join('');
+            svgBar.innerHTML = `<line x1="30" y1="160" x2="310" y2="160" stroke="#4a5568"/>` + bars;
+
+            // 2. Barras Composición (Auto)
+            const svgComp = document.getElementById('svg-lanes-comp');
+            let compBars = lanes.map((d, i) => {
+                const x = 35 + i * 68 + 10;
+                const h = (d.v / 10) * 130;
+                const y = 160 - h;
+                return `
+                    <rect x="${x}" y="${y}" width="42" height="${h}" fill="#3b82f6" rx="2"/>
+                    <text x="${x + 21}" y="180" fill="#94a3b8" font-size="7" text-anchor="end" transform="rotate(-15, ${x + 21}, 180)">${d.l}</text>
+                `;
+            }).join('');
+            svgComp.innerHTML = `<line x1="30" y1="160" x2="310" y2="160" stroke="#4a5568"/>` + compBars;
+
+            // 3. Pasos Acumulado por segundo
+            const svgStep = document.getElementById('svg-lanes-step');
+            const laneSteps = [
+                { s: 0, o1: 0, o2: 0, i1: 0, i2: 0 },
+                { s: 5, o1: 0, o2: 0, i1: 3, i2: 2 },
+                { s: 12, o1: 0, o2: 0, i1: 4, i2: 2 },
+                { s: 15, o1: 1, o2: 0, i1: 5, i2: 3 },
+                { s: 20, o1: 1, o2: 2, i1: 8, i2: 5 },
+                { s: 25, o1: 2, o2: 3, i1: 9, i2: 8 },
+                { s: 30, o1: 2, o2: 3, i1: 9, i2: 10 }
+            ];
+            const getSX = s => 35 + (s / 30) * 290;
+            const getSY = v => 160 - (v / 10) * 130;
+
+            const mkStep = k => laneSteps.map((d, i) => {
+                if (i === 0) return `M ${getSX(d.s)} ${getSY(d[k])}`;
+                return `L ${getSX(d.s)} ${getSY(laneSteps[i - 1][k])} L ${getSX(d.s)} ${getSY(d[k])}`;
+            }).join(' ');
+
+            svgStep.innerHTML = `
+                <line x1="35" y1="160" x2="330" y2="160" stroke="#4a5568"/>
+                <path d="${mkStep('o1')}" fill="none" stroke="#10b981" stroke-width="2"/>
+                <path d="${mkStep('o2')}" fill="none" stroke="#059669" stroke-width="2"/>
+                <path d="${mkStep('i1')}" fill="none" stroke="#facc15" stroke-width="2"/>
+                <path d="${mkStep('i2')}" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                <text x="35" y="176" fill="#718096" font-size="9">0s</text>
+                <text x="180" y="176" fill="#718096" font-size="9">15s</text>
+                <text x="325" y="176" fill="#718096" font-size="9">30s</text>
+            `;
+        }
+
+        function cambiarNodo(id) {
+            const data = {
+                'gdl-01': { a: '1,848 veh/h', p: '1,256 peat/h', c: '317 cic/h', b: '94 bus/h' },
+                'gdl-02': { a: '2,420 veh/h', p: '640 peat/h', c: '185 cic/h', b: '130 bus/h' },
+                'gdl-03': { a: '1,120 veh/h', p: '3,890 peat/h', c: '420 cic/h', b: '260 bus/h' },
+                'gdl-04': { a: '1,410 veh/h', p: '2,850 peat/h', c: '512 cic/h', b: '118 bus/h' },
+            };
+            const d = data[id] || data['gdl-01'];
+            document.getElementById('stat-aforo').innerText = d.a;
+            document.getElementById('stat-peatones').innerText = d.p;
+            document.getElementById('stat-ciclistas').innerText = d.c;
+            document.getElementById('stat-buses').innerText = d.b;
+        }
+
+        /* =========================================================
+           INTERRUPTOR DE TEMA (CLARO / OSCURO)
+           ========================================================= */
+        function updateThemeUI(isDark) {
+            const icon = document.getElementById('theme-icon');
+            const btn = document.getElementById('theme-toggle');
+            if (icon) {
+                if (isDark) {
+                    icon.className = 'fas fa-sun text-base text-amber-400';
+                } else {
+                    icon.className = 'fas fa-moon text-base text-gray-600 dark:text-gray-200';
+                }
+            }
+            if (btn) {
+                btn.setAttribute('title', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+                btn.setAttribute('aria-label', isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const newTheme = isDark ? 'dark' : 'light';
+            try {
+                localStorage.setItem('urbanbuild_theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            } catch (e) {}
+            updateThemeUI(isDark);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            updateThemeUI(isDark);
+        });
+    </script>
+</body>
+</html>
