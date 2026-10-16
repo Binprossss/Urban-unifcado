@@ -743,7 +743,7 @@ app.post('/api/login', (req, res) => {
   const u = String(usuario).trim().toLowerCase();
   const c = String(clave).trim();
   const validUsers = ['admin', 'admin_gdl', 'operador'];
-  const validKeys = ['admin', 'admin123', 'urbanbuild2026', 'admin_gdl', 'UrbanBuild2026!'];
+  const validKeys = ['urban2026', 'admin', 'admin123', 'urbanbuild2026', 'admin_gdl', 'UrbanBuild2026!'];
 
   if (validUsers.includes(u) && validKeys.includes(c)) {
     loginAttempts.delete(clientIp);
