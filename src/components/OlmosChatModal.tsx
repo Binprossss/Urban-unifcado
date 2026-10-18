@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Paperclip, MapPin, Sparkles, FileText, CheckCircle2, Shield, AlertCircle, Eye, Image as ImageIcon } from 'lucide-react';
+import { Bot, Send, X, Paperclip, MapPin, Sparkles, FileText, CheckCircle2, Shield, AlertCircle, Eye, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { NORMATIVE_DOCUMENTS } from '../data/urbanData';
 
 interface Message {
@@ -49,6 +49,19 @@ export const OlmosChatModal: React.FC<OlmosChatModalProps> = ({ isOpen, onClose,
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  const handleClearChat = () => {
+    setMessages([
+      {
+        id: 'init-1',
+        sender: 'olmos',
+        text: 'Hola, soy **URBIN**, núcleo de inteligencia urbana de **código cerrado y dominio restringido** de **UrbanBuild**.\n\nEstoy alimentado **exclusivamente con las normativas, leyes y documentos técnicos oficiales de desarrollo urbano y movilidad del Área Metropolitana de Guadalajara**:\n• **Código Urbano del Estado de Jalisco** (Cálculo de COS, CUS, 20% permeable obligatorio Art. 142 y cesiones del 16% Art. 176).\n• **Reglamento Estatal de Zonificación** (Compatibilidad de usos H1 a H4, Mixto Central y dotación de cajones).\n• **POTmet IMEPLAN** (Polígonos de consolidación urbana y protección ambiental ZMG).\n• **Ley de Movilidad, Seguridad Vial y Transporte de Jalisco** (Jerarquía de movilidad, límites de velocidad y ciclovías).\n• **Modelos de Visión Artificial YOLO** para análisis de aforos vehiculares y peatonales.\n\n*Como sistema de código cerrado, no respondo preguntas de cultura general ni temas ajenos a este marco.* ¿Qué consulta técnica o jurídica deseas realizar?',
+        timestamp: 'Ahora',
+      },
+    ]);
+    setSelectedFile(null);
+    setInput('');
+  };
 
   if (!isOpen) return null;
 
@@ -217,25 +230,36 @@ export const OlmosChatModal: React.FC<OlmosChatModalProps> = ({ isOpen, onClose,
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-white text-base tracking-tight">OLMOS Intelligence Core</h3>
-                <span className="text-[10px] bg-indigo-950 text-indigo-300 font-mono px-2 py-0.5 rounded border border-indigo-800">
-                  Gemini 3.8 Flash
+                <h3 className="font-bold text-white text-base tracking-tight">URBIN · Inteligencia Urbana</h3>
+                <span className="text-[10px] bg-rose-950 text-rose-300 font-mono px-2 py-0.5 rounded border border-rose-800">
+                  URBIN v3.8
                 </span>
                 <span className="text-[10px] bg-emerald-950 text-emerald-300 font-mono px-2 py-0.5 rounded border border-emerald-800">
                   RAG Jalisco
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Zero-Trust Semantic Router & Urban Vision Core · Asistente Técnico Pericial
+                Zero-Trust Semantic Router & Urban Vision Core · Asistente Técnico Pericial ZMG
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleClearChat}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 transition cursor-pointer"
+              title="Eliminar historial de chat de URBIN"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Eliminar Chat</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Message Log */}

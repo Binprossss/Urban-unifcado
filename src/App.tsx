@@ -450,27 +450,18 @@ export default function App() {
               style={{
                 backgroundImage: `linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.85)), url('${activeHeroBackground}')`,
               }}
+              onClick={() => {
+                const slide = heroSlides[currentSlide];
+                if (slide?.actionTab) {
+                  setActiveTab(slide.actionTab);
+                } else {
+                  openOlmosWithQuery('');
+                }
+              }}
+              title="Toca cualquier lugar de la imagen para ingresar a este módulo"
             >
-              {/* Prev / Next Image arrows on Hero sides */}
-              <button
-                onClick={handlePrevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-[#c9122f] text-white flex items-center justify-center transition border border-white/20 cursor-pointer shadow-lg"
-                title="Imagen anterior"
-                aria-label="Imagen anterior"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button
-                onClick={handleNextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-[#c9122f] text-white flex items-center justify-center transition border border-white/20 cursor-pointer shadow-lg"
-                title="Siguiente imagen"
-                aria-label="Siguiente imagen"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="max-w-3xl -translate-y-4 sm:-translate-y-8 space-y-6">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full my-auto pointer-events-none">
+                <div className="max-w-3xl space-y-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[#c9122f] font-bold text-xs uppercase tracking-widest block font-mono">
                       {heroSlides[currentSlide].badge}
@@ -489,78 +480,27 @@ export default function App() {
                   <p className="text-gray-200 text-sm sm:text-lg leading-relaxed font-normal">
                     {currentSlide === 0 ? cmsHeroDesc : heroSlides[currentSlide].description}
                   </p>
-
-                  <div className="flex flex-wrap items-center gap-4 pt-2">
-                    <button
-                      onClick={() => setActiveTab(heroSlides[currentSlide].actionTab)}
-                      className="bg-[#c9122f] hover:bg-[#a00e25] text-white px-7 py-3.5 rounded font-bold text-xs uppercase tracking-wider transition shadow-md flex items-center gap-2 cursor-pointer"
-                    >
-                      <span>{heroSlides[currentSlide].actionText}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      onClick={() => setShowImageModal(true)}
-                      className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 px-5 py-3.5 rounded font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2"
-                    >
-                      <ImageIcon className="w-4 h-4 text-[#c9122f]" />
-                      <span>Cambiar Imagen de Fondo</span>
-                    </button>
-
-                    <button
-                      onClick={() => openOlmosWithQuery('Generar dictamen pericial para aforos en Guadalajara')}
-                      className="text-gray-300 hover:text-white px-4 py-3.5 font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Bot className="w-4 h-4 text-[#c9122f]" />
-                      <span>Consultar OLMOS</span>
-                    </button>
-                  </div>
                 </div>
+              </div>
 
-                {/* Slider pagination dots & Controls */}
-                <div className="flex flex-wrap items-center justify-between gap-4 mt-12 pt-6 border-t border-white/10">
-                  <div className="flex items-center gap-3">
-                    {heroSlides.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          setIsAutoPlay(false);
-                          setCurrentSlide(idx);
-                        }}
-                        className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                          currentSlide === idx ? 'w-10 bg-[#c9122f]' : 'w-4 bg-gray-500 hover:bg-gray-400'
-                        }`}
-                        aria-label={`Diapositiva ${idx + 1}`}
-                      />
-                    ))}
-                    <button
-                      onClick={() => setIsAutoPlay(!isAutoPlay)}
-                      className="ml-3 text-gray-400 hover:text-white text-xs flex items-center gap-1 font-mono cursor-pointer"
-                      title={isAutoPlay ? 'Pausar rotación' : 'Reproducir rotación'}
-                    >
-                      {isAutoPlay ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs font-mono">
-                    <button
-                      onClick={() => setShowImageModal(true)}
-                      className="text-gray-300 hover:text-white underline cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Sliders className="w-3.5 h-3.5 text-[#c9122f]" />
-                      <span>Galería ({HERO_IMAGE_PRESETS.length} imágenes)</span>
-                    </button>
-                    {customHeroImage && (
-                      <button
-                        onClick={handleResetToCarousel}
-                        className="text-rose-400 hover:text-rose-300 underline cursor-pointer flex items-center gap-1"
-                        title="Restaurar carrusel automático"
-                      >
-                        <RotateCcw className="w-3 h-3" /> Restaurar carrusel
-                      </button>
-                    )}
-                  </div>
-                </div>
+              {/* BOLAS ROJAS INDICADORAS: SOLO INDICADORES DE DIAPOSITIVA (SIN NINGÚN BOTÓN) */}
+              <div className="relative z-20 w-full mt-6 flex justify-center items-center gap-2.5">
+                {heroSlides.map((_, idx) => (
+                  <span
+                    key={idx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsAutoPlay(false);
+                      setCurrentSlide(idx);
+                    }}
+                    className={`h-2.5 rounded-full transition-all cursor-pointer ${
+                      currentSlide === idx
+                        ? 'w-8 bg-[#c9122f] shadow-md shadow-red-600/50'
+                        : 'w-2.5 bg-red-950/70 border border-red-700/60 hover:bg-[#c9122f] hover:scale-125'
+                    }`}
+                    title={`Diapositiva ${idx + 1}`}
+                  />
+                ))}
               </div>
             </section>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://images.unsplash.com https://unpkg.com https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com https://geoserver2.imeplan.mx https://mapa.guadalajara.gob.mx:8443 https://mt0.google.com https://mt1.google.com https://mt2.google.com https://mt3.google.com https://*.google.com https://khms0.google.com https://khms1.google.com https://*.googleapis.com; connect-src 'self' https://nominatim.openstreetmap.org https://overpass-api.de https://*.basemaps.cartocdn.com https://geoserver2.imeplan.mx https://mapa.guadalajara.gob.mx:8443 https://mt0.google.com https://mt1.google.com https://mt2.google.com https://mt3.google.com https://*.google.com; object-src 'none'; base-uri 'self'; upgrade-insecure-requests;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://images.unsplash.com https://unpkg.com https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com https://geoserver2.imeplan.mx https://mapa.guadalajara.gob.mx:8443 https://mt0.google.com https://mt1.google.com https://mt2.google.com https://mt3.google.com https://*.google.com https://khms0.google.com https://khms1.google.com https://*.googleapis.com; connect-src 'self' ws: wss: https://nominatim.openstreetmap.org https://overpass-api.de https://*.basemaps.cartocdn.com https://geoserver2.imeplan.mx https://mapa.guadalajara.gob.mx:8443 https://mt0.google.com https://mt1.google.com https://mt2.google.com https://mt3.google.com https://*.google.com; object-src 'none'; base-uri 'self'; upgrade-insecure-requests;">
     <title>UrbanBuild | Plataforma de Inteligencia Urbana y Movilidad</title>
     
     <!-- Google Fonts: Open Sans -->
@@ -730,101 +730,27 @@
     </nav>
 
     <main class="flex-grow">
-        <!-- SECCIÓN HERO INTERACTIVO CON PESTAÑAS Y REDIRECCIÓN A CADA SECCIÓN -->
-        <section id="hero-section" class="hero-slide text-white pt-16 pb-12 lg:pt-24 lg:pb-16 relative overflow-hidden flex flex-col justify-between min-h-[560px] lg:min-h-[620px]" style="background-image: linear-gradient(rgba(0,0,0,0.78), rgba(0,0,0,0.88)), url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1920&auto=format&fit=crop');">
-            <!-- CONTENIDO PRINCIPAL DEL SLIDE ACTUAL -->
+        <!-- SECCIÓN HERO: SOLO LA IMAGEN CON TEXTO QUE REDIRIGE AL TOCAR CUALQUIER LUGAR (SIN NINGÚN BOTÓN) -->
+        <section id="hero-section" onclick="handleHeroClick(event)" class="hero-slide text-white py-24 lg:py-32 relative overflow-hidden flex flex-col justify-between cursor-pointer select-none" style="background-image: linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1920&auto=format&fit=crop');" title="Toca cualquier lugar de la imagen para ingresar a este módulo">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full my-auto">
-                <div class="max-w-3xl">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/80 border border-red-800/80 text-red-300 font-mono text-xs uppercase tracking-widest mb-4 shadow-sm" id="hero-badge-container">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span id="hero-badge">Sistema de Movilidad Inteligente · ZMG</span>
-                    </div>
-
-                    <h1 id="hero-title" class="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight mb-5 leading-tight text-white transition-opacity duration-300">
+                <div class="max-w-3xl pointer-events-none">
+                    <span id="hero-badge" class="text-hikred font-bold text-xs uppercase tracking-widest block mb-3">Sistema de Movilidad Inteligente</span>
+                    <h1 id="hero-title" class="text-4xl md:text-6xl font-extrabold uppercase tracking-tight mb-6 leading-tight transition-opacity duration-300">
                         Inteligencia Artificial para un Futuro Seguro
                     </h1>
-
-                    <p id="hero-desc" class="text-gray-300 text-sm sm:text-base md:text-lg mb-8 leading-relaxed max-w-2xl transition-opacity duration-300">
+                    <p id="hero-desc" class="text-gray-300 text-base md:text-lg leading-relaxed transition-opacity duration-300">
                         De los datos a mejores ciudades. Analizamos la movilidad urbana en tiempo real para generar recomendaciones de intervención basadas en normativa vigente.
                     </p>
-
-                    <!-- BOTONES DE ACCIÓN DIRECTA / REDIRECCIÓN -->
-                    <div class="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
-                        <a id="hero-btn-primary" href="estadisticas.html" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-hikred hover:bg-hikred-hover text-white text-xs sm:text-sm font-bold uppercase tracking-wider transition shadow-lg hover:shadow-red-900/40 cursor-pointer">
-                            <span id="hero-btn-text">Ver Estadísticas</span>
-                            <i id="hero-btn-icon" class="fas fa-arrow-right text-xs"></i>
-                        </a>
-
-                        <button id="hero-btn-secondary" onclick="toggleOlmosModal()" type="button" class="inline-flex items-center gap-2 px-5 py-3.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs sm:text-sm font-bold uppercase tracking-wider backdrop-blur-sm transition cursor-pointer">
-                            <i class="fas fa-robot text-hikred text-sm"></i>
-                            <span id="hero-btn-sec-text">Consultar URBIN IA</span>
-                        </button>
-                    </div>
                 </div>
             </div>
 
-            <!-- CONTROLES LATERALES (FLECHAS ANTERIOR / SIGUIENTE) -->
-            <button onclick="prevHeroSlide()" aria-label="Diapositiva anterior" class="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-hikred border border-white/20 text-white items-center justify-center transition cursor-pointer">
-                <i class="fas fa-chevron-left text-sm"></i>
-            </button>
-            <button onclick="nextHeroSlide()" aria-label="Siguiente diapositiva" class="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-hikred border border-white/20 text-white items-center justify-center transition cursor-pointer">
-                <i class="fas fa-chevron-right text-sm"></i>
-            </button>
-
-            <!-- BARRA DE PESTAÑAS INTERACTIVAS (TABS CON REDIRECCIÓN DIRECTA A CADA SECCIÓN) -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full mt-6">
-                <!-- Indicador de barra de progreso automático (5 segundos) -->
-                <div class="w-full bg-white/10 h-1 rounded-full overflow-hidden mb-3">
-                    <div id="hero-progress-bar" class="h-full bg-hikred transition-all duration-100 ease-linear" style="width: 0%;"></div>
-                </div>
-
-                <!-- Lista de pestañas -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2" id="hero-tabs-container">
-                    <!-- Tab 0: Inicio / URBIN IA -->
-                    <button onclick="selectHeroSlide(0)" class="hero-tab-btn text-left p-2.5 sm:p-3 rounded-lg border border-white/15 bg-black/50 hover:bg-black/70 backdrop-blur-sm transition cursor-pointer group" data-tab-index="0" title="Ver Inicio y Asistente URBIN IA">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-robot text-xs text-hikred group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider truncate">Inicio / URBIN</span>
-                        </div>
-                        <p class="text-[10px] text-gray-400 truncate hidden sm:block">Visor Urbano ZMG</p>
-                    </button>
-
-                    <!-- Tab 1: Estadísticas -->
-                    <button onclick="selectHeroSlide(1)" class="hero-tab-btn text-left p-2.5 sm:p-3 rounded-lg border border-white/15 bg-black/50 hover:bg-black/70 backdrop-blur-sm transition cursor-pointer group" data-tab-index="1" title="Ir a Estadísticas">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-chart-pie text-xs text-blue-400 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider truncate">Estadísticas</span>
-                        </div>
-                        <p class="text-[10px] text-gray-400 truncate hidden sm:block">Aforos y Telemetría</p>
-                    </button>
-
-                    <!-- Tab 2: Normativa -->
-                    <button onclick="selectHeroSlide(2)" class="hero-tab-btn text-left p-2.5 sm:p-3 rounded-lg border border-white/15 bg-black/50 hover:bg-black/70 backdrop-blur-sm transition cursor-pointer group" data-tab-index="2" title="Ir a Normativa">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-book-bookmark text-xs text-emerald-400 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider truncate">Normativa</span>
-                        </div>
-                        <p class="text-[10px] text-gray-400 truncate hidden sm:block">RAG Jalisco & IMEPLAN</p>
-                    </button>
-
-                    <!-- Tab 3: Recomendaciones -->
-                    <button onclick="selectHeroSlide(3)" class="hero-tab-btn text-left p-2.5 sm:p-3 rounded-lg border border-white/15 bg-black/50 hover:bg-black/70 backdrop-blur-sm transition cursor-pointer group" data-tab-index="3" title="Ir a Recomendaciones">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-lightbulb text-xs text-amber-400 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider truncate">Recomendaciones</span>
-                        </div>
-                        <p class="text-[10px] text-gray-400 truncate hidden sm:block">Guías y Cruces Viales</p>
-                    </button>
-
-                    <!-- Tab 4: Toma de Decisiones -->
-                    <button onclick="selectHeroSlide(4)" class="hero-tab-btn text-left p-2.5 sm:p-3 rounded-lg border border-white/15 bg-black/50 hover:bg-black/70 backdrop-blur-sm transition cursor-pointer group col-span-2 sm:col-span-1" data-tab-index="4" title="Ir a Toma de Decisiones">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fas fa-sliders text-xs text-purple-400 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider truncate">Decisiones</span>
-                        </div>
-                        <p class="text-[10px] text-gray-400 truncate hidden sm:block">Matriz de Priorización</p>
-                    </button>
-                </div>
+            <!-- BOLAS ROJAS INDICADORAS: SOLO INDICADORES DE DIAPOSITIVA (SIN NINGÚN BOTÓN) -->
+            <div class="relative z-20 w-full mt-6 flex justify-center items-center gap-2.5">
+                <span onclick="event.stopPropagation(); selectHeroSlide(0);" class="hero-dot w-8 h-2.5 rounded-full bg-hikred shadow-md shadow-red-600/50 transition-all cursor-pointer" data-dot-index="0" title="1. Inicio / URBIN IA" aria-label="1. Inicio"></span>
+                <span onclick="event.stopPropagation(); selectHeroSlide(1);" class="hero-dot w-2.5 h-2.5 rounded-full bg-red-950/70 border border-red-700/60 hover:bg-hikred transition-all cursor-pointer hover:scale-125" data-dot-index="1" title="2. Estadísticas" aria-label="2. Estadísticas"></span>
+                <span onclick="event.stopPropagation(); selectHeroSlide(2);" class="hero-dot w-2.5 h-2.5 rounded-full bg-red-950/70 border border-red-700/60 hover:bg-hikred transition-all cursor-pointer hover:scale-125" data-dot-index="2" title="3. Normativa" aria-label="3. Normativa"></span>
+                <span onclick="event.stopPropagation(); selectHeroSlide(3);" class="hero-dot w-2.5 h-2.5 rounded-full bg-red-950/70 border border-red-700/60 hover:bg-hikred transition-all cursor-pointer hover:scale-125" data-dot-index="3" title="4. Recomendaciones" aria-label="4. Recomendaciones"></span>
+                <span onclick="event.stopPropagation(); selectHeroSlide(4);" class="hero-dot w-2.5 h-2.5 rounded-full bg-red-950/70 border border-red-700/60 hover:bg-hikred transition-all cursor-pointer hover:scale-125" data-dot-index="4" title="5. Toma de Decisiones" aria-label="5. Toma de Decisiones"></span>
             </div>
         </section>
 
@@ -936,6 +862,9 @@
                         <i class="fa-solid fa-location-dot text-red-500 text-xs"></i>
                         <span id="coordsDisplayVal"><span id="coordsDisplayText">20.6668, -103.3868</span></span>
                     </div>
+                    <button onclick="eliminarChatUrbin()" class="bg-white dark:bg-[#18181b] hover:bg-rose-50 dark:hover:bg-red-950/40 text-slate-700 hover:text-red-600 dark:text-zinc-200 dark:hover:text-red-400 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition border border-slate-300 dark:border-[#27272a] hover:border-red-300 flex items-center gap-1.5 shadow-xs cursor-pointer" title="Eliminar y reiniciar conversación de chat">
+                        <i class="fa-solid fa-trash-can text-xs text-red-500"></i> <span class="hidden sm:inline">Eliminar Chat</span>
+                    </button>
                     <button onclick="abrirModalExportarReporte()" class="bg-white dark:bg-[#18181b] hover:bg-slate-100 dark:hover:bg-[#27272a] text-slate-700 dark:text-zinc-200 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition border border-slate-300 dark:border-[#27272a] flex items-center gap-1 shadow-xs cursor-pointer" title="Exportar Ficha Técnica Territorial">
                         <i class="fa-solid fa-download text-xs text-blue-600 dark:text-blue-400"></i> <span class="hidden sm:inline">Exportar</span>
                     </button>
@@ -1475,6 +1404,17 @@
 
                 <!-- PANEL DERECHO DE ASISTENTE URBIN (ESTILO IMAGEN 2) -->
                 <main id="panel-chat" class="flex-1 flex flex-col bg-slate-100 h-full overflow-hidden">
+                    <!-- BARRA SUPERIOR DE SESIÓN Y ELIMINAR CHAT -->
+                    <div class="px-4 py-2 bg-white/80 dark:bg-[#16171a] border-b border-slate-200 dark:border-[#27272a] flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[11px] text-slate-700 dark:text-zinc-300 font-bold uppercase tracking-wider">Sesión Activa · ZMG</span>
+                        </div>
+                        <button type="button" onclick="eliminarChatUrbin()" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold text-red-600 hover:text-white bg-red-50 hover:bg-red-600 dark:bg-red-950/40 dark:hover:bg-red-600 border border-red-200 dark:border-red-900/60 transition shadow-xs cursor-pointer" title="Eliminar todo el historial del chat">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                            <span>Eliminar Chat</span>
+                        </button>
+                    </div>
                     <div id="chat-history" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar">
                         <!-- MENSAJE DE BIENVENIDA URBIN (ESTILO IMAGEN 2) -->
                         <div class="flex items-start gap-3">
@@ -1512,10 +1452,13 @@
                         </div>
                         <form id="chat-form" class="relative flex items-center gap-2 bg-slate-50 rounded-xl border border-slate-300 p-1.5 focus-within:ring-2 ring-red-500 focus-within:bg-white transition-all shadow-xs">
                             <input id="chat-input" type="text" class="w-full bg-transparent outline-none px-3 text-slate-900 text-xs sm:text-sm placeholder:text-slate-400" placeholder="Escribe tu consulta urbana o pide dictamen del predio...">
-                            <button type="button" onclick="toggleVozDictado()" class="text-slate-400 hover:text-slate-600 p-2 text-sm" title="Dictado por voz">
+                            <button type="button" onclick="eliminarChatUrbin()" class="text-slate-400 hover:text-red-600 p-2 text-sm transition cursor-pointer" title="Eliminar y reiniciar chat">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                            <button type="button" onclick="toggleVozDictado()" class="text-slate-400 hover:text-slate-600 p-2 text-sm cursor-pointer" title="Dictado por voz">
                                 <i class="fa-solid fa-microphone"></i>
                             </button>
-                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white rounded-lg w-9 h-9 flex items-center justify-center shrink-0 transition shadow">
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white rounded-lg w-9 h-9 flex items-center justify-center shrink-0 transition shadow cursor-pointer">
                                 <i class="fa-solid fa-paper-plane text-xs"></i>
                             </button>
                         </form>
@@ -1707,15 +1650,13 @@
         const HERO_DURATION = 5000;
         let progressStart = Date.now();
 
-        function updateHeroTabsUI(index) {
-            const tabs = document.querySelectorAll('.hero-tab-btn');
-            tabs.forEach((tab, i) => {
+        function updateHeroDots(index) {
+            const dots = document.querySelectorAll('.hero-dot');
+            dots.forEach((dot, i) => {
                 if (i === index) {
-                    tab.classList.add('border-hikred', 'bg-red-950/60', 'ring-2', 'ring-hikred/60');
-                    tab.classList.remove('border-white/15', 'bg-black/50');
+                    dot.className = 'hero-dot w-8 h-3 rounded-full bg-hikred shadow-md shadow-red-600/50 transition-all cursor-pointer';
                 } else {
-                    tab.classList.remove('border-hikred', 'bg-red-950/60', 'ring-2', 'ring-hikred/60');
-                    tab.classList.add('border-white/15', 'bg-black/50');
+                    dot.className = 'hero-dot w-3 h-3 rounded-full bg-red-950/70 border border-red-700/60 hover:bg-hikred transition-all cursor-pointer hover:scale-125';
                 }
             });
         }
@@ -1730,14 +1671,10 @@
             const heroBadge = document.getElementById('hero-badge');
             const heroTitle = document.getElementById('hero-title');
             const heroDesc = document.getElementById('hero-desc');
-            const btnPrimary = document.getElementById('hero-btn-primary');
-            const btnText = document.getElementById('hero-btn-text');
-            const btnIcon = document.getElementById('hero-btn-icon');
-            const btnSecondary = document.getElementById('hero-btn-secondary');
-            const btnSecText = document.getElementById('hero-btn-sec-text');
+            const heroCta = document.getElementById('hero-cta-label');
 
             if (heroSection) {
-                heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.78), rgba(0,0,0,0.88)), url('${slide.image}')`;
+                heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url('${slide.image}')`;
             }
 
             if (heroBadge) heroBadge.textContent = slide.badge;
@@ -1755,77 +1692,49 @@
                     heroDesc.style.opacity = '1';
                 }, 150);
             }
-
-            if (btnPrimary) {
-                btnPrimary.setAttribute('href', slide.primaryUrl);
-                if (slide.primaryAction) {
-                    btnPrimary.setAttribute('onclick', `${slide.primaryAction}; return false;`);
-                } else {
-                    btnPrimary.removeAttribute('onclick');
-                }
-                if (btnText) btnText.textContent = slide.primaryText;
-                if (btnIcon) btnIcon.className = `${slide.primaryIcon} text-xs`;
+            if (heroCta) {
+                heroCta.textContent = slide.primaryText || "Toca para explorar esta sección";
             }
 
-            if (btnSecondary) {
-                if (slide.secAction) {
-                    btnSecondary.setAttribute('onclick', `${slide.secAction}; return false;`);
-                } else if (slide.secUrl && slide.secUrl !== '#') {
-                    btnSecondary.setAttribute('onclick', `window.location.href='${slide.secUrl}'`);
-                } else {
-                    btnSecondary.setAttribute('onclick', 'toggleOlmosModal()');
-                }
-                if (btnSecText) btnSecText.textContent = slide.secText;
-            }
-
-            updateHeroTabsUI(index);
+            updateHeroDots(index);
 
             if (resetTimer) {
-                startHeroAutoRotation();
+                clearInterval(heroTimer);
+                heroTimer = setInterval(() => {
+                    setHeroSlide(currentHeroIndex + 1, false);
+                }, HERO_DURATION);
             }
-        }
-
-        function startHeroAutoRotation() {
-            clearInterval(heroTimer);
-            clearInterval(heroProgressInterval);
-
-            const progressBar = document.getElementById('hero-progress-bar');
-            if (progressBar) progressBar.style.width = '0%';
-            progressStart = Date.now();
-
-            heroProgressInterval = setInterval(() => {
-                const elapsed = Date.now() - progressStart;
-                const pct = Math.min(100, (elapsed / HERO_DURATION) * 100);
-                if (progressBar) progressBar.style.width = `${pct}%`;
-            }, 50);
-
-            heroTimer = setInterval(() => {
-                setHeroSlide(currentHeroIndex + 1, true);
-            }, HERO_DURATION);
         }
 
         function selectHeroSlide(index) {
             setHeroSlide(index, true);
         }
 
-        function nextHeroSlide() {
-            setHeroSlide(currentHeroIndex + 1, true);
+        // Tocar cualquier lugar de la imagen redirige a la sección del slide actual
+        function handleHeroClick(e) {
+            if (e.target.closest('.hero-dot')) return; // Si tocó una bola roja, solo cambia el slide
+            const slide = heroSlidesData[currentHeroIndex];
+            if (!slide) return;
+            if (slide.primaryAction === 'toggleOlmosModal()') {
+                if (typeof toggleOlmosModal === 'function') toggleOlmosModal();
+            } else if (slide.primaryUrl && slide.primaryUrl !== '#urbin') {
+                window.location.href = slide.primaryUrl;
+            } else {
+                if (typeof toggleOlmosModal === 'function') toggleOlmosModal();
+            }
         }
 
-        function prevHeroSlide() {
-            setHeroSlide(currentHeroIndex - 1, true);
-        }
-
-        // Pausa en hover sobre el Hero para facilitar lectura y clics
         document.addEventListener('DOMContentLoaded', () => {
             const heroSection = document.getElementById('hero-section');
             if (heroSection) {
                 heroSection.addEventListener('mouseenter', () => {
                     clearInterval(heroTimer);
-                    clearInterval(heroProgressInterval);
                 });
                 heroSection.addEventListener('mouseleave', () => {
-                    startHeroAutoRotation();
+                    clearInterval(heroTimer);
+                    heroTimer = setInterval(() => {
+                        setHeroSlide(currentHeroIndex + 1, false);
+                    }, HERO_DURATION);
                 });
             }
             setHeroSlide(0, true);
@@ -3282,6 +3191,56 @@
                 chatInputOlmos.value = '';
                 ejecutarEnvioConsulta(text, selectedLat, selectedLng);
             });
+        }
+
+        function eliminarChatUrbin() {
+            const chatHistory = document.getElementById('chat-history');
+            if (!chatHistory) return;
+
+            chatHistory.innerHTML = `
+                <!-- MENSAJE DE BIENVENIDA URBIN (ESTILO IMAGEN 2) -->
+                <div class="flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-red-600 to-rose-500 flex items-center justify-center text-white shrink-0 shadow text-sm">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-xs border border-slate-200 max-w-[92%] text-xs md:text-sm leading-relaxed">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs font-bold text-slate-800">9 Municipios Metropolitanos</span>
+                            <span class="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded border border-red-200">ZMG Core</span>
+                        </div>
+                        <p class="text-slate-800 mb-2">
+                            Bienvenido al Asistente de Inteligencia Urbana <strong class="text-red-600">URBIN</strong>. El sistema está <strong class="text-red-600">restringido y especializado exclusivamente en la Zona Metropolitana de Guadalajara (ZMG)</strong>: Guadalajara, Zapopan, San Pedro Tlaquepaque, Tlajomulco de Zúñiga, Tonalá, El Salto, Ixtlahuacán de los Membrillos, Juanacatlán y Zapotlanejo.
+                        </p>
+                        <p class="text-slate-600 text-xs">
+                            Selecciona un predio en el mapa ZMG para análisis territorial con cruce de zonificación, solicita dictámenes normativos (Código Urbano de Jalisco / POTmet), activa tu cámara para aforo o usa los botones de consulta rápida.
+                        </p>
+                        
+                        <!-- BOTONES DE ACCIÓN RÁPIDA -->
+                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap gap-1.5">
+                            <button type="button" onclick="ejecutarConsultaRapida('dictamen')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg font-semibold transition">Dictamen Territorial</button>
+                            <button type="button" onclick="ejecutarConsultaRapida('zonificacion')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg font-semibold transition">Zonificación PPDU</button>
+                            <button type="button" onclick="ejecutarConsultaRapida('coscus')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg font-semibold transition">COS / CUS</button>
+                            <button type="button" onclick="ejecutarConsultaRapida('riesgos')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg font-semibold transition">Atlas de Riesgo</button>
+                            <button type="button" onclick="ejecutarConsultaRapida('sare')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-lg font-semibold transition">Giros Comerciales SARE</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            sessionId = "session_" + Math.random().toString(36).substring(2, 9);
+            try {
+                localStorage.setItem("pimus_session", sessionId);
+            } catch (_) {}
+
+            if (typeof limpiarArchivoSeleccionado === 'function') {
+                limpiarArchivoSeleccionado();
+            }
+
+            const input = document.getElementById('chat-input');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
         }
 
         async function descargarExcelDirecto(conteoObj = null) {
