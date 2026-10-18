@@ -277,14 +277,6 @@ export default function App() {
                 Inicio
               </button>
               <a
-                href="https://urbanbuilding.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 hover:text-[#c9122f] transition-colors py-2"
-              >
-                Captura de Datos
-              </a>
-              <a
                 href="estadisticas.html"
                 className="text-gray-600 hover:text-[#c9122f] transition-colors py-2 flex items-center gap-1"
               >
@@ -585,41 +577,15 @@ export default function App() {
               </div>
 
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {/* Card 1: Captura de Datos */}
-                  <div className="card-architecture p-6 relative flex flex-col justify-between">
-                    <span className="absolute top-4 right-4 bg-black text-white text-[10px] font-bold px-2.5 py-0.5 rounded">
-                      VERCEL APP
-                    </span>
-                    <div>
-                      <div className="text-[#c9122f] text-2xl mb-4">
-                        <Video className="w-7 h-7" />
-                      </div>
-                      <h3 className="text-base font-bold text-black uppercase mb-2">
-                        1. Captura de Datos
-                      </h3>
-                      <p className="text-xs text-gray-600 mb-6 leading-relaxed">
-                        Análisis de visión por computadora y conteo de movimiento en tiempo real.
-                      </p>
-                    </div>
-                    <a
-                      href="https://urbanbuilding.vercel.app"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#c9122f] hover:text-[#a00e25] font-bold text-xs uppercase tracking-wider inline-flex items-center"
-                    >
-                      Abrir Programa <ArrowRight className="w-3.5 h-3.5 ml-2" />
-                    </a>
-                  </div>
-
-                  {/* Card 2: Estadísticas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* Card 1: Estadísticas */}
                   <div className="card-architecture p-6 relative flex flex-col justify-between">
                     <div>
                       <div className="text-[#c9122f] text-2xl mb-4">
                         <BarChart3 className="w-7 h-7" />
                       </div>
                       <h3 className="text-base font-bold text-black uppercase mb-2">
-                        2. Estadísticas
+                        1. Estadísticas
                       </h3>
                       <p className="text-xs text-gray-600 mb-6 leading-relaxed">
                         Generación de datos estructurados por hora/zona y mapas de calor.
@@ -641,7 +607,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Card 3: Normativa */}
+                  {/* Card 2: Normativa */}
                   <div className="card-architecture p-6 relative flex flex-col justify-between">
                     <span className="absolute top-4 right-4 bg-[#c9122f] text-white text-[10px] font-bold px-2.5 py-0.5 rounded">
                       CORE IA
@@ -651,7 +617,7 @@ export default function App() {
                         <FileText className="w-7 h-7" />
                       </div>
                       <h3 className="text-base font-bold text-black uppercase mb-2">
-                        3. Normativa
+                        2. Normativa
                       </h3>
                       <p className="text-xs text-gray-600 mb-6 leading-relaxed">
                         Cruce de datos con reglamentos y normativas municipales vigentes.
@@ -665,14 +631,14 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Card 4: Recomendaciones */}
+                  {/* Card 3: Recomendaciones */}
                   <div className="card-architecture p-6 relative flex flex-col justify-between">
                     <div>
                       <div className="text-[#c9122f] text-2xl mb-4">
                         <Sparkles className="w-7 h-7" />
                       </div>
                       <h3 className="text-base font-bold text-black uppercase mb-2">
-                        4. Recomendaciones
+                        3. Recomendaciones
                       </h3>
                       <p className="text-xs text-gray-600 mb-6 leading-relaxed">
                         Guía de intervención visual y estructural con fundamento normativo.
@@ -686,14 +652,14 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Card 5: Toma de Decisiones */}
+                  {/* Card 4: Toma de Decisiones */}
                   <div className="card-architecture p-6 relative flex flex-col justify-between">
                     <div>
                       <div className="text-[#c9122f] text-2xl mb-4">
                         <Award className="w-7 h-7" />
                       </div>
                       <h3 className="text-base font-bold text-black uppercase mb-2">
-                        5. Toma de Decisiones
+                        4. Toma de Decisiones
                       </h3>
                       <p className="text-xs text-gray-600 mb-6 leading-relaxed">
                         Panel ejecutivo para priorización de proyectos y presupuesto.
