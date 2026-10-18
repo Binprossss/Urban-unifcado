@@ -658,6 +658,31 @@
             border-color: #27272a !important;
             color: #ffffff !important;
         }
+
+        /* Ergonomía y altura dinámica para chat en móviles y tablets */
+        @supports (height: 100dvh) {
+            #olmosModalContainer {
+                height: 100dvh !important;
+                max-height: 100dvh !important;
+            }
+            #olmosModalContainer > div {
+                height: 100dvh !important;
+                max-height: 100dvh !important;
+            }
+            @media (min-width: 640px) {
+                #olmosModalContainer > div {
+                    height: 96vh !important;
+                    max-height: 96vh !important;
+                }
+            }
+        }
+        #chat-input {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        #chat-input:focus {
+            outline: none !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-[#09090b] text-gray-800 dark:text-[#f4f4f5] antialiased min-h-screen flex flex-col transition-colors duration-200">
@@ -839,39 +864,39 @@
     </div>
 
     <!-- MODAL PRINCIPAL URBIN / VISOR URBANO GUADALAJARA -->
-    <div id="olmosModalContainer" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[10000] hidden items-center justify-center p-2 md:p-3">
-        <div class="bg-white w-full max-w-[1400px] h-[96vh] rounded-2xl shadow-2xl border border-slate-700/50 flex flex-col overflow-hidden chat-modal-animation relative">
+    <div id="olmosModalContainer" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[10000] hidden items-center justify-center p-0 sm:p-2 md:p-3 overflow-hidden" style="height: 100dvh; max-height: 100dvh;">
+        <div class="bg-white w-full max-w-[1400px] h-[100dvh] sm:h-[96vh] max-h-[100dvh] sm:max-h-[96vh] rounded-none sm:rounded-2xl shadow-2xl border-0 sm:border border-slate-700/50 flex flex-col overflow-hidden chat-modal-animation relative" style="height: 100dvh; max-height: 100dvh;">
             <!-- TOP BAR URBIN ADAPTABLE A MODO CLARO / OSCURO -->
-            <div id="olmosModalHeader" class="bg-slate-50 dark:bg-[#121214] text-slate-800 dark:text-white px-3 sm:px-5 py-3 flex flex-wrap justify-between items-center border-b border-slate-200 dark:border-[#27272a] shrink-0 gap-2 transition-colors duration-200">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-tr from-red-600 to-rose-500 w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
-                        <i class="fa-solid fa-shapes text-sm"></i>
+            <div id="olmosModalHeader" class="bg-slate-50 dark:bg-[#121214] text-slate-800 dark:text-white px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between border-b border-slate-200 dark:border-[#27272a] shrink-0 gap-2 transition-colors duration-200">
+                <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+                    <div class="bg-gradient-to-tr from-red-600 to-rose-500 w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
+                        <i class="fa-solid fa-shapes text-xs sm:text-sm"></i>
                     </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h2 class="text-sm md:text-base font-extrabold tracking-wide text-slate-900 dark:text-white">URBIN · Inteligencia Urbana</h2>
-                            <span class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-[9px] px-2 py-0.5 rounded-full font-bold border border-red-200 dark:border-red-900/60 uppercase tracking-wider">Visor Urbano ZMG</span>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <h2 class="text-xs sm:text-base font-extrabold tracking-wide text-slate-900 dark:text-white truncate">URBIN · Inteligencia Urbana</h2>
+                            <span class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-[9px] px-1.5 sm:px-2 py-0.5 rounded-full font-bold border border-red-200 dark:border-red-900/60 uppercase tracking-wider hidden xs:inline-block">ZMG</span>
                         </div>
-                        <p class="text-[9px] md:text-[10px] text-slate-500 dark:text-zinc-400 hidden sm:block">Ingeniería Vial, Normativa RAG Jalisco y Aforo de Medios en Vivo</p>
+                        <p class="text-[9px] md:text-[10px] text-slate-500 dark:text-zinc-400 hidden sm:block truncate">Ingeniería Vial, Normativa RAG Jalisco y Aforo de Medios en Vivo</p>
                     </div>
                 </div>
 
                 <!-- ACCIONES Y COORDENADAS -->
-                <div class="flex items-center gap-2 sm:gap-3">
-                    <div id="coordsDisplay" class="text-[10.5px] font-mono bg-white dark:bg-[#18181b] px-3 py-1.5 rounded-lg text-blue-700 dark:text-cyan-400 border border-slate-200 dark:border-[#27272a] flex items-center gap-1.5 shadow-xs">
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <div id="coordsDisplay" class="text-[10px] sm:text-[10.5px] font-mono bg-white dark:bg-[#18181b] px-2.5 py-1 sm:py-1.5 rounded-lg text-blue-700 dark:text-cyan-400 border border-slate-200 dark:border-[#27272a] hidden md:flex items-center gap-1.5 shadow-xs">
                         <i class="fa-solid fa-location-dot text-red-500 text-xs"></i>
                         <span id="coordsDisplayVal"><span id="coordsDisplayText">20.6668, -103.3868</span></span>
                     </div>
-                    <button onclick="eliminarChatUrbin()" class="bg-white dark:bg-[#18181b] hover:bg-rose-50 dark:hover:bg-red-950/40 text-slate-700 hover:text-red-600 dark:text-zinc-200 dark:hover:text-red-400 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition border border-slate-300 dark:border-[#27272a] hover:border-red-300 flex items-center gap-1.5 shadow-xs cursor-pointer" title="Eliminar y reiniciar conversación de chat">
+                    <button onclick="eliminarChatUrbin()" class="bg-white dark:bg-[#18181b] hover:bg-rose-50 dark:hover:bg-red-950/40 text-slate-700 hover:text-red-600 dark:text-zinc-200 dark:hover:text-red-400 text-xs font-semibold px-2 sm:px-2.5 py-1.5 rounded-lg transition border border-slate-300 dark:border-[#27272a] hover:border-red-300 flex items-center gap-1 shadow-xs cursor-pointer" title="Eliminar y reiniciar conversación de chat">
                         <i class="fa-solid fa-trash-can text-xs text-red-500"></i> <span class="hidden sm:inline">Eliminar Chat</span>
                     </button>
-                    <button onclick="abrirModalExportarReporte()" class="bg-white dark:bg-[#18181b] hover:bg-slate-100 dark:hover:bg-[#27272a] text-slate-700 dark:text-zinc-200 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition border border-slate-300 dark:border-[#27272a] flex items-center gap-1 shadow-xs cursor-pointer" title="Exportar Ficha Técnica Territorial">
-                        <i class="fa-solid fa-download text-xs text-blue-600 dark:text-blue-400"></i> <span class="hidden sm:inline">Exportar</span>
+                    <button onclick="abrirModalExportarReporte()" class="bg-white dark:bg-[#18181b] hover:bg-slate-100 dark:hover:bg-[#27272a] text-slate-700 dark:text-zinc-200 text-xs font-semibold px-2 sm:px-2.5 py-1.5 rounded-lg transition border border-slate-300 dark:border-[#27272a] hidden sm:flex items-center gap-1 shadow-xs cursor-pointer" title="Exportar Ficha Técnica Territorial">
+                        <i class="fa-solid fa-download text-xs text-blue-600 dark:text-blue-400"></i> <span class="hidden md:inline">Exportar</span>
                     </button>
-                    <button onclick="toggleFullscreenModal()" class="text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-white transition p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-[#18181b] cursor-pointer" title="Pantalla Completa">
+                    <button onclick="toggleFullscreenModal()" class="text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-white transition p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-[#18181b] hidden sm:block cursor-pointer" title="Pantalla Completa">
                         <i class="fa-solid fa-expand text-sm"></i>
                     </button>
-                    <button onclick="toggleOlmosModal()" class="text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-white transition p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-[#18181b] text-lg cursor-pointer" title="Cerrar">
+                    <button onclick="toggleOlmosModal()" class="text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-white transition w-8 h-8 rounded-lg hover:bg-slate-200 dark:hover:bg-[#18181b] flex items-center justify-center text-lg cursor-pointer" title="Cerrar">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
@@ -1403,9 +1428,9 @@
                 </aside>
 
                 <!-- PANEL DERECHO DE ASISTENTE URBIN (ESTILO IMAGEN 2) -->
-                <main id="panel-chat" class="flex-1 flex flex-col bg-slate-100 h-full overflow-hidden">
+                <main id="panel-chat" class="flex-1 flex flex-col bg-slate-100 dark:bg-[#09090b] h-full overflow-hidden min-h-0">
                     <!-- BARRA SUPERIOR DE SESIÓN Y ELIMINAR CHAT -->
-                    <div class="px-4 py-2 bg-white/80 dark:bg-[#16171a] border-b border-slate-200 dark:border-[#27272a] flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 shrink-0">
+                    <div class="px-3 sm:px-4 py-2 bg-white/80 dark:bg-[#16171a] border-b border-slate-200 dark:border-[#27272a] flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 shrink-0">
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span class="text-[11px] text-slate-700 dark:text-zinc-300 font-bold uppercase tracking-wider">Sesión Activa · ZMG</span>
@@ -1415,7 +1440,7 @@
                             <span>Eliminar Chat</span>
                         </button>
                     </div>
-                    <div id="chat-history" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar">
+                    <div id="chat-history" class="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-4 custom-scrollbar min-h-0">
                         <!-- MENSAJE DE BIENVENIDA URBIN (ESTILO IMAGEN 2) -->
                         <div class="flex items-start gap-3">
                             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-red-600 to-rose-500 flex items-center justify-center text-white shrink-0 shadow text-sm">
@@ -1445,22 +1470,31 @@
                         </div>
                     </div>
 
-                    <!-- BARRA DE ENTRADA DE CHAT -->
-                    <div class="p-3 bg-white border-t border-slate-200 shrink-0 z-20 relative">
-                        <div id="loading-indicator" class="hidden absolute -top-9 left-2 text-[11px] font-semibold text-blue-600 flex items-center gap-1.5 bg-white/95 px-3 py-1 rounded-full shadow border border-slate-200">
+                    <!-- BARRA DE ENTRADA DE CHAT (PERFECTAMENTE VISIBLE Y CÓMODA EN MÓVIL Y DESKTOP) -->
+                    <div class="p-2.5 sm:p-3 bg-white dark:bg-[#141416] border-t border-slate-200 dark:border-[#27272a] shrink-0 z-30 relative shadow-lg" style="padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));">
+                        <div id="loading-indicator" class="hidden absolute -top-10 left-3 text-[11px] font-semibold text-blue-600 dark:text-cyan-400 flex items-center gap-1.5 bg-white/95 dark:bg-[#18181b]/95 px-3 py-1.5 rounded-full shadow border border-slate-200 dark:border-[#27272a]">
                             <i class="fa-solid fa-circle-notch fa-spin"></i><span id="loading-text">Procesando solicitud territorial...</span>
                         </div>
-                        <form id="chat-form" class="relative flex items-center gap-2 bg-slate-50 rounded-xl border border-slate-300 p-1.5 focus-within:ring-2 ring-red-500 focus-within:bg-white transition-all shadow-xs">
-                            <input id="chat-input" type="text" class="w-full bg-transparent outline-none px-3 text-slate-900 text-xs sm:text-sm placeholder:text-slate-400" placeholder="Escribe tu consulta urbana o pide dictamen del predio...">
-                            <button type="button" onclick="eliminarChatUrbin()" class="text-slate-400 hover:text-red-600 p-2 text-sm transition cursor-pointer" title="Eliminar y reiniciar chat">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                            <button type="button" onclick="toggleVozDictado()" class="text-slate-400 hover:text-slate-600 p-2 text-sm cursor-pointer" title="Dictado por voz">
-                                <i class="fa-solid fa-microphone"></i>
-                            </button>
-                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white rounded-lg w-9 h-9 flex items-center justify-center shrink-0 transition shadow cursor-pointer">
-                                <i class="fa-solid fa-paper-plane text-xs"></i>
-                            </button>
+                        <form id="chat-form" class="relative flex items-center gap-1.5 sm:gap-2 bg-slate-100 dark:bg-[#1f1f23] rounded-2xl border border-slate-300 dark:border-[#333338] p-1.5 sm:p-2 focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500 focus-within:bg-white dark:focus-within:bg-[#18181b] transition-all shadow-sm">
+                            <input 
+                                id="chat-input" 
+                                type="text" 
+                                autocomplete="off" 
+                                class="flex-1 bg-transparent outline-none px-3 py-2 text-slate-900 dark:text-white text-sm sm:text-base placeholder:text-slate-400 dark:placeholder:text-zinc-500 font-sans" 
+                                placeholder="Escribe tu consulta urbana o pide dictamen..." 
+                                style="font-size: 16px; min-height: 42px;"
+                            >
+                            <div class="flex items-center gap-0.5 sm:gap-1 shrink-0">
+                                <button type="button" onclick="eliminarChatUrbin()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-xl hover:bg-slate-200/60 dark:hover:bg-zinc-800 transition active:scale-90 cursor-pointer" title="Eliminar conversación de chat">
+                                    <i class="fa-solid fa-trash-can text-sm"></i>
+                                </button>
+                                <button type="button" onclick="toggleVozDictado()" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-blue-600 dark:hover:text-cyan-400 rounded-xl hover:bg-slate-200/60 dark:hover:bg-zinc-800 transition active:scale-90 cursor-pointer" title="Dictado por voz">
+                                    <i class="fa-solid fa-microphone text-sm"></i>
+                                </button>
+                                <button type="submit" class="bg-[#c9122f] hover:bg-[#a00e25] text-white rounded-xl w-10 h-10 flex items-center justify-center shrink-0 shadow-md transition active:scale-95 cursor-pointer" title="Enviar consulta">
+                                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </main>
@@ -1856,18 +1890,55 @@
 
         function toggleOlmosModal() {
             const modal = document.getElementById('olmosModalContainer');
+            if (!modal) return;
             if (modal.classList.contains('hidden')) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
+                if (window.visualViewport && window.innerWidth < 768) {
+                    const inner = modal.querySelector(':scope > div');
+                    if (inner) {
+                        inner.style.height = `${window.visualViewport.height}px`;
+                        inner.style.maxHeight = `${window.visualViewport.height}px`;
+                    }
+                }
+                const chatHist = document.getElementById('chat-history');
+                if (chatHist) {
+                    setTimeout(() => { chatHist.scrollTop = chatHist.scrollHeight; }, 120);
+                }
                 if (!mapInitialized) {
                     setTimeout(() => { initMapOlmos(); mapInitialized = true; }, 100);
                 } else {
-                    setTimeout(() => { mapOlmos.invalidateSize(); }, 100);
+                    setTimeout(() => { if (mapOlmos) mapOlmos.invalidateSize(); }, 100);
                 }
             } else {
                 modal.classList.remove('flex');
                 modal.classList.add('hidden');
+                const inner = modal.querySelector(':scope > div');
+                if (inner && window.innerWidth < 768) {
+                    inner.style.height = '';
+                    inner.style.maxHeight = '';
+                }
             }
+        }
+
+        // Listener para sincronizar el modal con el teclado en Safari iOS y Chrome Android
+        if (window.visualViewport) {
+            function syncOlmosModalViewport() {
+                const modal = document.getElementById('olmosModalContainer');
+                if (modal && !modal.classList.contains('hidden') && window.innerWidth < 768) {
+                    const inner = modal.querySelector(':scope > div');
+                    if (inner) {
+                        inner.style.height = `${window.visualViewport.height}px`;
+                        inner.style.maxHeight = `${window.visualViewport.height}px`;
+                    }
+                    const chatHist = document.getElementById('chat-history');
+                    if (chatHist) {
+                        chatHist.scrollTop = chatHist.scrollHeight;
+                    }
+                }
+            }
+            window.visualViewport.addEventListener('resize', syncOlmosModalViewport);
+            window.visualViewport.addEventListener('scroll', syncOlmosModalViewport);
         }
 
         function cambiarTabMobile(tab) {

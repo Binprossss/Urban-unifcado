@@ -220,8 +220,8 @@ export const OlmosChatModal: React.FC<OlmosChatModalProps> = ({ isOpen, onClose,
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-4xl h-[88vh] flex flex-col shadow-2xl overflow-hidden text-slate-100">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-0 sm:p-3 md:p-5 overflow-hidden" style={{ height: '100dvh', maxHeight: '100dvh' }}>
+      <div className="bg-slate-900 border-0 sm:border border-slate-700/80 rounded-none sm:rounded-2xl w-full max-w-4xl h-[100dvh] sm:h-[88vh] max-h-[100dvh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden text-slate-100" style={{ height: '100dvh', maxHeight: '100dvh' }}>
         {/* Top Header */}
         <div className="bg-slate-950 px-5 py-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -404,7 +404,7 @@ export const OlmosChatModal: React.FC<OlmosChatModalProps> = ({ isOpen, onClose,
         )}
 
         {/* Input Bar */}
-        <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center gap-2">
+        <div className="p-3 sm:p-4 bg-slate-950 border-t border-slate-800 flex items-center gap-2 shrink-0 z-20" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom, 16px))' }}>
           <input
             type="file"
             ref={fileInputRef}
@@ -417,8 +417,9 @@ export const OlmosChatModal: React.FC<OlmosChatModalProps> = ({ isOpen, onClose,
             }}
           />
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
+            className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition cursor-pointer shrink-0"
             title="Adjuntar plano o foto para análisis YOLOv8"
           >
             <Paperclip className="w-4 h-4" />
@@ -431,14 +432,17 @@ export const OlmosChatModal: React.FC<OlmosChatModalProps> = ({ isOpen, onClose,
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSendMessage();
             }}
-            placeholder="Pregunta sobre reglamentos de Jalisco, cálculo de COS/CUS, o aforos..."
-            className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-rose-500 transition"
+            placeholder="Escribe tu consulta urbana o pide dictamen..."
+            className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm sm:text-base text-white placeholder-slate-400 focus:outline-none focus:border-rose-500 transition"
+            style={{ fontSize: '16px', minHeight: '42px' }}
           />
 
           <button
+            type="button"
             onClick={() => handleSendMessage()}
             disabled={isLoading || (!input.trim() && !selectedFile)}
-            className="p-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 disabled:text-slate-600 text-white transition cursor-pointer shadow-md"
+            className="w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 disabled:text-slate-600 text-white flex items-center justify-center transition cursor-pointer shadow-md shrink-0 active:scale-95"
+            title="Enviar mensaje"
           >
             <Send className="w-4 h-4" />
           </button>
